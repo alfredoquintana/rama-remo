@@ -1,10 +1,18 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import appConfig from './config/app.config';
 import { validateEnvironment } from './config/env.validation';
 import { typeOrmConfigFactory } from './database/typeorm.config';
+import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
+import { MeetingsModule } from './modules/meetings/meetings.module';
+import { MenusModule } from './modules/menus/menus.module';
+import { RolesModule } from './modules/roles/roles.module';
+import { SeedModule } from './modules/seed/seed.module';
+import { UsersModule } from './modules/users/users.module';
+import { AuthGuard } from './modules/auth/auth.guard';
 
 @Module({
   imports: [
@@ -16,7 +24,19 @@ import { HealthModule } from './modules/health/health.module';
       validate: validateEnvironment,
     }),
     TypeOrmModule.forRootAsync(typeOrmConfigFactory),
+    AuthModule,
     HealthModule,
+    RolesModule,
+    UsersModule,
+    MeetingsModule,
+    MenusModule,
+    SeedModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
   ],
 })
 export class AppModule {}

@@ -41,6 +41,22 @@ class EnvironmentVariables {
   @IsOptional()
   @IsString()
   FRONTEND_URL?: string;
+
+  @IsOptional()
+  @IsString()
+  APP_SECRET?: string;
+
+  @IsOptional()
+  @IsString()
+  ADMIN_RUT?: string;
+
+  @IsOptional()
+  @IsString()
+  ADMIN_PASSWORD?: string;
+
+  @IsOptional()
+  @IsString()
+  DEFAULT_USER_PASSWORD?: string;
 }
 
 export function validateEnvironment(config: Record<string, unknown>) {

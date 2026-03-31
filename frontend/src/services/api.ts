@@ -1,4 +1,5 @@
 import { appConfig } from '../app/config';
+import { getAccessToken } from '../app/session';
 
 type RequestOptions = Omit<RequestInit, 'body'> & {
   body?: BodyInit | Record<string, unknown> | null;
@@ -30,12 +31,36 @@ class ApiClient {
     });
   }
 
+  async patch<T>(
+    path: string,
+    body?: RequestOptions['body'],
+    options?: RequestOptions,
+  ): Promise<T> {
+    return this.request<T>(path, {
+      ...options,
+      method: 'PATCH',
+      body,
+    });
+  }
+
+  async delete<T>(path: string, options?: RequestOptions): Promise<T> {
+    return this.request<T>(path, {
+      ...options,
+      method: 'DELETE',
+    });
+  }
+
   private async request<T>(path: string, options: RequestOptions): Promise<T> {
     const headers = new Headers(options.headers);
     const normalizedBody = this.normalizeBody(options.body);
+    const accessToken = getAccessToken();
 
     if (!(options.body instanceof FormData) && !headers.has('Content-Type')) {
       headers.set('Content-Type', 'application/json');
+    }
+
+    if (accessToken && !headers.has('Authorization')) {
+      headers.set('Authorization', `Bearer ${accessToken}`);
     }
 
     const response = await fetch(`${this.baseUrl}${path}`, {
@@ -45,7 +70,7 @@ class ApiClient {
     });
 
     if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
+      throw new Error(await this.extractErrorMessage(response));
     }
 
     return (await response.json()) as T;
@@ -65,6 +90,23 @@ class ApiClient {
     }
 
     return JSON.stringify(body);
+  }
+
+  private async extractErrorMessage(response: Response) {
+    try {
+      const data = (await response.json()) as {
+        message?: string | string[];
+        error?: string;
+      };
+
+      if (Array.isArray(data.message)) {
+        return data.message.join(', ');
+      }
+
+      return data.message ?? data.error ?? `API request failed with status ${response.status}`;
+    } catch {
+      return `API request failed with status ${response.status}`;
+    }
   }
 }
 

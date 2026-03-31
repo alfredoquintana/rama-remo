@@ -15,7 +15,7 @@ export function buildTypeOrmOptions(
     password: configService.getOrThrow<string>('DB_PASSWORD'),
     database: configService.getOrThrow<string>('DB_NAME'),
     autoLoadEntities: true,
-    synchronize: false,
+    synchronize: true,
   };
 }
 

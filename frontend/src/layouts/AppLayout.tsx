@@ -1,11 +1,17 @@
-import type { PropsWithChildren } from 'react';
+import { Outlet } from 'react-router-dom';
 import { AppHeader } from '../components/AppHeader';
+import { AppSidebar } from '../components/AppSidebar';
 
-export function AppLayout({ children }: PropsWithChildren) {
+export function AppLayout() {
   return (
     <div className="app-shell">
       <AppHeader />
-      <main className="app-main">{children}</main>
+      <div className="app-body">
+        <AppSidebar />
+        <main className="app-main">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }
