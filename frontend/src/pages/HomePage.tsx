@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getMeetings } from '../services/meetings';
+import { getAnnualPlans } from '../services/planning';
 import { getUsers } from '../services/users';
 
 export function HomePage() {
@@ -8,13 +9,14 @@ export function HomePage() {
     users: 0,
     meetings: 0,
     meetingsWithMinutes: 0,
+    annualPlans: 0,
   });
 
   useEffect(() => {
     let active = true;
 
-    Promise.all([getUsers(), getMeetings()])
-      .then(([users, meetings]) => {
+    Promise.all([getUsers(), getMeetings(), getAnnualPlans()])
+      .then(([users, meetings, annualPlans]) => {
         if (!active) {
           return;
         }
@@ -23,6 +25,7 @@ export function HomePage() {
           users: users.length,
           meetings: meetings.length,
           meetingsWithMinutes: meetings.filter((meeting) => meeting.hasActa).length,
+          annualPlans: annualPlans.length,
         });
       })
       .catch(() => {
@@ -31,6 +34,7 @@ export function HomePage() {
             users: 0,
             meetings: 0,
             meetingsWithMinutes: 0,
+            annualPlans: 0,
           });
         }
       });
@@ -64,6 +68,10 @@ export function HomePage() {
           <span>Reuniones con acta</span>
           <strong>{stats.meetingsWithMinutes}</strong>
         </article>
+        <article className="stat-card">
+          <span>Planes anuales</span>
+          <strong>{stats.annualPlans}</strong>
+        </article>
       </div>
 
       <div className="content-grid">
@@ -95,6 +103,22 @@ export function HomePage() {
             </Link>
             <Link className="button button-secondary" to="/reuniones/nueva">
               Crear reunion
+            </Link>
+          </div>
+        </article>
+
+        <article className="panel-card">
+          <h3>Planificacion anual</h3>
+          <p>
+            Ordena compromisos del anio, registra cumplimiento, aprendizajes y
+            avances para la reunion general de la rama.
+          </p>
+          <div className="inline-actions">
+            <Link className="button button-primary" to="/planificacion">
+              Ver planificacion
+            </Link>
+            <Link className="button button-secondary" to="/planificacion/nuevo">
+              Crear plan anual
             </Link>
           </div>
         </article>

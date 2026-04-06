@@ -1,8 +1,17 @@
 import { useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useAuth } from '../app/useAuth';
 import { StatusMessage } from './StatusMessage';
-import type { MeetingMode, MeetingPayload, MeetingState } from '../types/meetings';
+import type {
+  MeetingMinutesFile,
+  MeetingMode,
+  MeetingPayload,
+  MeetingState,
+} from '../types/meetings';
 import type { User } from '../types/users';
+
+const MAX_ACTA_FILE_SIZE_BYTES = 5 * 1024 * 1024;
+const ACTA_FILE_ACCEPT =
+  '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.csv,.odt,.ods,.odp,.jpg,.jpeg,.png,.webp';
 
 type MeetingFormValues = {
   fecha: string;
@@ -13,7 +22,9 @@ type MeetingFormValues = {
   modalidad: MeetingMode;
   participantIds: number[];
   hasActa: boolean;
-  actaTexto: string;
+  actaTitulo: string;
+  actaDescripcion: string;
+  actaArchivo: MeetingMinutesFile | null;
 };
 
 type MeetingFormProps = {
@@ -39,6 +50,7 @@ export function MeetingForm({
   const { user } = useAuth();
   const [values, setValues] = useState<MeetingFormValues>(initialValues);
   const [participantQuery, setParticipantQuery] = useState('');
+  const [isReadingFile, setIsReadingFile] = useState(false);
   const [localError, setLocalError] = useState('');
 
   const currentRoleName = useMemo(() => {
@@ -91,7 +103,7 @@ export function MeetingForm({
 
   const handleChange =
     (
-      field: keyof Omit<MeetingFormValues, 'participantIds' | 'hasActa'>,
+      field: keyof Omit<MeetingFormValues, 'participantIds' | 'hasActa' | 'actaArchivo'>,
     ) =>
     (
       event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
@@ -124,14 +136,71 @@ export function MeetingForm({
       ...current,
       hasActa: !current.hasActa,
     }));
+    setLocalError('');
+  };
+
+  const handleActaFileChange = async (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const input = event.target;
+    const file = input.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (file.size > MAX_ACTA_FILE_SIZE_BYTES) {
+      setLocalError('El archivo del acta no puede superar los 5 MB.');
+      input.value = '';
+      return;
+    }
+
+    try {
+      setIsReadingFile(true);
+      const contenidoBase64 = await readFileAsBase64(file);
+
+      setValues((current) => ({
+        ...current,
+        actaArchivo: {
+          nombre: file.name,
+          tipo: file.type || 'application/octet-stream',
+          contenidoBase64,
+          tamanoBytes: file.size,
+        },
+      }));
+      setLocalError('');
+    } catch {
+      setLocalError('No fue posible leer el archivo seleccionado.');
+    } finally {
+      setIsReadingFile(false);
+      input.value = '';
+    }
+  };
+
+  const removeActaFile = () => {
+    setValues((current) => ({
+      ...current,
+      actaArchivo: null,
+    }));
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (values.hasActa && !values.actaTexto.trim()) {
-      setLocalError('Si agregas un acta, debes completar su texto.');
+    if (isReadingFile) {
+      setLocalError('Espera a que termine de cargarse el archivo del acta.');
       return;
+    }
+
+    if (values.hasActa) {
+      const descripcion = values.actaDescripcion.trim();
+
+      if (!descripcion && !values.actaArchivo) {
+        setLocalError(
+          'Si agregas un acta, debes escribir una descripcion o adjuntar un archivo.',
+        );
+        return;
+      }
     }
 
     setLocalError('');
@@ -146,7 +215,9 @@ export function MeetingForm({
       participantIds: values.participantIds,
       acta: values.hasActa
         ? {
-            texto: values.actaTexto,
+            titulo: values.actaTitulo.trim() || undefined,
+            descripcion: values.actaDescripcion.trim() || undefined,
+            archivo: values.actaArchivo ?? undefined,
           }
         : undefined,
     });
@@ -239,7 +310,7 @@ export function MeetingForm({
               >
                 <strong>{participant.nombre}</strong>
                 <span>
-                  {participant.rut} ·{' '}
+                  {participant.rut} -{' '}
                   {participant.roles.map((role) => role.nombre).join(', ')}
                 </span>
               </button>
@@ -285,21 +356,57 @@ export function MeetingForm({
         {values.hasActa ? (
           <div className="form-grid">
             <label className="form-field form-field--full">
-              <span>Texto del acta</span>
-              <textarea
-                required
-                rows={8}
-                value={values.actaTexto}
-                onChange={handleChange('actaTexto')}
+              <span>Titulo del acta</span>
+              <input
+                placeholder="Ej: Reunion ordinaria de directiva"
+                value={values.actaTitulo}
+                onChange={handleChange('actaTitulo')}
               />
             </label>
+
+            <label className="form-field form-field--full">
+              <span>Descripcion o resumen</span>
+              <textarea
+                rows={6}
+                value={values.actaDescripcion}
+                onChange={handleChange('actaDescripcion')}
+              />
+            </label>
+
+            <label className="form-field form-field--full">
+              <span>Archivo del acta</span>
+              <input accept={ACTA_FILE_ACCEPT} onChange={handleActaFileChange} type="file" />
+              <small className="form-help">
+                Puedes adjuntar PDF, Word, Excel, PowerPoint, texto o imagenes de
+                hasta 5 MB.
+              </small>
+            </label>
+
+            {values.actaArchivo ? (
+              <div className="file-card form-field--full">
+                <div className="file-card__meta">
+                  <strong>{values.actaArchivo.nombre}</strong>
+                  <span>
+                    {values.actaArchivo.tipo || 'application/octet-stream'} -{' '}
+                    {formatFileSize(values.actaArchivo.tamanoBytes)}
+                  </span>
+                </div>
+                <button
+                  className="button button-secondary button-small"
+                  onClick={removeActaFile}
+                  type="button"
+                >
+                  Quitar archivo
+                </button>
+              </div>
+            ) : null}
           </div>
         ) : null}
 
         {values.hasActa ? (
           <p className="form-help">
             El sistema registrara el acta a nombre de {user?.nombre ?? 'tu usuario'} con el
-            rol {currentRoleName}.
+            rol {currentRoleName}. Puedes guardar una descripcion corta, un archivo o ambos.
           </p>
         ) : null}
       </fieldset>
@@ -308,12 +415,50 @@ export function MeetingForm({
       {errorMessage ? <StatusMessage kind="error" message={errorMessage} /> : null}
 
       <div className="form-actions">
-        <button className="button button-primary" disabled={isSubmitting} type="submit">
-          {isSubmitting ? 'Guardando...' : submitLabel}
+        <button
+          className="button button-primary"
+          disabled={isSubmitting || isReadingFile}
+          type="submit"
+        >
+          {isSubmitting || isReadingFile ? 'Guardando...' : submitLabel}
         </button>
       </div>
     </form>
   );
+}
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
+
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function readFileAsBase64(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      if (typeof reader.result !== 'string') {
+        reject(new Error('Unexpected file reader result.'));
+        return;
+      }
+
+      const [, contenidoBase64 = ''] = reader.result.split(',', 2);
+      resolve(contenidoBase64);
+    };
+
+    reader.onerror = () => {
+      reject(reader.error ?? new Error('File read failed.'));
+    };
+
+    reader.readAsDataURL(file);
+  });
 }
 
 export type { MeetingFormValues };

@@ -30,7 +30,9 @@ export function MeetingEditPage() {
           modalidad: meetingData.modalidad,
           participantIds: meetingData.participantIds,
           hasActa: Boolean(meetingData.acta),
-          actaTexto: meetingData.acta?.texto ?? '',
+          actaTitulo: meetingData.acta?.titulo ?? '',
+          actaDescripcion: meetingData.acta?.descripcion ?? '',
+          actaArchivo: meetingData.acta?.archivo ?? null,
         });
       })
       .catch((error: Error) => {

@@ -21,6 +21,16 @@ export function UserForm({
 }: UserFormProps) {
   const [values, setValues] = useState<UserPayload>(initialValues);
   const [localError, setLocalError] = useState('');
+  const [pendingRoleId, setPendingRoleId] = useState('');
+
+  const selectedRoles = roles.filter((role) => values.roleIds.includes(role.idRol));
+  const availableRoles = roles.filter((role) => !values.roleIds.includes(role.idRol));
+  const currentPendingRoleId =
+    pendingRoleId && availableRoles.some((role) => String(role.idRol) === pendingRoleId)
+      ? pendingRoleId
+      : availableRoles[0]
+        ? String(availableRoles[0].idRol)
+        : '';
 
   const handleChange =
     (field: keyof Omit<UserPayload, 'roleIds'>) =>
@@ -31,12 +41,29 @@ export function UserForm({
       }));
     };
 
-  const handleRolesChange = (event: ChangeEvent<HTMLSelectElement>) => {
+  const handleRoleSelectChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    setPendingRoleId(event.target.value);
+  };
+
+  const handleAddRole = () => {
+    const roleId = Number(currentPendingRoleId);
+
+    if (!roleId) {
+      return;
+    }
+
     setValues((current) => ({
       ...current,
-      roleIds: Array.from(event.target.selectedOptions, (option) =>
-        Number(option.value),
-      ),
+      roleIds: [...current.roleIds, roleId],
+    }));
+    setPendingRoleId('');
+    setLocalError('');
+  };
+
+  const handleRemoveRole = (roleId: number) => {
+    setValues((current) => ({
+      ...current,
+      roleIds: current.roleIds.filter((currentRoleId) => currentRoleId !== roleId),
     }));
   };
 
@@ -101,24 +128,50 @@ export function UserForm({
 
       <fieldset className="form-section">
         <legend>Roles</legend>
-        <label className="form-field">
-          <span>Selecciona uno o mas roles</span>
-          <select
-            multiple
-            size={Math.min(roles.length, 8)}
-            value={values.roleIds.map(String)}
-            onChange={handleRolesChange}
+        <div className="selection-row">
+          <label className="form-field">
+            <span>Selecciona un rol</span>
+            <select
+              disabled={availableRoles.length === 0}
+              value={currentPendingRoleId}
+              onChange={handleRoleSelectChange}
+            >
+              {availableRoles.length === 0 ? (
+                <option value="">No quedan roles por agregar</option>
+              ) : (
+                availableRoles.map((role) => (
+                  <option key={role.idRol} value={role.idRol}>
+                    {role.nombre}
+                  </option>
+                ))
+              )}
+            </select>
+          </label>
+
+          <button
+            className="button button-secondary"
+            disabled={availableRoles.length === 0}
+            onClick={handleAddRole}
+            type="button"
           >
-            {roles.map((role) => (
-              <option key={role.idRol} value={role.idRol}>
-                {role.nombre}
-              </option>
+            Agregar rol
+          </button>
+        </div>
+
+        {selectedRoles.length === 0 ? (
+          <p className="form-help">Aun no has seleccionado roles para este usuario.</p>
+        ) : (
+          <div className="tag-list">
+            {selectedRoles.map((role) => (
+              <div key={role.idRol} className="tag-chip">
+                <span>{role.nombre}</span>
+                <button onClick={() => handleRemoveRole(role.idRol)} type="button">
+                  Quitar
+                </button>
+              </div>
             ))}
-          </select>
-          <small className="form-help">
-            Usa Ctrl o Cmd para seleccionar multiples roles.
-          </small>
-        </label>
+          </div>
+        )}
       </fieldset>
 
       {localError ? <StatusMessage kind="error" message={localError} /> : null}

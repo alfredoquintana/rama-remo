@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { StatusMessage } from '../components/StatusMessage';
 import { getMeeting } from '../services/meetings';
-import type { MeetingDetail } from '../types/meetings';
+import type { MeetingDetail, MeetingMinutesFile } from '../types/meetings';
 
 type NavigationState = {
   message?: string;
@@ -118,6 +118,10 @@ export function MeetingDetailPage() {
               <div className="minutes-card">
                 <div className="detail-grid">
                   <div>
+                    <dt>Titulo</dt>
+                    <dd>{meeting.acta.titulo ?? 'Sin titulo'}</dd>
+                  </div>
+                  <div>
                     <dt>Actualizado por</dt>
                     <dd>
                       {meeting.acta.actualizadoPor.nombre} ({meeting.acta.rol.nombre})
@@ -130,7 +134,38 @@ export function MeetingDetailPage() {
                     </dd>
                   </div>
                 </div>
-                <p className="minutes-card__text">{meeting.acta.texto}</p>
+
+                {meeting.acta.descripcion ? (
+                  <p className="minutes-card__text">{meeting.acta.descripcion}</p>
+                ) : (
+                  <p className="form-help">
+                    Esta acta no tiene descripcion escrita. Revisa el archivo adjunto si
+                    corresponde.
+                  </p>
+                )}
+
+                {meeting.acta.archivo ? (
+                  <div className="file-card">
+                    <div className="file-card__meta">
+                      <strong>{meeting.acta.archivo.nombre}</strong>
+                      <span>
+                        {meeting.acta.archivo.tipo || 'application/octet-stream'} -{' '}
+                        {formatFileSize(meeting.acta.archivo.tamanoBytes)}
+                      </span>
+                    </div>
+                    <button
+                      className="button button-secondary button-small"
+                      onClick={() => {
+                        if (meeting.acta?.archivo) {
+                          downloadActaFile(meeting.acta.archivo);
+                        }
+                      }}
+                      type="button"
+                    >
+                      Descargar archivo
+                    </button>
+                  </div>
+                ) : null}
               </div>
             ) : (
               <p>Esta reunion aun no tiene acta registrada.</p>
@@ -140,4 +175,32 @@ export function MeetingDetailPage() {
       ) : null}
     </section>
   );
+}
+
+function downloadActaFile(file: MeetingMinutesFile) {
+  const binary = window.atob(file.contenidoBase64);
+  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+  const blob = new Blob([bytes], {
+    type: file.tipo || 'application/octet-stream',
+  });
+  const url = window.URL.createObjectURL(blob);
+  const link = window.document.createElement('a');
+
+  link.href = url;
+  link.download = file.nombre;
+  link.click();
+
+  window.URL.revokeObjectURL(url);
+}
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
+
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }

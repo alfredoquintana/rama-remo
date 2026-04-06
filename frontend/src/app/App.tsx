@@ -3,6 +3,10 @@ import { AuthProvider } from './AuthContext';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { AppLayout } from '../layouts/AppLayout';
 import { AccessPage } from '../pages/AccessPage';
+import { AnnualPlanCreatePage } from '../pages/AnnualPlanCreatePage';
+import { AnnualPlanDetailPage } from '../pages/AnnualPlanDetailPage';
+import { AnnualPlanEditPage } from '../pages/AnnualPlanEditPage';
+import { AnnualPlansListPage } from '../pages/AnnualPlansListPage';
 import { HomePage } from '../pages/HomePage';
 import { LoginPage } from '../pages/LoginPage';
 import { MeetingCreatePage } from '../pages/MeetingCreatePage';
@@ -26,6 +30,10 @@ export function App() {
               <Route path="/usuarios" element={<UsersListPage />} />
               <Route path="/usuarios/nuevo" element={<UserCreatePage />} />
               <Route path="/usuarios/:id/editar" element={<UserEditPage />} />
+              <Route path="/planificacion" element={<AnnualPlansListPage />} />
+              <Route path="/planificacion/nuevo" element={<AnnualPlanCreatePage />} />
+              <Route path="/planificacion/:id" element={<AnnualPlanDetailPage />} />
+              <Route path="/planificacion/:id/editar" element={<AnnualPlanEditPage />} />
               <Route path="/reuniones" element={<MeetingsListPage />} />
               <Route path="/reuniones/nueva" element={<MeetingCreatePage />} />
               <Route path="/reuniones/:id" element={<MeetingDetailPage />} />

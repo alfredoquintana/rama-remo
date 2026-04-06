@@ -68,7 +68,12 @@ export class SeedService implements OnApplicationBootstrap {
 
   private async seedMenus() {
     await this.menusRepository.upsert(
-      [{ nombre: 'Inicio' }, { nombre: 'Usuarios' }, { nombre: 'Reuniones' }],
+      [
+        { nombre: 'Inicio' },
+        { nombre: 'Usuarios' },
+        { nombre: 'Reuniones' },
+        { nombre: 'Planificacion' },
+      ],
       ['nombre'],
     );
 
@@ -101,6 +106,16 @@ export class SeedService implements OnApplicationBootstrap {
           ruta: '/reuniones/nueva',
           idMenu: menuByName.get('Reuniones')!.idMenu,
         },
+        {
+          nombre: 'Planes anuales',
+          ruta: '/planificacion',
+          idMenu: menuByName.get('Planificacion')!.idMenu,
+        },
+        {
+          nombre: 'Crear plan anual',
+          ruta: '/planificacion/nuevo',
+          idMenu: menuByName.get('Planificacion')!.idMenu,
+        },
       ],
       ['ruta'],
     );
@@ -129,6 +144,10 @@ export class SeedService implements OnApplicationBootstrap {
           } as MenuRolEntity,
           {
             idMenu: menuByName.get('Reuniones')!.idMenu,
+            idRol: role.idRol,
+          } as MenuRolEntity,
+          {
+            idMenu: menuByName.get('Planificacion')!.idMenu,
             idRol: role.idRol,
           } as MenuRolEntity,
         );

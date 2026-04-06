@@ -9,7 +9,14 @@ export function AppHeader() {
       <div className="app-header__content">
         <div>
           <p className="app-header__eyebrow">Administracion</p>
-          <h1 className="app-header__title">Sistema Rama de Remo - MVP</h1>
+          <div className="app-header__title-row">
+            <img
+              className="app-header__logo"
+              src="/rudern-icon.jpeg"
+              alt="Icono Rudern"
+            />
+            <h1 className="app-header__title">Sistema Rama de Remo - MVP</h1>
+          </div>
           <p className="app-header__subtitle">
             Usuarios, roles, reuniones y actas para la directiva.
           </p>

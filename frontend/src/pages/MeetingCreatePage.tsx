@@ -16,7 +16,9 @@ const initialValues: MeetingFormValues = {
   modalidad: 'presencial',
   participantIds: [],
   hasActa: false,
-  actaTexto: '',
+  actaTitulo: '',
+  actaDescripcion: '',
+  actaArchivo: null,
 };
 
 export function MeetingCreatePage() {

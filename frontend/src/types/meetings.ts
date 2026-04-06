@@ -1,6 +1,13 @@
 export type MeetingState = 'programada' | 'realizada' | 'cancelada';
 export type MeetingMode = 'presencial' | 'online' | 'hibrida';
 
+export type MeetingMinutesFile = {
+  nombre: string;
+  tipo: string;
+  contenidoBase64: string;
+  tamanoBytes: number;
+};
+
 export type MeetingListItem = {
   idReunion: number;
   fecha: string;
@@ -37,7 +44,9 @@ export type MeetingDetail = {
   hasActa: boolean;
   acta: {
     idActa: number;
-    texto: string;
+    titulo: string | null;
+    descripcion: string;
+    archivo: MeetingMinutesFile | null;
     fechaActualizacion: string;
     actualizadoPor: {
       idUsuario: number;
@@ -59,6 +68,8 @@ export type MeetingPayload = {
   modalidad: MeetingMode;
   participantIds: number[];
   acta?: {
-    texto: string;
+    titulo?: string;
+    descripcion?: string;
+    archivo?: MeetingMinutesFile;
   };
 };

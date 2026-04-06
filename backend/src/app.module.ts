@@ -9,6 +9,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
 import { MeetingsModule } from './modules/meetings/meetings.module';
 import { MenusModule } from './modules/menus/menus.module';
+import { PlanningModule } from './modules/planning/planning.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { SeedModule } from './modules/seed/seed.module';
 import { UsersModule } from './modules/users/users.module';
@@ -29,6 +30,7 @@ import { AuthGuard } from './modules/auth/auth.guard';
     RolesModule,
     UsersModule,
     MeetingsModule,
+    PlanningModule,
     MenusModule,
     SeedModule,
   ],
