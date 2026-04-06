@@ -44,10 +44,10 @@ export function LoginPage() {
     <section className="auth-shell">
       <form className="auth-card" onSubmit={handleSubmit}>
         <span className="hero-card__badge">Acceso al sistema</span>
-        <h2>Iniciar sesion</h2>
+        <h2>Iniciar sesión</h2>
         <p>
           Ingresa con tu RUT y tu clave. Los usuarios nuevos quedan creados con una
-          clave provisoria estandar en este entorno de desarrollo.
+          clave provisoria estándar en este entorno de desarrollo.
         </p>
 
         <label className="form-field">
@@ -56,7 +56,7 @@ export function LoginPage() {
         </label>
 
         <label className="form-field">
-          <span>Contrasena</span>
+          <span>Contraseña</span>
           <input
             required
             type="password"

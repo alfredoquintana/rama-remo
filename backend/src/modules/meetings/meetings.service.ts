@@ -79,7 +79,7 @@ export class MeetingsService {
     });
 
     if (!meeting) {
-      throw new NotFoundException('Reunion no encontrada.');
+      throw new NotFoundException('Reunión no encontrada.');
     }
 
     return this.mapMeetingDetail(meeting);
@@ -149,7 +149,7 @@ export class MeetingsService {
     });
 
     if (!currentMeeting) {
-      throw new NotFoundException('Reunion no encontrada.');
+      throw new NotFoundException('Reunión no encontrada.');
     }
 
     const nextHoraInicio =
@@ -211,6 +211,22 @@ export class MeetingsService {
     return this.findOne(id);
   }
 
+  async delete(id: number) {
+    const currentMeeting = await this.meetingsRepository.findOneBy({
+      idReunion: id,
+    });
+
+    if (!currentMeeting) {
+      throw new NotFoundException('Reunión no encontrada.');
+    }
+
+    await this.meetingsRepository.delete({ idReunion: id });
+
+    return {
+      message: 'Reunión eliminada correctamente.',
+    };
+  }
+
   private uniqueIds(ids: number[]) {
     return [...new Set(ids)];
   }
@@ -225,7 +241,7 @@ export class MeetingsService {
     });
 
     if (users.length !== userIds.length) {
-      throw new NotFoundException('Uno o mas participantes no existen.');
+      throw new NotFoundException('Uno o más participantes no existen.');
     }
   }
 
@@ -240,7 +256,7 @@ export class MeetingsService {
 
     if (!hasDescripcion && !hasArchivo) {
       throw new BadRequestException(
-        'Debes ingresar una descripcion o adjuntar un archivo para el acta.',
+        'Debes ingresar una descripción o adjuntar un archivo para el acta.',
       );
     }
 

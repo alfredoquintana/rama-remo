@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -47,6 +48,11 @@ export class PlanningController {
     @Body() updatePlanDto: UpdatePlanDto,
   ) {
     return this.planningService.update(id, updatePlanDto);
+  }
+
+  @Delete(':id')
+  delete(@Param('id', ParseIntPipe) id: number) {
+    return this.planningService.delete(id);
   }
 
   @Post(':id/items')

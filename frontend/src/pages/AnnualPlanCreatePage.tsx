@@ -45,7 +45,7 @@ export function AnnualPlanCreatePage() {
         <div>
           <h2>Crear plan anual</h2>
           <p>
-            Define el objetivo general, las areas del anio y deja lista la base para el
+            Define el objetivo general, las áreas del año y deja lista la base para el
             seguimiento.
           </p>
         </div>

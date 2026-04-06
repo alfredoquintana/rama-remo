@@ -9,7 +9,7 @@ export function ProtectedRoute() {
     return (
       <section className="auth-shell">
         <div className="auth-card">
-          <h2>Cargando sesion...</h2>
+          <h2>Cargando sesión...</h2>
           <p>Estamos verificando tu acceso al sistema.</p>
         </div>
       </section>

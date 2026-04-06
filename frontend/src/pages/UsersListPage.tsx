@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { StatusMessage } from '../components/StatusMessage';
 import { deleteUser, getUsers } from '../services/users';
 import type { User } from '../types/users';
+import { formatRoleList } from '../utils/text';
 
 type NavigationState = {
   message?: string;
@@ -33,7 +34,7 @@ export function UsersListPage() {
 
   const handleDelete = async (user: User) => {
     const confirmed = window.confirm(
-      `¿Seguro que quieres eliminar a ${user.nombre}? Esta accion no se puede deshacer.`,
+      `¿Seguro que quieres eliminar a ${user.nombre}? Esta acción no se puede deshacer.`,
     );
 
     if (!confirmed) {
@@ -84,7 +85,7 @@ export function UsersListPage() {
               <tr>
                 <th>Nombre</th>
                 <th>RUT</th>
-                <th>Telefono</th>
+                <th>Teléfono</th>
                 <th>Roles</th>
                 <th>Acciones</th>
               </tr>
@@ -95,7 +96,7 @@ export function UsersListPage() {
                   <td>{user.nombre}</td>
                   <td>{user.rut}</td>
                   <td>{user.telefono}</td>
-                  <td>{user.roles.map((role) => role.nombre).join(', ')}</td>
+                  <td>{formatRoleList(user.roles)}</td>
                   <td>
                     <div className="table-actions">
                       <Link

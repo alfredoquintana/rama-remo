@@ -1,4 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { annualPlanStatusLabels } from '../app/labels';
 import { StatusMessage } from './StatusMessage';
 import type { AnnualPlanPayload, AnnualPlanStatus } from '../types/planning';
 
@@ -89,12 +90,12 @@ export function AnnualPlanForm({
       .filter((area) => area.nombre || area.descripcion);
 
     if (!anio) {
-      setLocalError('Debes indicar un anio valido para el plan.');
+      setLocalError('Debes indicar un año válido para el plan.');
       return;
     }
 
     if (anio < 2000 || anio > 2100) {
-      setLocalError('El anio debe estar entre 2000 y 2100.');
+      setLocalError('El año debe estar entre 2000 y 2100.');
       return;
     }
 
@@ -104,19 +105,19 @@ export function AnnualPlanForm({
     }
 
     if (normalizedAreas.length === 0) {
-      setLocalError('Debes agregar al menos un area para ordenar la planificacion.');
+      setLocalError('Debes agregar al menos un área para ordenar la planificación.');
       return;
     }
 
     if (normalizedAreas.some((area) => !area.nombre)) {
-      setLocalError('Todas las areas deben tener nombre.');
+      setLocalError('Todas las áreas deben tener nombre.');
       return;
     }
 
     const normalizedNames = normalizedAreas.map((area) => area.nombre.toLowerCase());
 
     if (new Set(normalizedNames).size !== normalizedNames.length) {
-      setLocalError('No puedes repetir nombres de areas dentro del mismo plan.');
+      setLocalError('No puedes repetir nombres de áreas dentro del mismo plan.');
       return;
     }
 
@@ -140,7 +141,7 @@ export function AnnualPlanForm({
     <form className="form-card" onSubmit={handleSubmit}>
       <div className="form-grid">
         <label className="form-field">
-          <span>Anio</span>
+          <span>Año</span>
           <input
             required
             max="2100"
@@ -156,7 +157,7 @@ export function AnnualPlanForm({
           <select value={values.estado} onChange={handleChange('estado')}>
             {annualPlanStatuses.map((status) => (
               <option key={status} value={status}>
-                {status}
+                {annualPlanStatusLabels[status]}
               </option>
             ))}
           </select>
@@ -183,13 +184,13 @@ export function AnnualPlanForm({
 
       <fieldset className="form-section">
         <div className="section-heading">
-          <legend>Areas del plan</legend>
+        <legend>Áreas del plan</legend>
           <button
             className="button button-secondary button-small"
             onClick={addArea}
             type="button"
           >
-            Agregar area
+            Agregar área
           </button>
         </div>
 
@@ -197,7 +198,7 @@ export function AnnualPlanForm({
           {values.areas.map((area, index) => (
             <div key={area.idAreaPlan ?? `new-${index}`} className="subform-card">
               <div className="subform-card__header">
-                <strong>Area {index + 1}</strong>
+                <strong>Área {index + 1}</strong>
                 <button
                   className="button button-secondary button-small"
                   disabled={values.areas.length === 1}
@@ -219,7 +220,7 @@ export function AnnualPlanForm({
                 </label>
 
                 <label className="form-field">
-                  <span>Descripcion</span>
+                  <span>Descripción</span>
                   <input
                     value={area.descripcion}
                     onChange={handleAreaChange(index, 'descripcion')}

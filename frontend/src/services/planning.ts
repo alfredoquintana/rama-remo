@@ -23,6 +23,10 @@ export function updateAnnualPlan(id: number, payload: Partial<AnnualPlanPayload>
   return apiClient.patch<AnnualPlanDetail>(`/planning/annual-plans/${id}`, payload);
 }
 
+export function deleteAnnualPlan(id: number) {
+  return apiClient.delete<{ message: string }>(`/planning/annual-plans/${id}`);
+}
+
 export function createPlanningItem(planId: number, payload: PlanningItemPayload) {
   return apiClient.post<AnnualPlanDetail>(
     `/planning/annual-plans/${planId}/items`,

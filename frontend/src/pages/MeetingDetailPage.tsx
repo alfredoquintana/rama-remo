@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { meetingModeLabels, meetingStateLabels } from '../app/labels';
 import { StatusMessage } from '../components/StatusMessage';
-import { getMeeting } from '../services/meetings';
+import { deleteMeeting, getMeeting } from '../services/meetings';
 import type { MeetingDetail, MeetingMinutesFile } from '../types/meetings';
+import { formatDate, formatDateTime, formatTime } from '../utils/dateTime';
+import { formatRoleList, toTitleCaseLabel } from '../utils/text';
 
 type NavigationState = {
   message?: string;
 };
 
 export function MeetingDetailPage() {
+  const navigate = useNavigate();
   const params = useParams();
   const location = useLocation();
   const meetingId = Number(params.id);
@@ -31,6 +35,29 @@ export function MeetingDetailPage() {
 
   const navigationState = (location.state as NavigationState | null) ?? null;
 
+  const handleDelete = async () => {
+    if (!meeting) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Seguro que quieres eliminar esta reunion del ${formatDate(meeting.fecha)}? Esta accion no se puede deshacer.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const response = await deleteMeeting(meeting.idReunion);
+      navigate('/reuniones', {
+        state: { message: response.message },
+      });
+    } catch (error) {
+      setErrorMessage((error as Error).message);
+    }
+  };
+
   return (
     <section className="page-section">
       <div className="page-heading">
@@ -39,12 +66,17 @@ export function MeetingDetailPage() {
           <p>Vista completa de participantes y acta asociada.</p>
         </div>
         {meeting ? (
-          <Link
-            className="button button-primary"
-            to={`/reuniones/${meeting.idReunion}/editar`}
-          >
-            Editar reunion
-          </Link>
+          <div className="table-actions">
+            <Link
+              className="button button-primary"
+              to={`/reuniones/${meeting.idReunion}/editar`}
+            >
+              Editar reunion
+            </Link>
+            <button className="button button-danger" onClick={() => void handleDelete()} type="button">
+              Eliminar reunion
+            </button>
+          </div>
         ) : null}
       </div>
 
@@ -66,12 +98,12 @@ export function MeetingDetailPage() {
               <dl className="detail-grid">
                 <div>
                   <dt>Fecha</dt>
-                  <dd>{meeting.fecha}</dd>
+                  <dd>{formatDate(meeting.fecha)}</dd>
                 </div>
                 <div>
                   <dt>Horario</dt>
                   <dd>
-                    {meeting.horaInicio} - {meeting.horaFin}
+                    {formatTime(meeting.horaInicio)} - {formatTime(meeting.horaFin)}
                   </dd>
                 </div>
                 <div>
@@ -80,11 +112,11 @@ export function MeetingDetailPage() {
                 </div>
                 <div>
                   <dt>Estado</dt>
-                  <dd>{meeting.estado}</dd>
+                  <dd>{meetingStateLabels[meeting.estado]}</dd>
                 </div>
                 <div>
                   <dt>Modalidad</dt>
-                  <dd>{meeting.modalidad}</dd>
+                  <dd>{meetingModeLabels[meeting.modalidad]}</dd>
                 </div>
               </dl>
             </article>
@@ -98,7 +130,7 @@ export function MeetingDetailPage() {
                   {meeting.participantes.map((participant) => (
                     <li key={participant.idUsuario}>
                       <strong>{participant.nombre}</strong>
-                      <span>{participant.roles.map((role) => role.nombre).join(', ')}</span>
+                      <span>{formatRoleList(participant.roles)}</span>
                     </li>
                   ))}
                 </ul>
@@ -124,14 +156,12 @@ export function MeetingDetailPage() {
                   <div>
                     <dt>Actualizado por</dt>
                     <dd>
-                      {meeting.acta.actualizadoPor.nombre} ({meeting.acta.rol.nombre})
+                      {meeting.acta.actualizadoPor.nombre} ({toTitleCaseLabel(meeting.acta.rol.nombre)})
                     </dd>
                   </div>
                   <div>
                     <dt>Fecha de actualizacion</dt>
-                    <dd>
-                      {new Date(meeting.acta.fechaActualizacion).toLocaleString()}
-                    </dd>
+                    <dd>{formatDateTime(meeting.acta.fechaActualizacion)}</dd>
                   </div>
                 </div>
 

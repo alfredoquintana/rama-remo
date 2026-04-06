@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { StatusMessage } from './StatusMessage';
 import type { Role, UserPayload } from '../types/users';
+import { toTitleCaseLabel } from '../utils/text';
 
 type UserFormProps = {
   roles: Role[];
@@ -97,7 +98,7 @@ export function UserForm({
         </label>
 
         <label className="form-field">
-          <span>Telefono</span>
+          <span>Teléfono</span>
           <input
             required
             value={values.telefono}
@@ -116,7 +117,7 @@ export function UserForm({
         </label>
 
         <label className="form-field form-field--full">
-          <span>Direccion</span>
+          <span>Dirección</span>
           <textarea
             required
             rows={3}
@@ -141,7 +142,7 @@ export function UserForm({
               ) : (
                 availableRoles.map((role) => (
                   <option key={role.idRol} value={role.idRol}>
-                    {role.nombre}
+                    {toTitleCaseLabel(role.nombre)}
                   </option>
                 ))
               )}
@@ -159,12 +160,12 @@ export function UserForm({
         </div>
 
         {selectedRoles.length === 0 ? (
-          <p className="form-help">Aun no has seleccionado roles para este usuario.</p>
+          <p className="form-help">Aún no has seleccionado roles para este usuario.</p>
         ) : (
           <div className="tag-list">
             {selectedRoles.map((role) => (
               <div key={role.idRol} className="tag-chip">
-                <span>{role.nombre}</span>
+                <span>{toTitleCaseLabel(role.nombre)}</span>
                 <button onClick={() => handleRemoveRole(role.idRol)} type="button">
                   Quitar
                 </button>

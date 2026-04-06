@@ -50,7 +50,7 @@ export function MeetingEditPage() {
     try {
       await updateMeeting(meetingId, values);
       navigate(`/reuniones/${meetingId}`, {
-        state: { message: 'Reunion actualizada correctamente.' },
+        state: { message: 'Reunión actualizada correctamente.' },
       });
     } catch (error) {
       setErrorMessage((error as Error).message);
@@ -63,17 +63,17 @@ export function MeetingEditPage() {
     <section className="page-section">
       <div className="page-heading">
         <div>
-          <h2>Editar reunion</h2>
+          <h2>Editar reunión</h2>
           <p>Actualiza datos generales, participantes y acta asociada.</p>
         </div>
       </div>
 
       {isLoading ? (
         <div className="panel-card">
-          <p>Cargando reunion...</p>
+          <p>Cargando reunión...</p>
         </div>
       ) : !initialValues ? (
-        <StatusMessage kind="error" message={errorMessage || 'Reunion no encontrada.'} />
+        <StatusMessage kind="error" message={errorMessage || 'Reunión no encontrada.'} />
       ) : (
         <MeetingForm
           errorMessage={errorMessage}

@@ -47,7 +47,6 @@ export function HomePage() {
   return (
     <section className="page-section">
       <div className="hero-card">
-        <span className="hero-card__badge">MVP operativo</span>
         <h2>Gestion administrativa para la rama de remo</h2>
         <p>
           Base funcional para manejar usuarios, roles, reuniones de directiva y
@@ -110,7 +109,7 @@ export function HomePage() {
         <article className="panel-card">
           <h3>Planificacion anual</h3>
           <p>
-            Ordena compromisos del anio, registra cumplimiento, aprendizajes y
+            Ordena compromisos del ano, registra cumplimiento, aprendizajes y
             avances para la reunion general de la rama.
           </p>
           <div className="inline-actions">

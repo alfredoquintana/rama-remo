@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { annualPlanStatusLabels } from '../app/labels';
 import { StatusMessage } from '../components/StatusMessage';
-import { getAnnualPlans } from '../services/planning';
+import { deleteAnnualPlan, getAnnualPlans } from '../services/planning';
 import type { AnnualPlanListItem } from '../types/planning';
 
 type NavigationState = {
@@ -13,6 +14,7 @@ export function AnnualPlansListPage() {
   const [plans, setPlans] = useState<AnnualPlanListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     getAnnualPlans()
@@ -29,13 +31,35 @@ export function AnnualPlansListPage() {
 
   const navigationState = (location.state as NavigationState | null) ?? null;
 
+  const handleDelete = async (plan: AnnualPlanListItem) => {
+    const confirmed = window.confirm(
+      `¿Seguro que quieres eliminar el plan "${plan.nombre}" del año ${plan.anio}? Esta acción no se puede deshacer.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const response = await deleteAnnualPlan(plan.idPlanAnual);
+      setPlans((current) =>
+        current.filter((currentPlan) => currentPlan.idPlanAnual !== plan.idPlanAnual),
+      );
+      setSuccessMessage(response.message);
+      setErrorMessage('');
+    } catch (error) {
+      setErrorMessage((error as Error).message);
+      setSuccessMessage('');
+    }
+  };
+
   return (
     <section className="page-section">
       <div className="page-heading">
         <div>
-          <h2>Planificacion anual</h2>
+          <h2>Planificación anual</h2>
           <p>
-            Define compromisos del anio, responsables y seguimiento para transparentar
+            Define compromisos del año, responsables y seguimiento para transparentar
             avances ante la rama.
           </p>
         </div>
@@ -48,21 +72,25 @@ export function AnnualPlansListPage() {
         <StatusMessage kind="success" message={navigationState.message} />
       ) : null}
 
+      {successMessage ? (
+        <StatusMessage kind="success" message={successMessage} />
+      ) : null}
+
       {errorMessage ? <StatusMessage kind="error" message={errorMessage} /> : null}
 
       <div className="panel-card">
         {isLoading ? (
-          <p>Cargando planificacion anual...</p>
+          <p>Cargando planificación anual...</p>
         ) : plans.length === 0 ? (
-          <p>Aun no hay planes anuales creados.</p>
+          <p>Aún no hay planes anuales creados.</p>
         ) : (
           <table className="data-table">
             <thead>
               <tr>
-                <th>Anio</th>
+                <th>Año</th>
                 <th>Plan</th>
                 <th>Estado</th>
-                <th>Items</th>
+                <th>Ítems</th>
                 <th>Cumplimiento</th>
                 <th>Atrasados</th>
                 <th>Acciones</th>
@@ -78,7 +106,7 @@ export function AnnualPlansListPage() {
                       {plan.objetivoGeneral ?? 'Sin objetivo general cargado.'}
                     </div>
                   </td>
-                  <td>{plan.estado}</td>
+                  <td>{annualPlanStatusLabels[plan.estado]}</td>
                   <td>{plan.summary.totalItems}</td>
                   <td>{plan.summary.porcentajeCumplimiento}%</td>
                   <td>{plan.summary.atrasados}</td>
@@ -96,6 +124,13 @@ export function AnnualPlansListPage() {
                       >
                         Editar
                       </Link>
+                      <button
+                        className="button button-danger button-small"
+                        onClick={() => void handleDelete(plan)}
+                        type="button"
+                      >
+                        Eliminar
+                      </button>
                     </div>
                   </td>
                 </tr>

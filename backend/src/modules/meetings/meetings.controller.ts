@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -48,5 +49,10 @@ export class MeetingsController {
     @Body() updateMeetingDto: UpdateMeetingDto,
   ) {
     return this.meetingsService.update(id, updateMeetingDto, request.user!.sub);
+  }
+
+  @Delete(':id')
+  delete(@Param('id', ParseIntPipe) id: number) {
+    return this.meetingsService.delete(id);
   }
 }

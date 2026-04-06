@@ -1,4 +1,5 @@
 import { useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
+import { meetingModeLabels, meetingStateLabels } from '../app/labels';
 import { useAuth } from '../app/useAuth';
 import { StatusMessage } from './StatusMessage';
 import type {
@@ -8,6 +9,7 @@ import type {
   MeetingState,
 } from '../types/meetings';
 import type { User } from '../types/users';
+import { formatRoleList, toTitleCaseLabel } from '../utils/text';
 
 const MAX_ACTA_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 const ACTA_FILE_ACCEPT =
@@ -66,7 +68,7 @@ export function MeetingForm({
       return first.nombre.localeCompare(second.nombre);
     });
 
-    return roles[0]?.nombre ?? 'sin rol';
+    return toTitleCaseLabel(roles[0]?.nombre ?? 'sin rol');
   }, [user?.roles]);
 
   const selectedParticipants = useMemo(
@@ -197,7 +199,7 @@ export function MeetingForm({
 
       if (!descripcion && !values.actaArchivo) {
         setLocalError(
-          'Si agregas un acta, debes escribir una descripcion o adjuntar un archivo.',
+          'Si agregas un acta, debes escribir una descripción o adjuntar un archivo.',
         );
         return;
       }
@@ -270,7 +272,7 @@ export function MeetingForm({
           <select value={values.estado} onChange={handleChange('estado')}>
             {meetingStates.map((state) => (
               <option key={state} value={state}>
-                {state}
+                {meetingStateLabels[state]}
               </option>
             ))}
           </select>
@@ -281,7 +283,7 @@ export function MeetingForm({
           <select value={values.modalidad} onChange={handleChange('modalidad')}>
             {meetingModes.map((mode) => (
               <option key={mode} value={mode}>
-                {mode}
+                {meetingModeLabels[mode]}
               </option>
             ))}
           </select>
@@ -311,25 +313,25 @@ export function MeetingForm({
                 <strong>{participant.nombre}</strong>
                 <span>
                   {participant.rut} -{' '}
-                  {participant.roles.map((role) => role.nombre).join(', ')}
+                  {formatRoleList(participant.roles)}
                 </span>
               </button>
             ))}
           </div>
         ) : participantQuery.trim() ? (
-          <p className="form-help">No hay coincidencias para esa busqueda.</p>
+          <p className="form-help">No hay coincidencias para esa búsqueda.</p>
         ) : null}
 
         <div className="selected-participants">
           {selectedParticipants.length === 0 ? (
-            <p className="form-help">Aun no has agregado participantes.</p>
+            <p className="form-help">Aún no has agregado participantes.</p>
           ) : (
             selectedParticipants.map((participant) => (
               <div key={participant.idUsuario} className="participant-chip">
                 <div>
                   <strong>{participant.nombre}</strong>
                   <span>
-                    {participant.roles.map((role) => role.nombre).join(', ')}
+                    {formatRoleList(participant.roles)}
                   </span>
                 </div>
                 <button
@@ -350,22 +352,22 @@ export function MeetingForm({
 
         <label className="switch-field">
           <input checked={values.hasActa} onChange={toggleActa} type="checkbox" />
-          <span>Agregar o actualizar acta en esta reunion</span>
+          <span>Agregar o actualizar acta en esta reunión</span>
         </label>
 
         {values.hasActa ? (
           <div className="form-grid">
             <label className="form-field form-field--full">
-              <span>Titulo del acta</span>
+              <span>Título del acta</span>
               <input
-                placeholder="Ej: Reunion ordinaria de directiva"
+                placeholder="Ej: Reunión ordinaria de directiva"
                 value={values.actaTitulo}
                 onChange={handleChange('actaTitulo')}
               />
             </label>
 
             <label className="form-field form-field--full">
-              <span>Descripcion o resumen</span>
+              <span>Descripción o resumen</span>
               <textarea
                 rows={6}
                 value={values.actaDescripcion}
@@ -377,7 +379,7 @@ export function MeetingForm({
               <span>Archivo del acta</span>
               <input accept={ACTA_FILE_ACCEPT} onChange={handleActaFileChange} type="file" />
               <small className="form-help">
-                Puedes adjuntar PDF, Word, Excel, PowerPoint, texto o imagenes de
+                Puedes adjuntar PDF, Word, Excel, PowerPoint, texto o imágenes de
                 hasta 5 MB.
               </small>
             </label>
@@ -405,8 +407,8 @@ export function MeetingForm({
 
         {values.hasActa ? (
           <p className="form-help">
-            El sistema registrara el acta a nombre de {user?.nombre ?? 'tu usuario'} con el
-            rol {currentRoleName}. Puedes guardar una descripcion corta, un archivo o ambos.
+            El sistema registrará el acta a nombre de {user?.nombre ?? 'tu usuario'} con el
+            rol {currentRoleName}. Puedes guardar una descripción corta, un archivo o ambos.
           </p>
         ) : null}
       </fieldset>

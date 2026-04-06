@@ -15,7 +15,7 @@ export function AccessPage() {
     event.preventDefault();
 
     if (newPassword !== confirmPassword) {
-      setErrorMessage('La nueva clave y la confirmacion deben coincidir.');
+      setErrorMessage('La nueva clave y la confirmación deben coincidir.');
       return;
     }
 
@@ -49,7 +49,7 @@ export function AccessPage() {
           Usuario actual: <strong>{user?.nombre}</strong> ({user?.rut})
         </p>
         <p className="form-help">
-          En desarrollo puedes seguir usando la clave provisoria, pero desde aqui
+          En desarrollo puedes seguir usando la clave provisoria, pero desde aquí
           puedes definir tu propia clave cuando quieras.
         </p>
       </div>

@@ -1,4 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { planningItemStatusLabels } from '../app/labels';
 import { StatusMessage } from './StatusMessage';
 import type { PlanningFollowupPayload, PlanningItemStatus } from '../types/planning';
 
@@ -102,7 +103,7 @@ export function PlanFollowupForm({
           <select value={values.estado} onChange={handleChange('estado')}>
             {planningStates.map((state) => (
               <option key={state} value={state}>
-                {state}
+                {planningItemStatusLabels[state]}
               </option>
             ))}
           </select>
@@ -139,7 +140,7 @@ export function PlanFollowupForm({
         </label>
 
         <label className="form-field">
-          <span>Proximo paso</span>
+          <span>Próximo paso</span>
           <textarea
             rows={3}
             value={values.proximoPaso}
@@ -148,7 +149,7 @@ export function PlanFollowupForm({
         </label>
 
         <label className="form-field">
-          <span>Que funciono bien</span>
+          <span>Qué funcionó bien</span>
           <textarea
             rows={3}
             value={values.funcionoBien}
@@ -157,7 +158,7 @@ export function PlanFollowupForm({
         </label>
 
         <label className="form-field">
-          <span>Que mejorar</span>
+          <span>Qué mejorar</span>
           <textarea
             rows={3}
             value={values.porMejorar}

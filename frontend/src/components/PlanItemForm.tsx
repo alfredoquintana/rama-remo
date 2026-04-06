@@ -1,4 +1,8 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
+import {
+  planningItemPriorityLabels,
+  planningItemStatusLabels,
+} from '../app/labels';
 import { StatusMessage } from './StatusMessage';
 import type {
   AnnualPlanArea,
@@ -75,17 +79,17 @@ export function PlanItemForm({
     const resultadoEsperado = values.resultadoEsperado.trim();
 
     if (!areaId) {
-      setLocalError('Debes seleccionar un area.');
+      setLocalError('Debes seleccionar un área.');
       return;
     }
 
     if (!titulo) {
-      setLocalError('Debes ingresar un titulo para el item.');
+      setLocalError('Debes ingresar un título para el ítem.');
       return;
     }
 
     if (!descripcion) {
-      setLocalError('Debes ingresar una descripcion para el item.');
+      setLocalError('Debes ingresar una descripción para el ítem.');
       return;
     }
 
@@ -132,7 +136,7 @@ export function PlanItemForm({
 
       <div className="form-grid">
         <label className="form-field">
-          <span>Area</span>
+          <span>Área</span>
           <select value={values.idAreaPlan} onChange={handleChange('idAreaPlan')}>
             {areas.map((area) => (
               <option key={area.idAreaPlan} value={area.idAreaPlan}>
@@ -155,12 +159,12 @@ export function PlanItemForm({
         </label>
 
         <label className="form-field form-field--full">
-          <span>Titulo</span>
+          <span>Título</span>
           <input required value={values.titulo} onChange={handleChange('titulo')} />
         </label>
 
         <label className="form-field form-field--full">
-          <span>Descripcion</span>
+          <span>Descripción</span>
           <textarea
             required
             rows={3}
@@ -184,7 +188,7 @@ export function PlanItemForm({
           <select value={values.prioridad} onChange={handleChange('prioridad')}>
             {planningPriorities.map((priority) => (
               <option key={priority} value={priority}>
-                {priority}
+                {planningItemPriorityLabels[priority]}
               </option>
             ))}
           </select>
@@ -195,7 +199,7 @@ export function PlanItemForm({
           <select value={values.estado} onChange={handleChange('estado')}>
             {planningStates.map((state) => (
               <option key={state} value={state}>
-                {state}
+                {planningItemStatusLabels[state]}
               </option>
             ))}
           </select>

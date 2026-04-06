@@ -11,6 +11,25 @@ const fallbackMenus: Menu[] = [
   },
 ];
 
+function HomeIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="app-nav__icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 10.5 12 3l9 7.5" />
+      <path d="M5.5 9.5V20h13V9.5" />
+      <path d="M10 20v-5.5h4V20" />
+    </svg>
+  );
+}
+
 export function AppSidebar() {
   const [menus, setMenus] = useState<Menu[]>(fallbackMenus);
 
@@ -42,12 +61,13 @@ export function AppSidebar() {
             {menu.nombre === 'Inicio' ? (
               <NavLink
                 className={({ isActive }) =>
-                  `app-nav__menu ${isActive ? 'is-active' : ''}`
+                  `app-nav__menu app-nav__menu--link ${isActive ? 'is-active' : ''}`
                 }
                 end
                 to="/"
               >
-                {menu.nombre}
+                <HomeIcon />
+                <span>{menu.nombre}</span>
               </NavLink>
             ) : (
               <span className="app-nav__menu">{menu.nombre}</span>

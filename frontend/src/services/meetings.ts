@@ -16,3 +16,7 @@ export function createMeeting(payload: MeetingPayload) {
 export function updateMeeting(id: number, payload: Partial<MeetingPayload>) {
   return apiClient.patch<MeetingDetail>(`/meetings/${id}`, payload);
 }
+
+export function deleteMeeting(id: number) {
+  return apiClient.delete<{ message: string }>(`/meetings/${id}`);
+}

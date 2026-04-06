@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { meetingModeLabels, meetingStateLabels } from '../app/labels';
 import { StatusMessage } from '../components/StatusMessage';
-import { getMeetings } from '../services/meetings';
+import { deleteMeeting, getMeetings } from '../services/meetings';
 import type { MeetingListItem } from '../types/meetings';
+import { formatDate, formatTime } from '../utils/dateTime';
 
 type NavigationState = {
   message?: string;
@@ -13,6 +15,7 @@ export function MeetingsListPage() {
   const [meetings, setMeetings] = useState<MeetingListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     getMeetings()
@@ -29,6 +32,28 @@ export function MeetingsListPage() {
 
   const navigationState = (location.state as NavigationState | null) ?? null;
 
+  const handleDelete = async (meeting: MeetingListItem) => {
+    const confirmed = window.confirm(
+      `Seguro que quieres eliminar la reunion del ${formatDate(meeting.fecha)} en ${meeting.lugar}? Esta accion no se puede deshacer.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const response = await deleteMeeting(meeting.idReunion);
+      setMeetings((current) =>
+        current.filter((currentMeeting) => currentMeeting.idReunion !== meeting.idReunion),
+      );
+      setSuccessMessage(response.message);
+      setErrorMessage('');
+    } catch (error) {
+      setErrorMessage((error as Error).message);
+      setSuccessMessage('');
+    }
+  };
+
   return (
     <section className="page-section">
       <div className="page-heading">
@@ -43,6 +68,10 @@ export function MeetingsListPage() {
 
       {navigationState?.message ? (
         <StatusMessage kind="success" message={navigationState.message} />
+      ) : null}
+
+      {successMessage ? (
+        <StatusMessage kind="success" message={successMessage} />
       ) : null}
 
       {errorMessage ? <StatusMessage kind="error" message={errorMessage} /> : null}
@@ -67,13 +96,13 @@ export function MeetingsListPage() {
             <tbody>
               {meetings.map((meeting) => (
                 <tr key={meeting.idReunion}>
-                  <td>{meeting.fecha}</td>
+                  <td>{formatDate(meeting.fecha)}</td>
                   <td>
-                    {meeting.horaInicio} - {meeting.horaFin}
+                    {formatTime(meeting.horaInicio)} - {formatTime(meeting.horaFin)}
                   </td>
                   <td>{meeting.lugar}</td>
-                  <td>{meeting.estado}</td>
-                  <td>{meeting.modalidad}</td>
+                  <td>{meetingStateLabels[meeting.estado]}</td>
+                  <td>{meetingModeLabels[meeting.modalidad]}</td>
                   <td>{meeting.participantCount}</td>
                   <td>{meeting.hasActa ? 'Si' : 'No'}</td>
                   <td>
@@ -90,6 +119,13 @@ export function MeetingsListPage() {
                       >
                         Editar
                       </Link>
+                      <button
+                        className="button button-danger button-small"
+                        onClick={() => void handleDelete(meeting)}
+                        type="button"
+                      >
+                        Eliminar
+                      </button>
                     </div>
                   </td>
                 </tr>

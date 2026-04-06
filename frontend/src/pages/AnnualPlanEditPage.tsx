@@ -61,7 +61,7 @@ export function AnnualPlanEditPage() {
       <div className="page-heading">
         <div>
           <h2>Editar plan anual</h2>
-          <p>Ajusta el alcance del plan y la estructura de areas para el seguimiento.</p>
+          <p>Ajusta el alcance del plan y la estructura de áreas para el seguimiento.</p>
         </div>
       </div>
 
