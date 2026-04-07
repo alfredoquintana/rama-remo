@@ -3,11 +3,11 @@ import { EstadoPlanItem } from '../../../database/entities';
 
 export class CreatePlanFollowupDto {
   @IsEnum(EstadoPlanItem, {
-    message: 'El estado del seguimiento no es valido.',
+    message: 'El estado del seguimiento no es válido.',
   })
   estado!: EstadoPlanItem;
 
-  @IsInt({ message: 'El avance debe ser un numero entero.' })
+  @IsInt({ message: 'El avance debe ser un número entero.' })
   @Min(0, { message: 'El avance debe estar entre 0 y 100.' })
   @Max(100, { message: 'El avance debe estar entre 0 y 100.' })
   avancePorcentaje!: number;
@@ -20,7 +20,7 @@ export class CreatePlanFollowupDto {
   bloqueos?: string;
 
   @IsOptional()
-  @IsString({ message: 'El proximo paso debe enviarse como texto.' })
+  @IsString({ message: 'El próximo paso debe enviarse como texto.' })
   proximoPaso?: string;
 
   @IsOptional()

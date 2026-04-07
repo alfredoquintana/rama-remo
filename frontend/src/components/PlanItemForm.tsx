@@ -80,17 +80,17 @@ export function PlanItemForm({
     const resumenFinal = values.resumenFinal.trim();
 
     if (!areaId) {
-      setLocalError('Debes seleccionar un area.');
+      setLocalError('Debes seleccionar un ?rea.');
       return;
     }
 
     if (!titulo) {
-      setLocalError('Debes ingresar un titulo para el item.');
+      setLocalError('Debes ingresar un título para el ítem.');
       return;
     }
 
     if (!descripcion) {
-      setLocalError('Debes ingresar una descripcion para el item.');
+      setLocalError('Debes ingresar una descripción para el ítem.');
       return;
     }
 
@@ -137,7 +137,7 @@ export function PlanItemForm({
 
       <div className="form-grid">
         <label className="form-field">
-          <span>Area</span>
+          <span>?rea</span>
           <select value={values.idAreaPlan} onChange={handleChange('idAreaPlan')}>
             {areas.map((area) => (
               <option key={area.idAreaPlan} value={area.idAreaPlan}>
@@ -160,12 +160,12 @@ export function PlanItemForm({
         </label>
 
         <label className="form-field form-field--full">
-          <span>Titulo</span>
+          <span>Título</span>
           <input required value={values.titulo} onChange={handleChange('titulo')} />
         </label>
 
         <label className="form-field form-field--full">
-          <span>Descripcion</span>
+          <span>Descripción</span>
           <textarea
             required
             rows={3}

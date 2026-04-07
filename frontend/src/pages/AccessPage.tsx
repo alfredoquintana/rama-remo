@@ -15,7 +15,7 @@ export function AccessPage() {
     event.preventDefault();
 
     if (newPassword !== confirmPassword) {
-      setErrorMessage('La nueva clave y su confirmacion deben coincidir.');
+      setErrorMessage('La nueva clave y su confirmación deben coincidir.');
       return;
     }
 

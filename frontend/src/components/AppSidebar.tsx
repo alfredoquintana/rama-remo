@@ -207,9 +207,9 @@ export function AppSidebar({
         id="app-primary-navigation"
       >
         <div className="app-sidebar__mobile-header">
-          <span className="app-sidebar__mobile-title">Menu</span>
+          <span className="app-sidebar__mobile-title">Menú</span>
           <button
-            aria-label="Cerrar menu principal"
+            aria-label="Cerrar menú principal"
             className="app-sidebar__close-button"
             type="button"
             onClick={onCloseMobileNav}

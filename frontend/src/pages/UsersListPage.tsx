@@ -95,7 +95,7 @@ export function UsersListPage() {
                 <tr key={user.idUsuario}>
                   <td data-label="Nombre">{user.nombre}</td>
                   <td data-label="RUT">{user.rut}</td>
-                  <td data-label="Telefono">{user.telefono}</td>
+                  <td data-label="Teléfono">{user.telefono}</td>
                   <td data-label="Roles">{formatRoleList(user.roles)}</td>
                   <td data-label="Acciones">
                     <div className="table-actions">

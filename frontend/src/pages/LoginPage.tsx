@@ -49,7 +49,7 @@ export function LoginPage() {
           <h2>Sistema Rama de Remo</h2>
           <p className="auth-card__text">
             Ingresa con tu RUT y clave para gestionar usuarios, reuniones y
-            planificacion anual.
+            planificación anual.
           </p>
         </div>
 
@@ -85,8 +85,8 @@ export function LoginPage() {
         </button>
 
         <p className="auth-card__hint">
-          Si estas usando credenciales demo, entra con el RUT y clave entregados para la
-          presentacion.
+          Si estás usando credenciales demo, entra con el RUT y clave entregados para la
+          presentación.
         </p>
       </form>
     </section>

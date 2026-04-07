@@ -149,7 +149,7 @@ export function AppHeader({
     }
 
     if (!file.type.startsWith('image/')) {
-      setPhotoMessage('Selecciona una imagen valida.');
+      setPhotoMessage('Selecciona una imagen válida.');
       setPhotoMessageKind('error');
       event.target.value = '';
       return;
@@ -215,7 +215,7 @@ export function AppHeader({
             <button
               aria-controls={MOBILE_NAV_ID}
               aria-expanded={isMobileNavOpen}
-              aria-label="Abrir menu principal"
+              aria-label="Abrir menú principal"
               className="app-header__menu-button"
               type="button"
               onClick={onOpenMobileNav}
@@ -279,7 +279,7 @@ export function AppHeader({
                 <span className="app-header__account-copy">
                   <span className="app-header__account-label">Cuenta</span>
                   <span className="app-header__account-name">
-                    {user?.nombre ?? 'Sin sesion'}
+                    {user?.nombre ?? 'Sin sesión'}
                   </span>
                 </span>
 
@@ -322,7 +322,7 @@ export function AppHeader({
 
                 <div className="app-header__account-modal-copy">
                   <span className="app-header__account-label">Cuenta</span>
-                  <strong>{user?.nombre ?? 'Sin sesion'}</strong>
+                  <strong>{user?.nombre ?? 'Sin sesión'}</strong>
                   <span>{photoUrl ? 'Foto configurada' : 'Sin foto personal'}</span>
                 </div>
               </div>
@@ -376,7 +376,7 @@ export function AppHeader({
                 Mi acceso
               </Link>
               <button className="button button-secondary" type="button" onClick={logout}>
-                Cerrar sesion
+                Cerrar sesión
               </button>
             </div>
 
@@ -387,7 +387,7 @@ export function AppHeader({
                   : 'app-header__photo-help'
               }
             >
-              {photoMessage || 'PNG, JPG o WEBP. Maximo 1 MB.'}
+              {photoMessage || 'PNG, JPG o WEBP. Máximo 1 MB.'}
             </p>
           </div>
         </div>

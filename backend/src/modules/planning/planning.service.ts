@@ -220,15 +220,15 @@ export class PlanningService {
     await this.ensureUserExistsIfNeeded(createPlanItemDto.idResponsable);
     const titulo = this.normalizeRequiredText(
       createPlanItemDto.titulo,
-      'Debes ingresar un titulo para el item.',
+      'Debes ingresar un título para el ítem.',
     );
     const descripcion = this.normalizeRequiredText(
       createPlanItemDto.descripcion,
-      'Debes ingresar una descripcion para el item.',
+      'Debes ingresar una descripción para el ítem.',
     );
     const resultadoEsperado = this.normalizeRequiredText(
       createPlanItemDto.resultadoEsperado,
-      'Debes ingresar el resultado esperado del item.',
+      'Debes ingresar el resultado esperado del ítem.',
     );
 
     const item = await this.planItemsRepository.save(
@@ -258,7 +258,7 @@ export class PlanningService {
     });
 
     if (!currentItem) {
-      throw new NotFoundException('Item de planificacion no encontrado.');
+      throw new NotFoundException('Ítem de planificación no encontrado.');
     }
 
     const nextAreaId = updatePlanItemDto.idAreaPlan ?? currentItem.idAreaPlan;
@@ -266,21 +266,21 @@ export class PlanningService {
       updatePlanItemDto.titulo !== undefined
         ? this.normalizeRequiredText(
             updatePlanItemDto.titulo,
-            'Debes ingresar un titulo para el item.',
+            'Debes ingresar un título para el ítem.',
           )
         : currentItem.titulo;
     const nextDescription =
       updatePlanItemDto.descripcion !== undefined
         ? this.normalizeRequiredText(
             updatePlanItemDto.descripcion,
-            'Debes ingresar una descripcion para el item.',
+            'Debes ingresar una descripción para el ítem.',
           )
         : currentItem.descripcion;
     const nextExpectedResult =
       updatePlanItemDto.resultadoEsperado !== undefined
         ? this.normalizeRequiredText(
             updatePlanItemDto.resultadoEsperado,
-            'Debes ingresar el resultado esperado del item.',
+            'Debes ingresar el resultado esperado del ítem.',
           )
         : currentItem.resultadoEsperado;
 
@@ -327,7 +327,7 @@ export class PlanningService {
     });
 
     if (!currentItem) {
-      throw new NotFoundException('Item de planificacion no encontrado.');
+      throw new NotFoundException('Ítem de planificación no encontrado.');
     }
 
     await this.ensureUserExists(actorUserId);
@@ -377,7 +377,7 @@ export class PlanningService {
     });
 
     if (!item) {
-      throw new NotFoundException('Item de planificacion no encontrado.');
+      throw new NotFoundException('Ítem de planificación no encontrado.');
     }
 
     return this.findOne(item.idPlanAnual);
@@ -417,7 +417,7 @@ export class PlanningService {
       if (!nextAreaIds.has(area.idAreaPlan)) {
         if ((area.items?.length ?? 0) > 0) {
           throw new BadRequestException(
-            `No se puede quitar el area "${area.nombre}" porque ya tiene items asociados.`,
+            `No se puede quitar el área "${area.nombre}" porque ya tiene ítems asociados.`,
           );
         }
 
@@ -431,7 +431,7 @@ export class PlanningService {
 
         if (!currentArea || currentArea.idPlanAnual !== planId) {
           throw new BadRequestException(
-            'Una de las areas no pertenece al plan.',
+            'Una de las áreas no pertenece al plan.',
           );
         }
 
@@ -475,7 +475,7 @@ export class PlanningService {
 
     if (!area) {
       throw new NotFoundException(
-        'El area seleccionada no existe para este plan.',
+        'El área seleccionada no existe para este plan.',
       );
     }
   }
@@ -527,7 +527,7 @@ export class PlanningService {
     }));
 
     if (normalizedAreas.some((area) => !area.nombre)) {
-      throw new BadRequestException('Todas las areas deben tener nombre.');
+      throw new BadRequestException('Todas las áreas deben tener nombre.');
     }
 
     const seenNames = new Set<string>();
@@ -537,7 +537,7 @@ export class PlanningService {
 
       if (seenNames.has(normalizedName)) {
         throw new BadRequestException(
-          'No puedes repetir nombres de areas dentro del mismo plan.',
+          'No puedes repetir nombres de áreas dentro del mismo plan.',
         );
       }
 
@@ -583,8 +583,8 @@ export class PlanningService {
         cumplidoVsTotal: `${summary.cumplidos} de ${summary.totalItems} compromisos cerrados como cumplidos`,
         pendientesCriticos:
           summary.atrasados > 0
-            ? `${summary.atrasados} items estan atrasados y requieren seguimiento`
-            : 'No hay items atrasados al dia de hoy',
+            ? `${summary.atrasados} ítems están atrasados y requieren seguimiento`
+            : 'No hay ítems atrasados al día de hoy',
       },
     };
   }
@@ -716,7 +716,7 @@ export class PlanningService {
       driverError.code === 'ER_DUP_ENTRY'
     ) {
       throw new BadRequestException(
-        'Ya existe un plan anual o un area con esos datos.',
+        'Ya existe un plan anual o un área con esos datos.',
       );
     }
 

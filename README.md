@@ -12,6 +12,14 @@ Aplicacion full stack para la gestion administrativa de una rama de remo. El sis
 - Formato visual estandar de fechas `dd/mm/YY`.
 - Formato visual estandar de horas `HH:mm`.
 
+## Estandar de idioma y codificacion
+
+- Todos los archivos fuente y de configuracion deben guardarse en `UTF-8`.
+- Los textos visibles al usuario deben escribirse en español correcto, con tildes, `ñ` y signos como `¿`.
+- Esta misma regla aplica a seeds, usuarios demo, nombres simulados, mensajes de validacion, labels y placeholders.
+- No se deben reemplazar tildes o `ñ` por versiones simplificadas como `sesion`, `reunion`, `ano`, `Munoz` o `Nunez`, salvo que una restriccion tecnica externa lo exija.
+- Cuando se agreguen nuevos textos o datos simulados, se debe preferir ortografia natural en español, tanto al escribir manualmente como al generar contenido desde codigo.
+
 ## Modulos funcionales
 
 ### Autenticacion y sesion

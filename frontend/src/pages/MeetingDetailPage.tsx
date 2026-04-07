@@ -41,7 +41,7 @@ export function MeetingDetailPage() {
     }
 
     const confirmed = window.confirm(
-      `Seguro que quieres eliminar esta reunion del ${formatDate(meeting.fecha)}? Esta accion no se puede deshacer.`,
+      `Seguro que quieres eliminar esta reunión del ${formatDate(meeting.fecha)}? Esta acción no se puede deshacer.`,
     );
 
     if (!confirmed) {
@@ -62,7 +62,7 @@ export function MeetingDetailPage() {
     <section className="page-section">
       <div className="page-heading">
         <div>
-          <h2>Detalle de reunion</h2>
+          <h2>Detalle de reunión</h2>
           <p>Revisa participantes, horario y acta asociada.</p>
         </div>
         {meeting ? (
@@ -71,10 +71,10 @@ export function MeetingDetailPage() {
               className="button button-primary"
               to={`/reuniones/${meeting.idReunion}/editar`}
             >
-              Editar reunion
+              Editar reunión
             </Link>
             <button className="button button-danger" onClick={() => void handleDelete()} type="button">
-              Eliminar reunion
+              Eliminar reunión
             </button>
           </div>
         ) : null}
@@ -150,8 +150,8 @@ export function MeetingDetailPage() {
               <div className="minutes-card">
                 <div className="detail-grid">
                   <div>
-                    <dt>Titulo</dt>
-                    <dd>{meeting.acta.titulo ?? 'Sin titulo'}</dd>
+                    <dt>Título</dt>
+                    <dd>{meeting.acta.titulo ?? 'Sin título'}</dd>
                   </div>
                   <div>
                     <dt>Actualizado por</dt>
@@ -160,7 +160,7 @@ export function MeetingDetailPage() {
                     </dd>
                   </div>
                   <div>
-                    <dt>Fecha de actualizacion</dt>
+                    <dt>Fecha de actualización</dt>
                     <dd>{formatDateTime(meeting.acta.fechaActualizacion)}</dd>
                   </div>
                 </div>
@@ -169,7 +169,7 @@ export function MeetingDetailPage() {
                   <p className="minutes-card__text">{meeting.acta.descripcion}</p>
                 ) : (
                   <p className="form-help">
-                    Esta acta no tiene descripcion escrita. Revisa el archivo adjunto si
+                    Esta acta no tiene descripción escrita. Revisa el archivo adjunto si
                     corresponde.
                   </p>
                 )}
@@ -198,7 +198,7 @@ export function MeetingDetailPage() {
                 ) : null}
               </div>
             ) : (
-              <p>Esta reunion aun no tiene acta registrada.</p>
+              <p>Esta reunión aún no tiene acta registrada.</p>
             )}
           </article>
         </>

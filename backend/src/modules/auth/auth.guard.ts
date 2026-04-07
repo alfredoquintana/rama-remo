@@ -54,7 +54,7 @@ export class AuthGuard implements CanActivate {
     );
 
     if (!payload) {
-      throw new UnauthorizedException('Sesion invalida o expirada.');
+      throw new UnauthorizedException('Sesión inválida o expirada.');
     }
 
     request.user = payload;

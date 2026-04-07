@@ -14,7 +14,7 @@ const initialValues: AnnualPlanFormValues = {
   objetivoGeneral: '',
   areas: [
     { nombre: 'Deportivo', descripcion: '' },
-    { nombre: 'Administrativo', descripcion: '' },
+    { nombre: 'Administración', descripcion: '' },
   ],
 };
 
@@ -45,8 +45,8 @@ export function AnnualPlanCreatePage() {
         <div>
           <h2>Crear plan anual</h2>
           <p>
-            Define el objetivo general, las areas y la base para dar seguimiento durante
-            el ano.
+            Define el objetivo general, las áreas y la base para dar seguimiento durante
+            el año.
           </p>
         </div>
       </div>
