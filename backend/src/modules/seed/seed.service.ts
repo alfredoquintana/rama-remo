@@ -162,13 +162,21 @@ export class SeedService implements OnApplicationBootstrap {
       '/usuarios',
       usuariosMenu.idMenu,
     );
-    await this.ensureItem('Crear usuario', '/usuarios/nuevo', usuariosMenu.idMenu);
+    await this.ensureItem(
+      'Crear usuario',
+      '/usuarios/nuevo',
+      usuariosMenu.idMenu,
+    );
     await this.ensureItem(
       'Listado de reuniones',
       '/reuniones',
       reunionesMenu.idMenu,
     );
-    await this.ensureItem('Crear reunión', '/reuniones/nueva', reunionesMenu.idMenu);
+    await this.ensureItem(
+      'Crear reunión',
+      '/reuniones/nueva',
+      reunionesMenu.idMenu,
+    );
     await this.ensureItem(
       'Planes anuales',
       '/planificacion',
@@ -219,8 +227,14 @@ export class SeedService implements OnApplicationBootstrap {
   }
 
   private async seedUsers() {
-    const adminRut = this.configService.get<string>('app.adminRut', '11111111-1');
-    const adminPassword = this.configService.get<string>('app.adminPassword', 'admin123');
+    const adminRut = this.configService.get<string>(
+      'app.adminRut',
+      '11111111-1',
+    );
+    const adminPassword = this.configService.get<string>(
+      'app.adminPassword',
+      'admin123',
+    );
     const defaultUserPassword = this.configService.get<string>(
       'app.defaultUserPassword',
       'remo1234',
@@ -232,7 +246,9 @@ export class SeedService implements OnApplicationBootstrap {
       telefono: user.telefono,
       fechaNac: user.fechaNac,
       direccion: user.direccion,
-      claveHash: hashPassword(user.rut === adminRut ? adminPassword : defaultUserPassword),
+      claveHash: hashPassword(
+        user.rut === adminRut ? adminPassword : defaultUserPassword,
+      ),
     }));
 
     await this.usersRepository.upsert(usersToUpsert, ['rut']);
@@ -271,9 +287,7 @@ export class SeedService implements OnApplicationBootstrap {
     return userByRut;
   }
 
-  private async seedDemoMeetings(
-    userByRut: Map<string, UsuarioEntity>,
-  ) {
+  private async seedDemoMeetings(userByRut: Map<string, UsuarioEntity>) {
     const meetingsCount = await this.meetingsRepository.count();
 
     if (meetingsCount > 0) {
@@ -312,29 +326,23 @@ export class SeedService implements OnApplicationBootstrap {
       }),
     );
 
-    await this.participantsRepository.save([
-      presidente,
-      secretaria,
-      tesorero,
-      directora,
-    ].map((user) =>
-      this.participantsRepository.create({
-        idReunion: firstMeeting.idReunion,
-        idUsuario: user.idUsuario,
-      }),
-    ));
+    await this.participantsRepository.save(
+      [presidente, secretaria, tesorero, directora].map((user) =>
+        this.participantsRepository.create({
+          idReunion: firstMeeting.idReunion,
+          idUsuario: user.idUsuario,
+        }),
+      ),
+    );
 
-    await this.participantsRepository.save([
-      presidente,
-      secretaria,
-      entrenador,
-      directora,
-    ].map((user) =>
-      this.participantsRepository.create({
-        idReunion: secondMeeting.idReunion,
-        idUsuario: user.idUsuario,
-      }),
-    ));
+    await this.participantsRepository.save(
+      [presidente, secretaria, entrenador, directora].map((user) =>
+        this.participantsRepository.create({
+          idReunion: secondMeeting.idReunion,
+          idUsuario: user.idUsuario,
+        }),
+      ),
+    );
 
     const secretaryRole = await this.rolesRepository.findOneBy({
       nombre: 'secretario',
@@ -383,26 +391,27 @@ export class SeedService implements OnApplicationBootstrap {
       }),
     );
 
-    const [deportivo, administracion, vinculacion] = await this.planAreasRepository.save([
-      this.planAreasRepository.create({
-        idPlanAnual: plan.idPlanAnual,
-        nombre: 'Deportivo',
-        descripcion: 'Preparación, competencias y control de asistencia.',
-        orden: 1,
-      }),
-      this.planAreasRepository.create({
-        idPlanAnual: plan.idPlanAnual,
-        nombre: 'Administración',
-        descripcion: 'Actas, presupuesto y seguimiento de acuerdos.',
-        orden: 2,
-      }),
-      this.planAreasRepository.create({
-        idPlanAnual: plan.idPlanAnual,
-        nombre: 'Vinculación',
-        descripcion: 'Relación con apoderados, socios y difusión interna.',
-        orden: 3,
-      }),
-    ]);
+    const [deportivo, administracion, vinculacion] =
+      await this.planAreasRepository.save([
+        this.planAreasRepository.create({
+          idPlanAnual: plan.idPlanAnual,
+          nombre: 'Deportivo',
+          descripcion: 'Preparación, competencias y control de asistencia.',
+          orden: 1,
+        }),
+        this.planAreasRepository.create({
+          idPlanAnual: plan.idPlanAnual,
+          nombre: 'Administración',
+          descripcion: 'Actas, presupuesto y seguimiento de acuerdos.',
+          orden: 2,
+        }),
+        this.planAreasRepository.create({
+          idPlanAnual: plan.idPlanAnual,
+          nombre: 'Vinculación',
+          descripcion: 'Relación con apoderados, socios y difusión interna.',
+          orden: 3,
+        }),
+      ]);
 
     const [item1, item2, item3] = await this.planItemsRepository.save([
       this.planItemsRepository.create({
@@ -463,7 +472,8 @@ export class SeedService implements OnApplicationBootstrap {
         comentario:
           'Se consolidó la asistencia de marzo y quedó pendiente integrar la serie máster.',
         bloqueos: 'Falta un encargado fijo para el cierre de cada sábado.',
-        proximoPaso: 'Definir responsable por categoría antes del próximo directorio.',
+        proximoPaso:
+          'Definir responsable por categoría antes del próximo directorio.',
         funcionoBien: 'La planilla compartida redujo duplicidad de registros.',
         porMejorar: 'Asegurar carga de datos el mismo día del entrenamiento.',
       }),

@@ -43,21 +43,27 @@ export function LoginPage() {
   return (
     <section className="auth-shell">
       <form className="auth-card" onSubmit={handleSubmit}>
-        <span className="hero-card__badge">Acceso al sistema</span>
-        <h2>Iniciar sesión</h2>
-        <p>
-          Ingresa con tu RUT y tu clave. Los usuarios nuevos quedan creados con una
-          clave provisoria estándar en este entorno de desarrollo.
-        </p>
+        <div className="auth-card__intro">
+          <img alt="Rudern" className="auth-card__logo" src="/rudern-icon.jpeg" />
+          <h2>Iniciar sesion</h2>
+        </div>
 
         <label className="form-field">
-          <span>RUT</span>
-          <input required value={rut} onChange={(event) => setRut(event.target.value)} />
+          <input
+            aria-label="RUT"
+            autoComplete="username"
+            placeholder="RUT"
+            required
+            value={rut}
+            onChange={(event) => setRut(event.target.value)}
+          />
         </label>
 
         <label className="form-field">
-          <span>Contraseña</span>
           <input
+            aria-label="Contrasena"
+            autoComplete="current-password"
+            placeholder="Contrasena"
             required
             type="password"
             value={password}

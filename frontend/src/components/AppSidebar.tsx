@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { getMenus } from '../services/menus';
 import type { Menu } from '../types/navigation';
 
@@ -20,7 +20,7 @@ function HomeIcon() {
   return (
     <svg
       aria-hidden="true"
-      className="app-nav__icon"
+      className="app-nav__icon app-nav__icon--section"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -31,6 +31,71 @@ function HomeIcon() {
       <path d="M3 10.5 12 3l9 7.5" />
       <path d="M5.5 9.5V20h13V9.5" />
       <path d="M10 20v-5.5h4V20" />
+    </svg>
+  );
+}
+
+function UsersSectionIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="app-nav__icon app-nav__icon--section"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="9" cy="8" r="3" />
+      <path d="M4.5 18a4.5 4.5 0 0 1 9 0" />
+      <circle cx="17" cy="9.5" r="2.5" />
+      <path d="M14.5 18a3.6 3.6 0 0 1 5 0" />
+    </svg>
+  );
+}
+
+function MeetingsSectionIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="app-nav__icon app-nav__icon--section"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3.5" y="5" width="17" height="15" rx="2.5" />
+      <path d="M7.5 3.5v3" />
+      <path d="M16.5 3.5v3" />
+      <path d="M3.5 9.5h17" />
+      <path d="M8 13h3" />
+      <path d="M13.5 13h2.5" />
+      <path d="M8 16.5h8" />
+    </svg>
+  );
+}
+
+function PlanningSectionIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="app-nav__icon app-nav__icon--section"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4.5 19.5h15" />
+      <path d="M7.5 16V10.5" />
+      <path d="M12 16V7.5" />
+      <path d="M16.5 16v-4" />
+      <path d="M6.2 8.7 9.8 6l3.5 2.6 4.5-3.6" />
+      <path d="m16.8 5 1-.1-.1 1" />
     </svg>
   );
 }
@@ -53,10 +118,60 @@ function CloseIcon() {
   );
 }
 
+function resolveSectionIcon(menuName: string) {
+  const normalizedName = menuName.toLowerCase();
+
+  if (normalizedName.includes('usuario')) {
+    return <UsersSectionIcon />;
+  }
+
+  if (normalizedName.includes('reunion')) {
+    return <MeetingsSectionIcon />;
+  }
+
+  if (normalizedName.includes('planificacion') || normalizedName.includes('planificación')) {
+    return <PlanningSectionIcon />;
+  }
+
+  return null;
+}
+
+function isCreateMenuRoute(route: string) {
+  const normalizedRoute = route.toLowerCase();
+
+  return (
+    normalizedRoute.endsWith('/nuevo') ||
+    normalizedRoute.endsWith('/nueva') ||
+    normalizedRoute.endsWith('/crear')
+  );
+}
+
+function isMenuItemActive(currentPathname: string, itemRoute: string) {
+  const pathname = currentPathname.toLowerCase();
+  const route = itemRoute.toLowerCase();
+
+  if (isCreateMenuRoute(route)) {
+    return pathname === route || pathname.startsWith(`${route}/`);
+  }
+
+  if (pathname === route) {
+    return true;
+  }
+
+  if (!pathname.startsWith(`${route}/`)) {
+    return false;
+  }
+
+  const nestedSegment = pathname.slice(route.length + 1).split('/')[0] ?? '';
+
+  return !['nuevo', 'nueva', 'crear'].includes(nestedSegment);
+}
+
 export function AppSidebar({
   isMobileOpen,
   onCloseMobileNav,
 }: AppSidebarProps) {
+  const location = useLocation();
   const [menus, setMenus] = useState<Menu[]>(fallbackMenus);
 
   useEffect(() => {
@@ -109,7 +224,7 @@ export function AppSidebar({
               {menu.nombre === 'Inicio' ? (
                 <NavLink
                   className={({ isActive }) =>
-                    `app-nav__menu app-nav__menu--link ${isActive ? 'is-active' : ''}`
+                    `app-nav__menu app-nav__menu--link app-nav__menu--section ${isActive ? 'is-active' : ''}`
                   }
                   end
                   to="/"
@@ -119,7 +234,10 @@ export function AppSidebar({
                   <span>{menu.nombre}</span>
                 </NavLink>
               ) : (
-                <span className="app-nav__menu">{menu.nombre}</span>
+                <span className="app-nav__menu app-nav__menu--section">
+                  {resolveSectionIcon(menu.nombre)}
+                  <span>{menu.nombre}</span>
+                </span>
               )}
 
               {menu.items.length > 0 ? (
@@ -127,9 +245,7 @@ export function AppSidebar({
                   {menu.items.map((item) => (
                     <NavLink
                       key={item.idItem}
-                      className={({ isActive }) =>
-                        `app-nav__item ${isActive ? 'is-active' : ''}`
-                      }
+                      className={`app-nav__item ${isMenuItemActive(location.pathname, item.ruta) ? 'is-active' : ''}`}
                       to={item.ruta}
                       onClick={onCloseMobileNav}
                     >

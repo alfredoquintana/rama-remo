@@ -33,7 +33,7 @@ export function AnnualPlansListPage() {
 
   const handleDelete = async (plan: AnnualPlanListItem) => {
     const confirmed = window.confirm(
-      `¿Seguro que quieres eliminar el plan "${plan.nombre}" del año ${plan.anio}? Esta acción no se puede deshacer.`,
+      `Seguro que quieres eliminar el plan "${plan.nombre}" del ano ${plan.anio}? Esta accion no se puede deshacer.`,
     );
 
     if (!confirmed) {
@@ -57,9 +57,9 @@ export function AnnualPlansListPage() {
     <section className="page-section">
       <div className="page-heading">
         <div>
-          <h2>Planificación anual</h2>
+          <h2>Planificacion anual</h2>
           <p>
-            Define compromisos del año, responsables y seguimiento para transparentar
+            Define compromisos del ano, responsables y seguimiento para transparentar
             avances ante la rama.
           </p>
         </div>
@@ -80,17 +80,17 @@ export function AnnualPlansListPage() {
 
       <div className="panel-card">
         {isLoading ? (
-          <p>Cargando planificación anual...</p>
+          <p>Cargando planificacion anual...</p>
         ) : plans.length === 0 ? (
-          <p>Aún no hay planes anuales creados.</p>
+          <p>Aun no hay planes anuales creados.</p>
         ) : (
           <table className="data-table">
             <thead>
               <tr>
-                <th>Año</th>
+                <th>Ano</th>
                 <th>Plan</th>
                 <th>Estado</th>
-                <th>Ítems</th>
+                <th>Items</th>
                 <th>Cumplimiento</th>
                 <th>Atrasados</th>
                 <th>Acciones</th>

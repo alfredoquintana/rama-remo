@@ -1,4 +1,10 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  Unique,
+} from 'typeorm';
 import { PlanAreaEntity } from './plan-area.entity';
 import { PlanItemEntity } from './plan-item.entity';
 import { EstadoPlanAnual } from './planning.enums';

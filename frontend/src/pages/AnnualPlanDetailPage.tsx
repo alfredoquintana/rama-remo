@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
-  annualPlanStatusLabels,
   planningItemPriorityLabels,
   planningItemStatusLabels,
 } from '../app/labels';
@@ -22,6 +21,7 @@ import { getUsers } from '../services/users';
 import type {
   AnnualPlanDetail,
   PlanningFollowupPayload,
+  PlanningItem,
   PlanningItemPayload,
 } from '../types/planning';
 import type { User } from '../types/users';
@@ -30,6 +30,65 @@ import { formatDate, formatDateTime } from '../utils/dateTime';
 type NavigationState = {
   message?: string;
 };
+
+type ItemModalMode = 'detail' | 'edit' | 'followup';
+
+const FINAL_ITEM_STATES = new Set<string>([
+  'cumplido',
+  'parcialmente_cumplido',
+  'no_cumplido',
+  'cancelado',
+]);
+
+function ChevronIcon({ isOpen }: { isOpen: boolean }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={`planning-chevron ${isOpen ? 'is-open' : ''}`}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
+function truncateText(value: string, maxLength = 180) {
+  return value.length <= maxLength
+    ? value
+    : `${value.slice(0, maxLength).trimEnd()}...`;
+}
+
+function buildItemFormValues(item: PlanningItem): PlanItemFormValues {
+  return {
+    idAreaPlan: String(item.area.idAreaPlan),
+    idResponsable: item.responsable ? String(item.responsable.idUsuario) : '',
+    titulo: item.titulo,
+    descripcion: item.descripcion,
+    resultadoEsperado: item.resultadoEsperado,
+    prioridad: item.prioridad,
+    estado: item.estado,
+    fechaPlanificada: item.fechaPlanificada,
+    fechaCumplimientoReal: item.fechaCumplimientoReal ?? '',
+    resumenFinal: item.resumenFinal ?? '',
+  };
+}
+
+function buildFollowupInitialValues(item: PlanningItem): PlanFollowupFormValues {
+  return {
+    estado: item.estado,
+    avancePorcentaje: String(item.lastProgress),
+    comentario: '',
+    bloqueos: '',
+    proximoPaso: '',
+    funcionoBien: '',
+    porMejorar: '',
+  };
+}
 
 export function AnnualPlanDetailPage() {
   const navigate = useNavigate();
@@ -45,11 +104,13 @@ export function AnnualPlanDetailPage() {
   const [followupErrorMessage, setFollowupErrorMessage] = useState('');
   const [followupSuccessMessage, setFollowupSuccessMessage] = useState('');
   const [isItemSubmitting, setIsItemSubmitting] = useState(false);
-  const [editingItemId, setEditingItemId] = useState<number | null>(null);
+  const [openAreaId, setOpenAreaId] = useState<number | null>(null);
+  const [createItemAreaId, setCreateItemAreaId] = useState<number | null>(null);
   const [submittingFollowupItemId, setSubmittingFollowupItemId] = useState<number | null>(
     null,
   );
-  const [openFollowupItemId, setOpenFollowupItemId] = useState<number | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
+  const [itemModalMode, setItemModalMode] = useState<ItemModalMode>('detail');
   const [createItemFormVersion, setCreateItemFormVersion] = useState(0);
   const [followupFormVersion, setFollowupFormVersion] = useState(0);
 
@@ -67,11 +128,68 @@ export function AnnualPlanDetailPage() {
       });
   }, [planId]);
 
+  useEffect(() => {
+    if (!plan?.areas.length) {
+      setOpenAreaId(null);
+      return;
+    }
+
+    if (openAreaId != null && !plan.areas.some((area) => area.idAreaPlan === openAreaId)) {
+      setOpenAreaId(null);
+    }
+  }, [openAreaId, plan]);
+
+  useEffect(() => {
+    if (!plan?.items.length) {
+      setSelectedItemId(null);
+      return;
+    }
+
+    const itemIds = new Set(plan.items.map((item) => item.idPlanItem));
+
+    if (selectedItemId != null && !itemIds.has(selectedItemId)) {
+      setSelectedItemId(null);
+    }
+  }, [plan, selectedItemId]);
+
   const navigationState = (location.state as NavigationState | null) ?? null;
 
-  const defaultItemValues = useMemo<PlanItemFormValues>(
-    () => ({
-      idAreaPlan: plan?.areas[0] ? String(plan.areas[0].idAreaPlan) : '',
+  const selectedItem = useMemo(
+    () => plan?.items.find((item) => item.idPlanItem === selectedItemId) ?? null,
+    [plan?.items, selectedItemId],
+  );
+
+  const areaSections = useMemo(() => {
+    if (!plan) {
+      return [];
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+
+    return plan.areas.map((area) => {
+      const items = plan.items.filter((item) => item.area.idAreaPlan === area.idAreaPlan);
+      const stats = items.reduce(
+        (accumulator, item) => {
+          accumulator.total += 1;
+          if (item.estado === 'cumplido') accumulator.cumplidos += 1;
+          if (item.estado === 'en_curso') accumulator.enCurso += 1;
+          if (!FINAL_ITEM_STATES.has(item.estado) && item.fechaPlanificada < today) {
+            accumulator.atrasados += 1;
+          }
+          return accumulator;
+        },
+        { total: 0, cumplidos: 0, enCurso: 0, atrasados: 0 },
+      );
+
+      return { area, items, stats };
+    });
+  }, [plan]);
+
+  const createItemInitialValues = useMemo<PlanItemFormValues>(() => {
+    const targetAreaId = createItemAreaId ?? openAreaId ?? plan?.areas[0]?.idAreaPlan ?? null;
+
+    return {
+      idAreaPlan: targetAreaId ? String(targetAreaId) : '',
       idResponsable: '',
       titulo: '',
       descripcion: '',
@@ -81,14 +199,37 @@ export function AnnualPlanDetailPage() {
       fechaPlanificada: '',
       fechaCumplimientoReal: '',
       resumenFinal: '',
-    }),
-    [plan?.areas],
-  );
+    };
+  }, [createItemAreaId, openAreaId, plan?.areas]);
+
+  const openCreateItemForm = (areaId: number) => {
+    setOpenAreaId(areaId);
+    setCreateItemAreaId(areaId);
+    setSelectedItemId(null);
+    setItemErrorMessage('');
+    setItemSuccessMessage('');
+  };
+
+  const toggleArea = (areaId: number) => {
+    setOpenAreaId((current) => (current === areaId ? null : areaId));
+  };
+
+  const openItemModal = (itemId: number, mode: ItemModalMode = 'detail') => {
+    setSelectedItemId(itemId);
+    setItemModalMode(mode);
+    setItemErrorMessage('');
+    setFollowupErrorMessage('');
+  };
+
+  const closeItemModal = () => {
+    setSelectedItemId(null);
+    setItemModalMode('detail');
+    setItemErrorMessage('');
+    setFollowupErrorMessage('');
+  };
 
   const handleCreateItem = async (values: PlanningItemPayload) => {
-    if (!plan) {
-      return;
-    }
+    if (!plan) return;
 
     setIsItemSubmitting(true);
     setItemErrorMessage('');
@@ -98,8 +239,10 @@ export function AnnualPlanDetailPage() {
     try {
       const updatedPlan = await createPlanningItem(plan.idPlanAnual, values);
       setPlan(updatedPlan);
+      setOpenAreaId(values.idAreaPlan);
+      setCreateItemAreaId(null);
       setCreateItemFormVersion((current) => current + 1);
-      setItemSuccessMessage('Ítem guardado correctamente.');
+      setItemSuccessMessage('Item guardado correctamente.');
     } catch (error) {
       setItemErrorMessage((error as Error).message);
     } finally {
@@ -116,8 +259,9 @@ export function AnnualPlanDetailPage() {
     try {
       const updatedPlan = await updatePlanningItem(itemId, values);
       setPlan(updatedPlan);
-      setEditingItemId(null);
-      setItemSuccessMessage('Ítem actualizado correctamente.');
+      setOpenAreaId(values.idAreaPlan);
+      setItemSuccessMessage('Item actualizado correctamente.');
+      setItemModalMode('detail');
     } catch (error) {
       setItemErrorMessage((error as Error).message);
     } finally {
@@ -125,10 +269,7 @@ export function AnnualPlanDetailPage() {
     }
   };
 
-  const handleCreateFollowup = async (
-    itemId: number,
-    values: PlanningFollowupPayload,
-  ) => {
+  const handleCreateFollowup = async (itemId: number, values: PlanningFollowupPayload) => {
     setSubmittingFollowupItemId(itemId);
     setFollowupErrorMessage('');
     setFollowupSuccessMessage('');
@@ -139,6 +280,7 @@ export function AnnualPlanDetailPage() {
       setPlan(updatedPlan);
       setFollowupFormVersion((current) => current + 1);
       setFollowupSuccessMessage('Seguimiento guardado correctamente.');
+      setItemModalMode('detail');
     } catch (error) {
       setFollowupErrorMessage((error as Error).message);
     } finally {
@@ -147,23 +289,17 @@ export function AnnualPlanDetailPage() {
   };
 
   const handleDeletePlan = async () => {
-    if (!plan) {
-      return;
-    }
+    if (!plan) return;
 
     const confirmed = window.confirm(
-      `¿Seguro que quieres eliminar el plan "${plan.nombre}" del año ${plan.anio}? Esta acción no se puede deshacer.`,
+      `Seguro que quieres eliminar el plan "${plan.nombre}" del ano ${plan.anio}? Esta accion no se puede deshacer.`,
     );
 
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
 
     try {
       const response = await deleteAnnualPlan(plan.idPlanAnual);
-      navigate('/planificacion', {
-        state: { message: response.message },
-      });
+      navigate('/planificacion', { state: { message: response.message } });
     } catch (error) {
       setErrorMessage((error as Error).message);
     }
@@ -173,10 +309,10 @@ export function AnnualPlanDetailPage() {
     <section className="page-section">
       <div className="page-heading">
         <div>
-          <h2>Detalle de planificación anual</h2>
+          <h2>Plan anual</h2>
           <p>
-            Seguimiento operativo del año para rendir cuentas con datos claros,
-            responsables y retroalimentación.
+            Parte desde el resumen del plan y entra al detalle solo cuando haga
+            falta.
           </p>
         </div>
         {plan ? (
@@ -187,7 +323,11 @@ export function AnnualPlanDetailPage() {
             >
               Editar plan
             </Link>
-            <button className="button button-danger" onClick={() => void handleDeletePlan()} type="button">
+            <button
+              className="button button-danger"
+              onClick={() => void handleDeletePlan()}
+              type="button"
+            >
               Eliminar plan
             </button>
           </div>
@@ -206,92 +346,16 @@ export function AnnualPlanDetailPage() {
         </div>
       ) : plan ? (
         <>
-          <div className="content-grid">
-            <article className="panel-card">
-              <div className="panel-card__header">
-                <h3>
-                  {plan.nombre} {plan.anio}
-                </h3>
-                <span className="pill neutral">{annualPlanStatusLabels[plan.estado]}</span>
-              </div>
-              <p>{plan.objetivoGeneral ?? 'Sin objetivo general definido todavía.'}</p>
-              <div className="planning-note-grid">
-                <div className="planning-note">
-                  <strong>Transparencia</strong>
-                  <span>{plan.transparencyNotes.cumplidoVsTotal}</span>
-                </div>
-                <div className="planning-note">
-                  <strong>Alerta</strong>
-                  <span>{plan.transparencyNotes.pendientesCriticos}</span>
-                </div>
-              </div>
-            </article>
-
-            <article className="panel-card">
-              <h3>Áreas del plan</h3>
-              <div className="planning-area-grid">
-                {plan.areas.map((area) => (
-                  <div key={area.idAreaPlan} className="planning-area-card">
-                    <strong>{area.nombre}</strong>
-                    <span>{area.descripcion ?? 'Sin descripción adicional.'}</span>
-                    <small>{area.itemCount} ítems asociados</small>
-                  </div>
-                ))}
-              </div>
-            </article>
-          </div>
-
-          <div className="stats-grid planning-stats-grid">
-            <article className="stat-card">
-              <span>Total ítems</span>
-              <strong>{plan.summary.totalItems}</strong>
-            </article>
-            <article className="stat-card">
-              <span>Cumplidos</span>
-              <strong>{plan.summary.cumplidos}</strong>
-            </article>
-            <article className="stat-card">
-              <span>En curso</span>
-              <strong>{plan.summary.enCurso}</strong>
-            </article>
-            <article className="stat-card">
-              <span>Atrasados</span>
-              <strong>{plan.summary.atrasados}</strong>
-            </article>
-          </div>
-
           <article className="panel-card">
             <div className="panel-card__header">
-              <h3>Agregar ítem al plan</h3>
-              <span className="pill success">
-                {plan.summary.porcentajeCumplimiento}% cumplimiento
-              </span>
-            </div>
-
-            {plan.areas.length === 0 ? (
-              <StatusMessage
-                kind="error"
-                message="Este plan no tiene áreas disponibles. Agrégalas editando el plan."
-              />
-            ) : (
-              <PlanItemForm
-                areas={plan.areas}
-                errorMessage={itemErrorMessage}
-                initialValues={defaultItemValues}
-                isSubmitting={isItemSubmitting}
-                key={`create-item-${createItemFormVersion}`}
-                onSubmit={handleCreateItem}
-                submitLabel="Guardar ítem"
-                successMessage={itemSuccessMessage}
-                users={users}
-              />
-            )}
-          </article>
-
-          <article className="panel-card">
-            <div className="panel-card__header">
-              <h3>Ítems y seguimiento</h3>
-              <span className="pill neutral">{plan.items.length} registrados</span>
+              <div>
+                <h3>Areas y compromisos</h3>
+                <p className="form-help">
+                  Abre un area para ver sus items y profundiza solo en el que
+                  necesites revisar.
+                </p>
+              </div>
+              <span className="pill neutral">{plan.areas.length} areas</span>
             </div>
 
             {followupSuccessMessage ? (
@@ -302,197 +366,376 @@ export function AnnualPlanDetailPage() {
               <StatusMessage kind="error" message={followupErrorMessage} />
             ) : null}
 
-            {plan.items.length === 0 ? (
-              <p>Aún no hay compromisos cargados para este plan.</p>
+            {itemSuccessMessage && createItemAreaId == null ? (
+              <StatusMessage kind="success" message={itemSuccessMessage} />
+            ) : null}
+
+            {plan.areas.length === 0 ? (
+              <StatusMessage
+                kind="error"
+                message="Este plan no tiene areas disponibles. Agregalas editando el plan."
+              />
             ) : (
-              <div className="planning-item-list">
-                {plan.items.map((item) => {
-                  const itemFormValues: PlanItemFormValues = {
-                    idAreaPlan: String(item.area.idAreaPlan),
-                    idResponsable: item.responsable ? String(item.responsable.idUsuario) : '',
-                    titulo: item.titulo,
-                    descripcion: item.descripcion,
-                    resultadoEsperado: item.resultadoEsperado,
-                    prioridad: item.prioridad,
-                    estado: item.estado,
-                    fechaPlanificada: item.fechaPlanificada,
-                    fechaCumplimientoReal: item.fechaCumplimientoReal ?? '',
-                    resumenFinal: item.resumenFinal ?? '',
-                  };
-
-                  const followupInitialValues: PlanFollowupFormValues = {
-                    estado: item.estado,
-                    avancePorcentaje: String(item.lastProgress),
-                    comentario: '',
-                    bloqueos: '',
-                    proximoPaso: '',
-                    funcionoBien: '',
-                    porMejorar: '',
-                  };
-
-                  const isEditing = editingItemId === item.idPlanItem;
-                  const isOpenFollowup = openFollowupItemId === item.idPlanItem;
+              <div className="planning-area-stack">
+                {areaSections.map(({ area, items, stats }) => {
+                  const isAreaOpen = openAreaId === area.idAreaPlan;
+                  const isCreateOpenForArea = createItemAreaId === area.idAreaPlan;
 
                   return (
-                    <div key={item.idPlanItem} className="planning-item-card">
-                      <div className="planning-item-card__header">
-                        <div>
-                          <h4>{item.titulo}</h4>
-                          <div className="planning-item-card__meta">
-                            <span>{item.area.nombre}</span>
-                            <span>{planningItemPriorityLabels[item.prioridad]}</span>
-                            <span>{planningItemStatusLabels[item.estado]}</span>
-                            <span>
-                              Responsable: {item.responsable?.nombre ?? 'Sin asignar'}
-                            </span>
-                            <span>Planificado: {formatDate(item.fechaPlanificada)}</span>
+                    <section
+                      key={area.idAreaPlan}
+                      className={`planning-area-section ${isAreaOpen ? 'is-open' : ''}`}
+                    >
+                      <button
+                        aria-expanded={isAreaOpen}
+                        className="planning-area-toggle"
+                        type="button"
+                        onClick={() => toggleArea(area.idAreaPlan)}
+                      >
+                        <div className="planning-area-toggle__main">
+                          <div className="planning-area-toggle__title-row">
+                            <strong>{area.nombre}</strong>
                           </div>
+                          <p>{area.descripcion ?? 'Sin descripcion adicional.'}</p>
                         </div>
 
-                        <div className="table-actions">
-                          <button
-                            className="button button-secondary button-small"
-                            onClick={() =>
-                              setEditingItemId((current) =>
-                                current === item.idPlanItem ? null : item.idPlanItem,
-                              )
-                            }
-                            type="button"
-                          >
-                            {isEditing ? 'Cerrar edición' : 'Editar ítem'}
-                          </button>
-                          <button
-                            className="button button-secondary button-small"
-                            onClick={() => {
-                              setFollowupErrorMessage('');
-                              setFollowupSuccessMessage('');
-                              setOpenFollowupItemId((current) =>
-                                current === item.idPlanItem ? null : item.idPlanItem,
-                              );
-                            }}
-                            type="button"
-                          >
-                            {isOpenFollowup ? 'Cerrar seguimiento' : 'Registrar seguimiento'}
-                          </button>
+                        <div className="planning-area-toggle__meta">
+                          <span>{stats.cumplidos} cumplidos</span>
+                          <span>{stats.enCurso} en curso</span>
+                          <span>{stats.atrasados} atrasados</span>
+                          <ChevronIcon isOpen={isAreaOpen} />
                         </div>
-                      </div>
+                      </button>
 
-                      <div className="planning-item-card__body">
-                        <div>
-                          <strong>Descripción</strong>
-                          <p>{item.descripcion}</p>
-                        </div>
-                        <div>
-                          <strong>Resultado esperado</strong>
-                          <p>{item.resultadoEsperado}</p>
-                        </div>
-                        {item.resumenFinal ? (
-                          <div>
-                            <strong>Resumen final</strong>
-                            <p>{item.resumenFinal}</p>
-                          </div>
-                        ) : null}
-                      </div>
-
-                      <div className="planning-progress">
-                        <div className="planning-progress__label">
-                          <span>Avance reportado</span>
-                          <strong>{item.lastProgress}%</strong>
-                        </div>
-                        <div className="planning-progress__bar">
-                          <span style={{ width: `${item.lastProgress}%` }} />
-                        </div>
-                      </div>
-
-                      {isEditing ? (
-                        <PlanItemForm
-                          areas={plan.areas}
-                          errorMessage={itemErrorMessage}
-                          initialValues={itemFormValues}
-                          isSubmitting={isItemSubmitting}
-                          key={`edit-${item.idPlanItem}`}
-                          onCancel={() => setEditingItemId(null)}
-                          onSubmit={(values) => handleUpdateItem(item.idPlanItem, values)}
-                          submitLabel="Actualizar ítem"
-                          successMessage={
-                            editingItemId === item.idPlanItem ? itemSuccessMessage : ''
-                          }
-                          users={users}
-                        />
-                      ) : null}
-
-                      {isOpenFollowup ? (
-                        <PlanFollowupForm
-                          errorMessage=""
-                          initialValues={followupInitialValues}
-                          isSubmitting={submittingFollowupItemId === item.idPlanItem}
-                          key={`followup-${item.idPlanItem}-${followupFormVersion}`}
-                          onCancel={() => setOpenFollowupItemId(null)}
-                          onSubmit={(values) => handleCreateFollowup(item.idPlanItem, values)}
-                          submitLabel="Guardar seguimiento"
-                          successMessage=""
-                        />
-                      ) : null}
-
-                      <div className="planning-followup-list">
-                        {item.followups.length === 0 ? (
-                          <p className="form-help">Aún no hay seguimientos registrados.</p>
-                        ) : (
-                          item.followups.map((followup) => (
-                            <div
-                              key={followup.idPlanSeguimiento}
-                              className="planning-followup-card"
+                      {isAreaOpen ? (
+                        <div className="planning-area-panel">
+                          <div className="planning-area-toolbar">
+                            <button
+                              className="button button-secondary button-small"
+                              type="button"
+                              onClick={() => openCreateItemForm(area.idAreaPlan)}
                             >
-                              <div className="planning-followup-card__header">
-                                <strong>
-                                  {formatDateTime(followup.fechaSeguimiento)}
-                                </strong>
-                                <span>
-                                  {planningItemStatusLabels[followup.estado]} -{' '}
-                                  {followup.avancePorcentaje}%
-                                </span>
-                              </div>
-                              <p>{followup.comentario}</p>
-                              <div className="planning-feedback-grid">
-                                {followup.bloqueos ? (
-                                  <div>
-                                    <strong>Bloqueos</strong>
-                                    <span>{followup.bloqueos}</span>
-                                  </div>
-                                ) : null}
-                                {followup.proximoPaso ? (
-                                  <div>
-                                    <strong>Próximo paso</strong>
-                                    <span>{followup.proximoPaso}</span>
-                                  </div>
-                                ) : null}
-                                {followup.funcionoBien ? (
-                                  <div>
-                                    <strong>Funcionó bien</strong>
-                                    <span>{followup.funcionoBien}</span>
-                                  </div>
-                                ) : null}
-                                {followup.porMejorar ? (
-                                  <div>
-                                    <strong>Por mejorar</strong>
-                                    <span>{followup.porMejorar}</span>
-                                  </div>
-                                ) : null}
-                              </div>
-                              <small>
-                                Registrado por{' '}
-                                {followup.registradoPor?.nombre ?? 'usuario no disponible'}
-                              </small>
+                              Nuevo item en esta area
+                            </button>
+                          </div>
+
+                          {isCreateOpenForArea ? (
+                            <div className="planning-item-detail">
+                              <PlanItemForm
+                                areas={plan.areas}
+                                errorMessage={itemErrorMessage}
+                                initialValues={createItemInitialValues}
+                                isSubmitting={isItemSubmitting}
+                                key={`create-item-${createItemFormVersion}-${area.idAreaPlan}`}
+                                onCancel={() => {
+                                  setCreateItemAreaId(null);
+                                  setItemErrorMessage('');
+                                }}
+                                onSubmit={handleCreateItem}
+                                submitLabel="Guardar item"
+                                successMessage={itemSuccessMessage}
+                                users={users}
+                              />
                             </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
+                          ) : null}
+
+                          {items.length === 0 ? (
+                            <div className="planning-area-empty">
+                              <p>No hay compromisos registrados en esta area.</p>
+                            </div>
+                          ) : (
+                            <div className="planning-item-list">
+                              {items.map((item) => {
+                                const latestFollowup = item.followups[0] ?? null;
+
+                                return (
+                                  <article key={item.idPlanItem} className="planning-item-card">
+                                    <div className="planning-item-summary">
+                                      <div className="planning-item-summary__header">
+                                        <div className="planning-item-summary__copy">
+                                          <h4>{item.titulo}</h4>
+                                          <div className="planning-item-card__meta">
+                                            <span>
+                                              {planningItemPriorityLabels[item.prioridad]}
+                                            </span>
+                                            <span>
+                                              {planningItemStatusLabels[item.estado]}
+                                            </span>
+                                            <span>
+                                              Responsable:{' '}
+                                              {item.responsable?.nombre ?? 'Sin asignar'}
+                                            </span>
+                                            <span>
+                                              Planificado: {formatDate(item.fechaPlanificada)}
+                                            </span>
+                                          </div>
+
+                                          <p>{truncateText(item.descripcion)}</p>
+                                        </div>
+
+                                        <div className="planning-item-summary__actions">
+                                          <button
+                                            className="button button-secondary button-small planning-item-summary__manage-button"
+                                            type="button"
+                                            onClick={() => openItemModal(item.idPlanItem)}
+                                          >
+                                            Gestionar item
+                                          </button>
+                                        </div>
+                                      </div>
+
+                                      <div className="planning-item-summary__footer">
+                                        <div className="planning-item-summary__metrics">
+                                          <div className="planning-item-summary__metric-card planning-item-summary__metric-card--progress">
+                                            <div className="planning-progress__label">
+                                              <span>Avance</span>
+                                              <strong>{item.lastProgress}%</strong>
+                                            </div>
+                                            <div className="planning-progress__bar">
+                                              <span
+                                                style={{ width: `${item.lastProgress}%` }}
+                                              />
+                                            </div>
+                                          </div>
+
+                                          <div className="planning-item-summary__metric-card planning-item-summary__signals">
+                                            <span>
+                                              {item.followups.length} seguimientos
+                                            </span>
+                                            <span>
+                                              {latestFollowup
+                                                ? `Ultimo: ${formatDateTime(
+                                                    latestFollowup.fechaSeguimiento,
+                                                  )}`
+                                                : 'Sin seguimientos'}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </article>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      ) : null}
+                    </section>
                   );
                 })}
               </div>
             )}
           </article>
+
+          {selectedItem ? (
+            <div
+              className="planning-item-modal-backdrop"
+              role="presentation"
+              onClick={closeItemModal}
+            >
+              <div
+                aria-modal="true"
+                className="planning-item-modal"
+                role="dialog"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <div className="planning-item-modal__header">
+                  <div>
+                    <div className="planning-overview__eyebrow">
+                      {selectedItem.area.nombre}
+                    </div>
+                    <h3>{selectedItem.titulo}</h3>
+                    <div className="planning-item-card__meta">
+                      <span>
+                        {planningItemPriorityLabels[selectedItem.prioridad]}
+                      </span>
+                      <span>{planningItemStatusLabels[selectedItem.estado]}</span>
+                      <span>
+                        Responsable:{' '}
+                        {selectedItem.responsable?.nombre ?? 'Sin asignar'}
+                      </span>
+                      <span>
+                        Planificado: {formatDate(selectedItem.fechaPlanificada)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    aria-label="Cerrar gestion del item"
+                    className="app-header__account-close"
+                    type="button"
+                    onClick={closeItemModal}
+                  >
+                    x
+                  </button>
+                </div>
+
+                <div className="planning-item-modal__tabs">
+                  <button
+                    className={`button ${itemModalMode === 'detail' ? 'button-primary' : 'button-secondary'}`}
+                    type="button"
+                    onClick={() => setItemModalMode('detail')}
+                  >
+                    Resumen
+                  </button>
+                  <button
+                    className={`button ${itemModalMode === 'edit' ? 'button-primary' : 'button-secondary'}`}
+                    type="button"
+                    onClick={() => setItemModalMode('edit')}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    className={`button ${itemModalMode === 'followup' ? 'button-primary' : 'button-secondary'}`}
+                    type="button"
+                    onClick={() => setItemModalMode('followup')}
+                  >
+                    Seguimiento
+                  </button>
+                </div>
+
+                {itemModalMode === 'detail' ? (
+                  <div className="planning-item-detail">
+                    {itemSuccessMessage ? (
+                      <StatusMessage kind="success" message={itemSuccessMessage} />
+                    ) : null}
+                    {followupSuccessMessage ? (
+                      <StatusMessage kind="success" message={followupSuccessMessage} />
+                    ) : null}
+
+                    <div className="planning-item-card__body">
+                      <div>
+                        <strong>Descripcion</strong>
+                        <p>{selectedItem.descripcion}</p>
+                      </div>
+                      <div>
+                        <strong>Resultado esperado</strong>
+                        <p>{selectedItem.resultadoEsperado}</p>
+                      </div>
+                      {selectedItem.resumenFinal ? (
+                        <div>
+                          <strong>Resumen final</strong>
+                          <p>{selectedItem.resumenFinal}</p>
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div className="planning-item-summary__metrics">
+                      <div className="planning-progress">
+                        <div className="planning-progress__label">
+                          <span>Avance</span>
+                          <strong>{selectedItem.lastProgress}%</strong>
+                        </div>
+                        <div className="planning-progress__bar">
+                          <span style={{ width: `${selectedItem.lastProgress}%` }} />
+                        </div>
+                      </div>
+
+                      <div className="planning-item-summary__signals">
+                        <span>{selectedItem.followups.length} seguimientos</span>
+                        <span>
+                          {selectedItem.fechaCumplimientoReal
+                            ? `Cierre: ${formatDate(selectedItem.fechaCumplimientoReal)}`
+                            : 'Sin fecha de cierre'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="planning-followup-list">
+                      <div className="planning-followup-list__header">
+                        <strong>Historial de seguimiento</strong>
+                        <span>
+                          {selectedItem.followups.length === 0
+                            ? 'Sin registros'
+                            : `${selectedItem.followups.length} registros`}
+                        </span>
+                      </div>
+
+                      {selectedItem.followups.length === 0 ? (
+                        <p className="form-help">Aun no hay seguimientos registrados.</p>
+                      ) : (
+                        selectedItem.followups.map((followup) => (
+                          <div
+                            key={followup.idPlanSeguimiento}
+                            className="planning-followup-card"
+                          >
+                            <div className="planning-followup-card__header">
+                              <strong>{formatDateTime(followup.fechaSeguimiento)}</strong>
+                              <span>
+                                {planningItemStatusLabels[followup.estado]} -{' '}
+                                {followup.avancePorcentaje}%
+                              </span>
+                            </div>
+                            <p>{followup.comentario}</p>
+                            <div className="planning-feedback-grid">
+                              {followup.bloqueos ? (
+                                <div>
+                                  <strong>Bloqueos</strong>
+                                  <span>{followup.bloqueos}</span>
+                                </div>
+                              ) : null}
+                              {followup.proximoPaso ? (
+                                <div>
+                                  <strong>Proximo paso</strong>
+                                  <span>{followup.proximoPaso}</span>
+                                </div>
+                              ) : null}
+                              {followup.funcionoBien ? (
+                                <div>
+                                  <strong>Funciono bien</strong>
+                                  <span>{followup.funcionoBien}</span>
+                                </div>
+                              ) : null}
+                              {followup.porMejorar ? (
+                                <div>
+                                  <strong>Por mejorar</strong>
+                                  <span>{followup.porMejorar}</span>
+                                </div>
+                              ) : null}
+                            </div>
+                            <small>
+                              Registrado por{' '}
+                              {followup.registradoPor?.nombre ?? 'usuario no disponible'}
+                            </small>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+
+                {itemModalMode === 'edit' ? (
+                  <PlanItemForm
+                    areas={plan.areas}
+                    errorMessage={itemErrorMessage}
+                    initialValues={buildItemFormValues(selectedItem)}
+                    isSubmitting={isItemSubmitting}
+                    key={`edit-${selectedItem.idPlanItem}`}
+                    onCancel={closeItemModal}
+                    onSubmit={(values) => handleUpdateItem(selectedItem.idPlanItem, values)}
+                    submitLabel="Actualizar item"
+                    successMessage=""
+                    users={users}
+                  />
+                ) : null}
+
+                {itemModalMode === 'followup' ? (
+                  <PlanFollowupForm
+                    errorMessage={followupErrorMessage}
+                    initialValues={buildFollowupInitialValues(selectedItem)}
+                    isSubmitting={submittingFollowupItemId === selectedItem.idPlanItem}
+                    key={`followup-${selectedItem.idPlanItem}-${followupFormVersion}`}
+                    onCancel={closeItemModal}
+                    onSubmit={(values) =>
+                      handleCreateFollowup(selectedItem.idPlanItem, values)
+                    }
+                    submitLabel="Guardar seguimiento"
+                    successMessage=""
+                  />
+                ) : null}
+              </div>
+            </div>
+          ) : null}
         </>
       ) : null}
     </section>

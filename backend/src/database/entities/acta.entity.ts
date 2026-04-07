@@ -24,13 +24,27 @@ export class ActaEntity {
   @Column({ type: 'longtext' })
   texto!: string;
 
-  @Column({ name: 'archivo_nombre', type: 'varchar', length: 255, nullable: true })
+  @Column({
+    name: 'archivo_nombre',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
   archivoNombre!: string | null;
 
-  @Column({ name: 'archivo_tipo', type: 'varchar', length: 150, nullable: true })
+  @Column({
+    name: 'archivo_tipo',
+    type: 'varchar',
+    length: 150,
+    nullable: true,
+  })
   archivoTipo!: string | null;
 
-  @Column({ name: 'archivo_contenido_base64', type: 'longtext', nullable: true })
+  @Column({
+    name: 'archivo_contenido_base64',
+    type: 'longtext',
+    nullable: true,
+  })
   archivoContenidoBase64!: string | null;
 
   @Column({ name: 'archivo_tamano_bytes', type: 'int', nullable: true })
