@@ -55,6 +55,26 @@ function UsersSectionIcon() {
   );
 }
 
+function AthletesSectionIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="app-nav__icon app-nav__icon--section"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 20c1.2-3.7 4-6 7-6s5.8 2.3 7 6" />
+      <circle cx="12" cy="8" r="3.5" />
+      <path d="M3.5 12.5 6.2 11" />
+      <path d="m17.8 11 2.7 1.5" />
+    </svg>
+  );
+}
+
 function MeetingsSectionIcon() {
   return (
     <svg
@@ -125,11 +145,18 @@ function resolveSectionIcon(menuName: string) {
     return <UsersSectionIcon />;
   }
 
+  if (normalizedName.includes('deportista')) {
+    return <AthletesSectionIcon />;
+  }
+
   if (normalizedName.includes('reunion')) {
     return <MeetingsSectionIcon />;
   }
 
-  if (normalizedName.includes('planificacion') || normalizedName.includes('planificación')) {
+  if (
+    normalizedName.includes('planificacion') ||
+    normalizedName.includes('planificación')
+  ) {
     return <PlanningSectionIcon />;
   }
 

@@ -2,10 +2,12 @@ import {
   Column,
   Entity,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
 import { ActaEntity } from './acta.entity';
+import { DeportistaEntity } from './deportista.entity';
 import { ParticipanteReunionEntity } from './participante-reunion.entity';
 import { UsuarioRolEntity } from './usuario-rol.entity';
 
@@ -50,4 +52,7 @@ export class UsuarioEntity {
 
   @OneToMany(() => ActaEntity, (acta) => acta.actualizadoPor)
   actasActualizadas!: ActaEntity[];
+
+  @OneToOne(() => DeportistaEntity, (deportista) => deportista.usuario)
+  deportista?: DeportistaEntity | null;
 }

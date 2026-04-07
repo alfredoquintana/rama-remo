@@ -1,9 +1,9 @@
 import {
-  ArrayNotEmpty,
   ArrayUnique,
   IsArray,
   IsDateString,
   IsInt,
+  IsOptional,
   IsString,
   MaxLength,
 } from 'class-validator';
@@ -28,9 +28,9 @@ export class CreateUserDto {
   @MaxLength(255)
   direccion!: string;
 
+  @IsOptional()
   @IsArray()
-  @ArrayNotEmpty()
   @ArrayUnique()
   @IsInt({ each: true })
-  roleIds!: number[];
+  roleIds?: number[];
 }

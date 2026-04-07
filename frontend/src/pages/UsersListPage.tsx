@@ -59,7 +59,7 @@ export function UsersListPage() {
       <div className="page-heading">
         <div>
           <h2>Usuarios</h2>
-          <p>Listado general de personas con sus roles asignados.</p>
+          <p>Listado general de personas, con o sin acceso al sistema.</p>
         </div>
         <Link className="button button-primary" to="/usuarios/nuevo">
           Crear usuario
@@ -86,6 +86,7 @@ export function UsersListPage() {
                 <th>Nombre</th>
                 <th>RUT</th>
                 <th>Teléfono</th>
+                <th>Acceso</th>
                 <th>Roles</th>
                 <th>Acciones</th>
               </tr>
@@ -96,7 +97,12 @@ export function UsersListPage() {
                   <td data-label="Nombre">{user.nombre}</td>
                   <td data-label="RUT">{user.rut}</td>
                   <td data-label="Teléfono">{user.telefono}</td>
-                  <td data-label="Roles">{formatRoleList(user.roles)}</td>
+                  <td data-label="Acceso">
+                    {user.accesoHabilitado ? 'Habilitado' : 'Sin acceso'}
+                  </td>
+                  <td data-label="Roles">
+                    {user.roles.length > 0 ? formatRoleList(user.roles) : 'Sin roles'}
+                  </td>
                   <td data-label="Acciones">
                     <div className="table-actions">
                       <Link
@@ -105,6 +111,14 @@ export function UsersListPage() {
                       >
                         Editar
                       </Link>
+                      {!user.accesoHabilitado ? (
+                        <Link
+                          className="button button-secondary button-small"
+                          to={`/usuarios/${user.idUsuario}/habilitar-acceso`}
+                        >
+                          Habilitar acceso
+                        </Link>
+                      ) : null}
                       <button
                         className="button button-danger button-small"
                         onClick={() => void handleDelete(user)}

@@ -2,6 +2,9 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
   ActaEntity,
+  CategoriaEntity,
+  DeportistaCategoriaEntity,
+  DeportistaEntity,
   ItemEntity,
   MenuEntity,
   MenuRolEntity,
@@ -21,11 +24,14 @@ import { SeedService } from './seed.service';
   imports: [
     TypeOrmModule.forFeature([
       RolEntity,
+      CategoriaEntity,
       MenuEntity,
       ItemEntity,
       MenuRolEntity,
       UsuarioEntity,
       UsuarioRolEntity,
+      DeportistaEntity,
+      DeportistaCategoriaEntity,
       ReunionEntity,
       ParticipanteReunionEntity,
       ActaEntity,

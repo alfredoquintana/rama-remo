@@ -3,19 +3,19 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { StatusMessage } from '../components/StatusMessage';
 import { UserForm } from '../components/UserForm';
 import { getRoles } from '../services/roles';
-import { getUser, updateUser } from '../services/users';
+import { enableUserAccess, getUser } from '../services/users';
 import type { Role, UserPayload } from '../types/users';
 
-export function UserEditPage() {
+export function UserEnableAccessPage() {
   const navigate = useNavigate();
   const params = useParams();
   const userId = Number(params.id);
   const [roles, setRoles] = useState<Role[]>([]);
-  const [hasAccessEnabled, setHasAccessEnabled] = useState(false);
   const [initialValues, setInitialValues] = useState<UserPayload | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [alreadyEnabled, setAlreadyEnabled] = useState(false);
 
   useEffect(() => {
     Promise.all([getRoles(), getUser(userId)])
@@ -27,9 +27,9 @@ export function UserEditPage() {
           telefono: userData.telefono,
           fechaNac: userData.fechaNac,
           direccion: userData.direccion,
-          roleIds: userData.roleIds,
+          roleIds: [],
         });
-        setHasAccessEnabled(userData.accesoHabilitado);
+        setAlreadyEnabled(userData.accesoHabilitado);
       })
       .catch((error: Error) => {
         setErrorMessage(error.message);
@@ -44,9 +44,13 @@ export function UserEditPage() {
     setErrorMessage('');
 
     try {
-      await updateUser(userId, values);
+      const updatedUser = await enableUserAccess(userId, {
+        roleIds: values.roleIds,
+      });
       navigate('/usuarios', {
-        state: { message: 'Usuario actualizado correctamente.' },
+        state: {
+          message: `Acceso habilitado correctamente. Clave provisoria para ${updatedUser.rut}: ${updatedUser.provisionalPassword}`,
+        },
       });
     } catch (error) {
       setErrorMessage((error as Error).message);
@@ -59,8 +63,8 @@ export function UserEditPage() {
     <section className="page-section">
       <div className="page-heading">
         <div>
-          <h2>Editar usuario</h2>
-          <p>Actualiza los datos personales y, si corresponde, sus roles vigentes.</p>
+          <h2>Habilitar acceso</h2>
+          <p>Asigna roles y genera la clave provisoria para un usuario existente.</p>
         </div>
       </div>
 
@@ -70,15 +74,21 @@ export function UserEditPage() {
         </div>
       ) : !initialValues ? (
         <StatusMessage kind="error" message={errorMessage || 'Usuario no encontrado.'} />
+      ) : alreadyEnabled ? (
+        <StatusMessage
+          kind="error"
+          message="Este usuario ya tiene acceso habilitado. Usa editar usuario para ajustar sus roles."
+        />
       ) : (
         <UserForm
-          accessSectionMode={hasAccessEnabled ? 'required' : 'hidden'}
+          accessSectionMode="required"
+          disablePersonalFields
           errorMessage={errorMessage}
           initialValues={initialValues}
           isSubmitting={isSubmitting}
           onSubmit={handleSubmit}
           roles={roles}
-          submitLabel="Guardar cambios"
+          submitLabel="Habilitar acceso"
         />
       )}
     </section>

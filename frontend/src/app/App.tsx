@@ -3,6 +3,9 @@ import { AuthProvider } from './AuthContext';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { AppLayout } from '../layouts/AppLayout';
 import { AccessPage } from '../pages/AccessPage';
+import { AthleteCreatePage } from '../pages/AthleteCreatePage';
+import { AthleteDetailPage } from '../pages/AthleteDetailPage';
+import { AthletesListPage } from '../pages/AthletesListPage';
 import { AnnualPlanCreatePage } from '../pages/AnnualPlanCreatePage';
 import { AnnualPlanDetailPage } from '../pages/AnnualPlanDetailPage';
 import { AnnualPlanEditPage } from '../pages/AnnualPlanEditPage';
@@ -15,6 +18,7 @@ import { MeetingEditPage } from '../pages/MeetingEditPage';
 import { MeetingsListPage } from '../pages/MeetingsListPage';
 import { UserCreatePage } from '../pages/UserCreatePage';
 import { UserEditPage } from '../pages/UserEditPage';
+import { UserEnableAccessPage } from '../pages/UserEnableAccessPage';
 import { UsersListPage } from '../pages/UsersListPage';
 
 export function App() {
@@ -27,9 +31,16 @@ export function App() {
             <Route element={<AppLayout />}>
               <Route path="/" element={<HomePage />} />
               <Route path="/mi-acceso" element={<AccessPage />} />
+              <Route path="/deportistas" element={<AthletesListPage />} />
+              <Route path="/deportistas/nuevo" element={<AthleteCreatePage />} />
+              <Route path="/deportistas/:id" element={<AthleteDetailPage />} />
               <Route path="/usuarios" element={<UsersListPage />} />
               <Route path="/usuarios/nuevo" element={<UserCreatePage />} />
               <Route path="/usuarios/:id/editar" element={<UserEditPage />} />
+              <Route
+                path="/usuarios/:id/habilitar-acceso"
+                element={<UserEnableAccessPage />}
+              />
               <Route path="/planificacion" element={<AnnualPlansListPage />} />
               <Route path="/planificacion/nuevo" element={<AnnualPlanCreatePage />} />
               <Route path="/planificacion/:id" element={<AnnualPlanDetailPage />} />

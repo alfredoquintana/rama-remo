@@ -80,33 +80,37 @@ export function MeetingsListPage() {
         {isLoading ? (
           <p>Cargando reuniones...</p>
         ) : (
-          <table className="data-table">
+          <table className="data-table meetings-table">
             <thead>
               <tr>
-                <th>Fecha</th>
-                <th>Horario</th>
-                <th>Lugar</th>
+                <th className="meetings-table__date">Fecha</th>
+                <th className="meetings-table__time">Horario</th>
+                <th className="meetings-table__place">Lugar</th>
                 <th>Estado</th>
                 <th>Modalidad</th>
-                <th>Participantes</th>
                 <th>Acta</th>
-                <th>Acciones</th>
+                <th className="meetings-table__actions">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {meetings.map((meeting) => (
                 <tr key={meeting.idReunion}>
-                  <td data-label="Fecha">{formatDate(meeting.fecha)}</td>
-                  <td data-label="Horario">
-                    {formatTime(meeting.horaInicio)} - {formatTime(meeting.horaFin)}
+                  <td className="meetings-table__date" data-label="Fecha">
+                    {formatDate(meeting.fecha)}
                   </td>
-                  <td data-label="Lugar">{meeting.lugar}</td>
+                  <td className="meetings-table__time" data-label="Horario">
+                    <span className="meetings-table__time-range">
+                      {formatTime(meeting.horaInicio)} - {formatTime(meeting.horaFin)}
+                    </span>
+                  </td>
+                  <td className="meetings-table__place" data-label="Lugar">
+                    {meeting.lugar}
+                  </td>
                   <td data-label="Estado">{meetingStateLabels[meeting.estado]}</td>
                   <td data-label="Modalidad">{meetingModeLabels[meeting.modalidad]}</td>
-                  <td data-label="Participantes">{meeting.participantCount}</td>
                   <td data-label="Acta">{meeting.hasActa ? 'Si' : 'No'}</td>
-                  <td data-label="Acciones">
-                    <div className="table-actions">
+                  <td className="meetings-table__actions" data-label="Acciones">
+                    <div className="table-actions meetings-table__actions-group">
                       <Link
                         className="button button-secondary button-small"
                         to={`/reuniones/${meeting.idReunion}`}
