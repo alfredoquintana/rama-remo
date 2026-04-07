@@ -140,7 +140,7 @@ export function PlanFollowupForm({
         </label>
 
         <label className="form-field">
-          <span>Proximo paso</span>
+          <span>Próximo paso</span>
           <textarea
             rows={3}
             value={values.proximoPaso}
@@ -149,7 +149,7 @@ export function PlanFollowupForm({
         </label>
 
         <label className="form-field">
-          <span>Que funciono bien</span>
+          <span>Qué funcionó bien</span>
           <textarea
             rows={3}
             value={values.funcionoBien}
@@ -158,7 +158,7 @@ export function PlanFollowupForm({
         </label>
 
         <label className="form-field">
-          <span>Que mejorar</span>
+          <span>Qué mejorar</span>
           <textarea
             rows={3}
             value={values.porMejorar}

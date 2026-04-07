@@ -34,7 +34,7 @@ export function MeetingsListPage() {
 
   const handleDelete = async (meeting: MeetingListItem) => {
     const confirmed = window.confirm(
-      `Seguro que quieres eliminar la reunion del ${formatDate(meeting.fecha)} en ${meeting.lugar}? Esta accion no se puede deshacer.`,
+      `Seguro que quieres eliminar la reunión del ${formatDate(meeting.fecha)} en ${meeting.lugar}? Esta acción no se puede deshacer.`,
     );
 
     if (!confirmed) {
@@ -62,7 +62,7 @@ export function MeetingsListPage() {
           <p>Controla agenda, participantes y actas de la directiva.</p>
         </div>
         <Link className="button button-primary" to="/reuniones/nueva">
-          Crear reunion
+          Crear reunión
         </Link>
       </div>
 

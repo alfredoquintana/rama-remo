@@ -36,7 +36,7 @@ export class AuthService {
       !user?.claveHash ||
       !verifyPassword(loginDto.password, user.claveHash)
     ) {
-      throw new UnauthorizedException('Credenciales invalidas.');
+      throw new UnauthorizedException('Credenciales inválidas.');
     }
 
     return this.buildAuthResponse(user);
@@ -53,7 +53,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Sesion invalida.');
+      throw new UnauthorizedException('Sesión inválida.');
     }
 
     return this.mapUser(user);
@@ -69,7 +69,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Sesion invalida.');
+      throw new UnauthorizedException('Sesión inválida.');
     }
 
     await this.usersRepository.save(

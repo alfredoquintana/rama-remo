@@ -9,38 +9,38 @@ import {
 import { EstadoPlanItem, PrioridadPlanItem } from '../../../database/entities';
 
 export class CreatePlanItemDto {
-  @IsInt({ message: 'Debes seleccionar un area valida.' })
+  @IsInt({ message: 'Debes seleccionar un área válida.' })
   idAreaPlan!: number;
 
   @IsOptional()
-  @IsInt({ message: 'El responsable seleccionado no es valido.' })
+  @IsInt({ message: 'El responsable seleccionado no es válido.' })
   idResponsable?: number;
 
-  @IsString({ message: 'Debes ingresar un titulo para el item.' })
+  @IsString({ message: 'Debes ingresar un título para el ítem.' })
   @MaxLength(150, {
-    message: 'El titulo del item puede tener hasta 150 caracteres.',
+    message: 'El título del ítem puede tener hasta 150 caracteres.',
   })
   titulo!: string;
 
-  @IsString({ message: 'Debes ingresar una descripcion para el item.' })
+  @IsString({ message: 'Debes ingresar una descripción para el ítem.' })
   descripcion!: string;
 
-  @IsString({ message: 'Debes ingresar el resultado esperado del item.' })
+  @IsString({ message: 'Debes ingresar el resultado esperado del ítem.' })
   resultadoEsperado!: string;
 
   @IsOptional()
-  @IsEnum(PrioridadPlanItem, { message: 'La prioridad del item no es valida.' })
+  @IsEnum(PrioridadPlanItem, { message: 'La prioridad del ítem no es válida.' })
   prioridad?: PrioridadPlanItem;
 
   @IsOptional()
-  @IsEnum(EstadoPlanItem, { message: 'El estado del item no es valido.' })
+  @IsEnum(EstadoPlanItem, { message: 'El estado del ítem no es válido.' })
   estado?: EstadoPlanItem;
 
-  @IsDateString({}, { message: 'Debes ingresar una fecha planificada valida.' })
+  @IsDateString({}, { message: 'Debes ingresar una fecha planificada válida.' })
   fechaPlanificada!: string;
 
   @IsOptional()
-  @IsDateString({}, { message: 'La fecha de cumplimiento real no es valida.' })
+  @IsDateString({}, { message: 'La fecha de cumplimiento real no es válida.' })
   fechaCumplimientoReal?: string;
 
   @IsOptional()

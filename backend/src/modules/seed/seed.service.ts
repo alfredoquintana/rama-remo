@@ -48,7 +48,7 @@ const MANAGEMENT_ROLE_NAMES = [
 const DEMO_USERS = [
   {
     rut: '11111111-1',
-    nombre: 'Alejandro Munoz',
+    nombre: 'Alejandro Muñoz',
     telefono: '+56961234567',
     fechaNac: '1988-04-12',
     direccion: 'Av. Costanera 245, Valdivia',
@@ -56,7 +56,7 @@ const DEMO_USERS = [
   },
   {
     rut: '13888999-2',
-    nombre: 'Carolina Pena',
+    nombre: 'Carolina Peña',
     telefono: '+56969874521',
     fechaNac: '1991-09-03',
     direccion: 'Pasaje Los Laureles 118, Valdivia',
@@ -64,7 +64,7 @@ const DEMO_USERS = [
   },
   {
     rut: '15444777-5',
-    nombre: 'Sebastian Nunez',
+    nombre: 'Sebastián Núñez',
     telefono: '+56974561230',
     fechaNac: '1987-11-19',
     direccion: 'Calle General Lagos 840, Valdivia',
@@ -80,7 +80,7 @@ const DEMO_USERS = [
   },
   {
     rut: '17666111-4',
-    nombre: 'Tomas Ocana',
+    nombre: 'Tomás Ocaña',
     telefono: '+56977889944',
     fechaNac: '1995-07-15',
     direccion: 'Aníbal Pinto 365, Valdivia',
@@ -88,7 +88,7 @@ const DEMO_USERS = [
   },
   {
     rut: '18222999-3',
-    nombre: 'Camila Ibanez',
+    nombre: 'Camila Ibáñez',
     telefono: '+56970112233',
     fechaNac: '2001-05-28',
     direccion: 'Bueras 210, Valdivia',
@@ -149,8 +149,8 @@ export class SeedService implements OnApplicationBootstrap {
     const inicioMenu = await this.ensureMenu('Inicio', ['Inicio']);
     const usuariosMenu = await this.ensureMenu('Usuarios', ['Usuarios']);
     const reunionesMenu = await this.ensureMenu('Reuniones', ['Reuniones']);
-    const planificacionMenu = await this.ensureMenu('Planificacion', [
-      'Planificacion',
+    const planificacionMenu = await this.ensureMenu('Planificación', [
+      'Planificación',
       'Planificacion',
     ]);
 
@@ -173,7 +173,7 @@ export class SeedService implements OnApplicationBootstrap {
       reunionesMenu.idMenu,
     );
     await this.ensureItem(
-      'Crear reunion',
+      'Crear reunión',
       '/reuniones/nueva',
       reunionesMenu.idMenu,
     );
@@ -223,7 +223,7 @@ export class SeedService implements OnApplicationBootstrap {
     }
 
     await this.menuRolesRepository.upsert(menuRoles, ['idMenu', 'idRol']);
-    this.logger.log('Catalogo base aplicado.');
+    this.logger.log('Catálogo base aplicado.');
   }
 
   private async seedUsers() {
@@ -242,7 +242,7 @@ export class SeedService implements OnApplicationBootstrap {
 
     const usersToUpsert = DEMO_USERS.map((user) => ({
       rut: user.rut,
-      nombre: user.rut === adminRut ? 'Alejandro Munoz' : user.nombre,
+      nombre: user.rut === adminRut ? 'Alejandro Muñoz' : user.nombre,
       telefono: user.telefono,
       fechaNac: user.fechaNac,
       direccion: user.direccion,
@@ -357,9 +357,9 @@ export class SeedService implements OnApplicationBootstrap {
       await this.minutesRepository.save(
         this.minutesRepository.create({
           idReunion: firstMeeting.idReunion,
-          titulo: 'Acta de reunion ordinaria de directorio',
+          titulo: 'Acta de reunión ordinaria de directorio',
           texto:
-            'Se reviso el calendario de regatas, el estado de los botes de entrenamiento y el avance de la campana de socios colaboradores.',
+            'Se revisó el calendario de regatas, el estado de los botes de entrenamiento y el avance de la campaña de socios colaboradores.',
           fechaActualizacion: new Date('2026-03-18T21:05:00'),
           actualizadoPorId: secretaria.idUsuario,
           idRol: secretaryRole.idRol,
@@ -392,7 +392,7 @@ export class SeedService implements OnApplicationBootstrap {
         nombre: 'Plan anual de la Rama de Remo',
         estado: EstadoPlanAnual.ACTIVO,
         objetivoGeneral:
-          'Fortalecer la gestion deportiva y administrativa de la rama, mejorando asistencia, financiamiento y seguimiento de acuerdos.',
+          'Fortalecer la gestión deportiva y administrativa de la rama, mejorando asistencia, financiamiento y seguimiento de acuerdos.',
       }),
     );
 
@@ -401,19 +401,19 @@ export class SeedService implements OnApplicationBootstrap {
         this.planAreasRepository.create({
           idPlanAnual: plan.idPlanAnual,
           nombre: 'Deportivo',
-          descripcion: 'Preparacion, competencias y control de asistencia.',
+          descripcion: 'Preparación, competencias y control de asistencia.',
           orden: 1,
         }),
         this.planAreasRepository.create({
           idPlanAnual: plan.idPlanAnual,
-          nombre: 'Administracion',
+          nombre: 'Administración',
           descripcion: 'Actas, presupuesto y seguimiento de acuerdos.',
           orden: 2,
         }),
         this.planAreasRepository.create({
           idPlanAnual: plan.idPlanAnual,
-          nombre: 'Vinculacion',
-          descripcion: 'Relacion con apoderados, socios y difusion interna.',
+          nombre: 'Vinculación',
+          descripcion: 'Relación con apoderados, socios y difusión interna.',
           orden: 3,
         }),
       ]);
@@ -425,9 +425,9 @@ export class SeedService implements OnApplicationBootstrap {
         idResponsable: directora.idUsuario,
         titulo: 'Implementar control semanal de asistencia',
         descripcion:
-          'Levantar una planilla unica de asistencia para series formativas y adultos.',
+          'Levantar una planilla única de asistencia para series formativas y adultos.',
         resultadoEsperado:
-          'Contar con un reporte semanal validado por la direccion deportiva.',
+          'Contar con un reporte semanal validado por la dirección deportiva.',
         prioridad: PrioridadPlanItem.ALTA,
         estado: EstadoPlanItem.EN_CURSO,
         fechaPlanificada: '2026-04-30',
@@ -440,7 +440,7 @@ export class SeedService implements OnApplicationBootstrap {
         idResponsable: secretaria.idUsuario,
         titulo: 'Estandarizar actas de directorio',
         descripcion:
-          'Definir una plantilla unica con acuerdos, responsables y fechas compromiso.',
+          'Definir una plantilla única con acuerdos, responsables y fechas compromiso.',
         resultadoEsperado:
           'Todas las reuniones del directorio usan el mismo formato de acta.',
         prioridad: PrioridadPlanItem.MEDIA,
@@ -448,7 +448,7 @@ export class SeedService implements OnApplicationBootstrap {
         fechaPlanificada: '2026-03-31',
         fechaCumplimientoReal: '2026-03-25',
         resumenFinal:
-          'Se aprobo una plantilla estandar y quedo compartida con la directiva.',
+          'Se aprobó una plantilla estándar y quedó compartida con la directiva.',
       }),
       this.planItemsRepository.create({
         idPlanAnual: plan.idPlanAnual,
@@ -458,7 +458,7 @@ export class SeedService implements OnApplicationBootstrap {
         descripcion:
           'Ordenar pagos, contactos y estado de compromiso de socios colaboradores.',
         resultadoEsperado:
-          'Disponer de una base consolidada para la campana de invierno.',
+          'Disponer de una base consolidada para la campaña de invierno.',
         prioridad: PrioridadPlanItem.ALTA,
         estado: EstadoPlanItem.PENDIENTE,
         fechaPlanificada: '2026-04-10',
@@ -475,12 +475,12 @@ export class SeedService implements OnApplicationBootstrap {
         estado: EstadoPlanItem.EN_CURSO,
         avancePorcentaje: 45,
         comentario:
-          'Se consolido la asistencia de marzo y quedo pendiente integrar la serie master.',
-        bloqueos: 'Falta un encargado fijo para el cierre de cada sabado.',
+          'Se consolidó la asistencia de marzo y quedó pendiente integrar la serie master.',
+        bloqueos: 'Falta un encargado fijo para el cierre de cada sábado.',
         proximoPaso:
-          'Definir responsable por categoria antes del proximo directorio.',
+          'Definir responsable por categoría antes del próximo directorio.',
         funcionoBien: 'La planilla compartida redujo duplicidad de registros.',
-        porMejorar: 'Asegurar carga de datos el mismo dia del entrenamiento.',
+        porMejorar: 'Asegurar carga de datos el mismo día del entrenamiento.',
       }),
       this.planFollowupsRepository.create({
         idPlanItem: item2.idPlanItem,
@@ -489,15 +489,15 @@ export class SeedService implements OnApplicationBootstrap {
         estado: EstadoPlanItem.CUMPLIDO,
         avancePorcentaje: 100,
         comentario:
-          'Se capacito a la directiva en el nuevo formato y quedo operativo.',
+          'Se capacitó a la directiva en el nuevo formato y quedó operativo.',
         bloqueos: null,
-        proximoPaso: 'Revisar cumplimiento del formato en la proxima sesion.',
-        funcionoBien: 'La estructura simplifico la lectura de acuerdos.',
+        proximoPaso: 'Revisar cumplimiento del formato en la próxima sesión.',
+        funcionoBien: 'La estructura simplificó la lectura de acuerdos.',
         porMejorar: null,
       }),
     ]);
 
-    this.logger.log('Planificacion demo creada.');
+    this.logger.log('Planificación demo creada.');
   }
 
   private async ensureMenu(nombre: string, legacyNames: string[]) {

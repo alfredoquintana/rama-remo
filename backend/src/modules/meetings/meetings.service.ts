@@ -79,7 +79,7 @@ export class MeetingsService {
     });
 
     if (!meeting) {
-      throw new NotFoundException('Reunion no encontrada.');
+      throw new NotFoundException('Reunión no encontrada.');
     }
 
     return this.mapMeetingDetail(meeting);
@@ -152,7 +152,7 @@ export class MeetingsService {
     });
 
     if (!currentMeeting) {
-      throw new NotFoundException('Reunion no encontrada.');
+      throw new NotFoundException('Reunión no encontrada.');
     }
 
     const nextHoraInicio =
@@ -225,13 +225,13 @@ export class MeetingsService {
     });
 
     if (!currentMeeting) {
-      throw new NotFoundException('Reunion no encontrada.');
+      throw new NotFoundException('Reunión no encontrada.');
     }
 
     await this.meetingsRepository.delete({ idReunion: id });
 
     return {
-      message: 'Reunion eliminada correctamente.',
+      message: 'Reunión eliminada correctamente.',
     };
   }
 
@@ -246,7 +246,7 @@ export class MeetingsService {
   private ensureMeetingPlaceIsValid(lugar: string) {
     if (!lugar) {
       throw new BadRequestException(
-        'Debes indicar el lugar o medio donde se realizara la reunion.',
+        'Debes indicar el lugar o medio donde se realizará la reunión.',
       );
     }
   }
@@ -276,7 +276,7 @@ export class MeetingsService {
 
     if (!hasDescripcion && !hasArchivo) {
       throw new BadRequestException(
-        'Debes ingresar una descripcion o adjuntar un archivo para el acta.',
+        'Debes ingresar una descripción o adjuntar un archivo para el acta.',
       );
     }
 
@@ -293,7 +293,7 @@ export class MeetingsService {
   private validateMeetingTimes(horaInicio: string, horaFin: string) {
     if (horaFin <= horaInicio) {
       throw new BadRequestException(
-        'La hora de termino debe ser posterior a la hora de inicio.',
+        'La hora de término debe ser posterior a la hora de inicio.',
       );
     }
   }

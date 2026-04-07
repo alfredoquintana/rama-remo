@@ -33,7 +33,7 @@ export function AnnualPlansListPage() {
 
   const handleDelete = async (plan: AnnualPlanListItem) => {
     const confirmed = window.confirm(
-      `Seguro que quieres eliminar el plan "${plan.nombre}" del ano ${plan.anio}? Esta accion no se puede deshacer.`,
+      `Seguro que quieres eliminar el plan "${plan.nombre}" del año ${plan.anio}? Esta acción no se puede deshacer.`,
     );
 
     if (!confirmed) {
@@ -57,9 +57,9 @@ export function AnnualPlansListPage() {
     <section className="page-section">
       <div className="page-heading">
         <div>
-          <h2>Planificacion anual</h2>
+          <h2>Planificación anual</h2>
           <p>
-            Ordena compromisos, responsables y seguimiento para mostrar avances del ano.
+            Ordena compromisos, responsables y seguimiento para mostrar avances del año.
           </p>
         </div>
         <Link className="button button-primary" to="/planificacion/nuevo">
@@ -79,14 +79,14 @@ export function AnnualPlansListPage() {
 
       <div className="panel-card">
         {isLoading ? (
-          <p>Cargando planificacion anual...</p>
+          <p>Cargando planificación anual...</p>
         ) : plans.length === 0 ? (
-          <p>Aun no hay planes anuales creados.</p>
+          <p>Aún no hay planes anuales creados.</p>
         ) : (
           <table className="data-table">
             <thead>
               <tr>
-                <th>Ano</th>
+                <th>Año</th>
                 <th>Plan</th>
                 <th>Estado</th>
                 <th>Items</th>
@@ -98,7 +98,7 @@ export function AnnualPlansListPage() {
             <tbody>
               {plans.map((plan) => (
                 <tr key={plan.idPlanAnual}>
-                  <td data-label="Ano">{plan.anio}</td>
+                  <td data-label="Año">{plan.anio}</td>
                   <td data-label="Plan">
                     <strong>{plan.nombre}</strong>
                     <div className="table-note">

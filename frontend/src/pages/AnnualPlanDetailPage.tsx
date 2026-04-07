@@ -242,7 +242,7 @@ export function AnnualPlanDetailPage() {
       setOpenAreaId(values.idAreaPlan);
       setCreateItemAreaId(null);
       setCreateItemFormVersion((current) => current + 1);
-      setItemSuccessMessage('Item guardado correctamente.');
+      setItemSuccessMessage('Ítem guardado correctamente.');
     } catch (error) {
       setItemErrorMessage((error as Error).message);
     } finally {
@@ -260,7 +260,7 @@ export function AnnualPlanDetailPage() {
       const updatedPlan = await updatePlanningItem(itemId, values);
       setPlan(updatedPlan);
       setOpenAreaId(values.idAreaPlan);
-      setItemSuccessMessage('Item actualizado correctamente.');
+      setItemSuccessMessage('Ítem actualizado correctamente.');
       setItemModalMode('detail');
     } catch (error) {
       setItemErrorMessage((error as Error).message);
@@ -292,7 +292,7 @@ export function AnnualPlanDetailPage() {
     if (!plan) return;
 
     const confirmed = window.confirm(
-      `Seguro que quieres eliminar el plan "${plan.nombre}" del ano ${plan.anio}? Esta accion no se puede deshacer.`,
+      `Seguro que quieres eliminar el plan "${plan.nombre}" del año ${plan.anio}? Esta acción no se puede deshacer.`,
     );
 
     if (!confirmed) return;
@@ -349,13 +349,13 @@ export function AnnualPlanDetailPage() {
           <article className="panel-card">
             <div className="panel-card__header">
               <div>
-                <h3>Areas y compromisos</h3>
+                <h3>Áreas y compromisos</h3>
                 <p className="form-help">
-                  Abre un area para ver sus items y profundiza solo en el que
+                  Abre un área para ver sus ítems y profundiza solo en el que
                   necesites revisar.
                 </p>
               </div>
-              <span className="pill neutral">{plan.areas.length} areas</span>
+              <span className="pill neutral">{plan.areas.length} áreas</span>
             </div>
 
             {followupSuccessMessage ? (
@@ -373,7 +373,7 @@ export function AnnualPlanDetailPage() {
             {plan.areas.length === 0 ? (
               <StatusMessage
                 kind="error"
-                message="Este plan no tiene areas disponibles. Agregalas editando el plan."
+                message="Este plan no tiene áreas disponibles. Agrégalas editando el plan."
               />
             ) : (
               <div className="planning-area-stack">
@@ -396,7 +396,7 @@ export function AnnualPlanDetailPage() {
                           <div className="planning-area-toggle__title-row">
                             <strong>{area.nombre}</strong>
                           </div>
-                          <p>{area.descripcion ?? 'Sin descripcion adicional.'}</p>
+                          <p>{area.descripcion ?? 'Sin descripción adicional.'}</p>
                         </div>
 
                         <div className="planning-area-toggle__meta">
@@ -415,7 +415,7 @@ export function AnnualPlanDetailPage() {
                               type="button"
                               onClick={() => openCreateItemForm(area.idAreaPlan)}
                             >
-                              Nuevo item en esta area
+                              Nuevo ítem en esta área
                             </button>
                           </div>
 
@@ -432,7 +432,7 @@ export function AnnualPlanDetailPage() {
                                   setItemErrorMessage('');
                                 }}
                                 onSubmit={handleCreateItem}
-                                submitLabel="Guardar item"
+                                submitLabel="Guardar ítem"
                                 successMessage={itemSuccessMessage}
                                 users={users}
                               />
@@ -441,7 +441,7 @@ export function AnnualPlanDetailPage() {
 
                           {items.length === 0 ? (
                             <div className="planning-area-empty">
-                              <p>No hay compromisos registrados en esta area.</p>
+                              <p>No hay compromisos registrados en esta área.</p>
                             </div>
                           ) : (
                             <div className="planning-item-list">
@@ -479,7 +479,7 @@ export function AnnualPlanDetailPage() {
                                             type="button"
                                             onClick={() => openItemModal(item.idPlanItem)}
                                           >
-                                            Gestionar item
+                                            Gestionar ítem
                                           </button>
                                         </div>
                                       </div>
@@ -504,7 +504,7 @@ export function AnnualPlanDetailPage() {
                                             </span>
                                             <span>
                                               {latestFollowup
-                                                ? `Ultimo: ${formatDateTime(
+                                                ? `Último: ${formatDateTime(
                                                     latestFollowup.fechaSeguimiento,
                                                   )}`
                                                 : 'Sin seguimientos'}
@@ -561,7 +561,7 @@ export function AnnualPlanDetailPage() {
                   </div>
 
                   <button
-                    aria-label="Cerrar gestion del item"
+                    aria-label="Cerrar gestión del ítem"
                     className="app-header__account-close"
                     type="button"
                     onClick={closeItemModal}
@@ -605,7 +605,7 @@ export function AnnualPlanDetailPage() {
 
                     <div className="planning-item-card__body">
                       <div>
-                        <strong>Descripcion</strong>
+                        <strong>Descripción</strong>
                         <p>{selectedItem.descripcion}</p>
                       </div>
                       <div>
@@ -652,7 +652,7 @@ export function AnnualPlanDetailPage() {
                       </div>
 
                       {selectedItem.followups.length === 0 ? (
-                        <p className="form-help">Aun no hay seguimientos registrados.</p>
+                        <p className="form-help">Aún no hay seguimientos registrados.</p>
                       ) : (
                         selectedItem.followups.map((followup) => (
                           <div
@@ -676,13 +676,13 @@ export function AnnualPlanDetailPage() {
                               ) : null}
                               {followup.proximoPaso ? (
                                 <div>
-                                  <strong>Proximo paso</strong>
+                                  <strong>Próximo paso</strong>
                                   <span>{followup.proximoPaso}</span>
                                 </div>
                               ) : null}
                               {followup.funcionoBien ? (
                                 <div>
-                                  <strong>Funciono bien</strong>
+                                  <strong>Funcionó bien</strong>
                                   <span>{followup.funcionoBien}</span>
                                 </div>
                               ) : null}
@@ -713,7 +713,7 @@ export function AnnualPlanDetailPage() {
                     key={`edit-${selectedItem.idPlanItem}`}
                     onCancel={closeItemModal}
                     onSubmit={(values) => handleUpdateItem(selectedItem.idPlanItem, values)}
-                    submitLabel="Actualizar item"
+                    submitLabel="Actualizar ítem"
                     successMessage=""
                     users={users}
                   />

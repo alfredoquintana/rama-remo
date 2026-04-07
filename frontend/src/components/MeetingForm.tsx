@@ -200,7 +200,7 @@ export function MeetingForm({
     }
 
     if (!fecha) {
-      setLocalError('Debes indicar la fecha de la reunion.');
+      setLocalError('Debes indicar la fecha de la reunión.');
       return;
     }
 
@@ -210,17 +210,17 @@ export function MeetingForm({
     }
 
     if (!horaFin) {
-      setLocalError('Debes indicar la hora de termino.');
+      setLocalError('Debes indicar la hora de término.');
       return;
     }
 
     if (horaFin <= horaInicio) {
-      setLocalError('La hora de termino debe ser posterior a la hora de inicio.');
+      setLocalError('La hora de término debe ser posterior a la hora de inicio.');
       return;
     }
 
     if (!lugar) {
-      setLocalError('Debes indicar el lugar o medio de la reunion.');
+      setLocalError('Debes indicar el lugar o medio de la reunión.');
       return;
     }
 
@@ -229,7 +229,7 @@ export function MeetingForm({
 
       if (!descripcion && !values.actaArchivo) {
         setLocalError(
-          'Si agregas un acta, debes escribir una descripcion o adjuntar un archivo.',
+          'Si agregas un acta, debes escribir una descripción o adjuntar un archivo.',
         );
         return;
       }
@@ -279,7 +279,7 @@ export function MeetingForm({
         </label>
 
         <label className="form-field">
-          <span>Hora de termino</span>
+          <span>Hora de término</span>
           <input
             required
             type="time"
@@ -348,12 +348,12 @@ export function MeetingForm({
             ))}
           </div>
         ) : participantQuery.trim() ? (
-          <p className="form-help">No hay coincidencias para esa busqueda.</p>
+          <p className="form-help">No hay coincidencias para esa búsqueda.</p>
         ) : null}
 
         <div className="selected-participants">
           {selectedParticipants.length === 0 ? (
-            <p className="form-help">Aun no has agregado participantes.</p>
+            <p className="form-help">Aún no has agregado participantes.</p>
           ) : (
             selectedParticipants.map((participant) => (
               <div key={participant.idUsuario} className="participant-chip">
@@ -379,22 +379,22 @@ export function MeetingForm({
 
         <label className="switch-field">
           <input checked={values.hasActa} onChange={toggleActa} type="checkbox" />
-          <span>Agregar o actualizar acta en esta reunion</span>
+          <span>Agregar o actualizar acta en esta reunión</span>
         </label>
 
         {values.hasActa ? (
           <div className="form-grid">
             <label className="form-field form-field--full">
-              <span>Titulo del acta</span>
+              <span>Título del acta</span>
               <input
-                placeholder="Ej: Reunion ordinaria de directiva"
+                placeholder="Ej: Reunión ordinaria de directiva"
                 value={values.actaTitulo}
                 onChange={handleChange('actaTitulo')}
               />
             </label>
 
             <label className="form-field form-field--full">
-              <span>Descripcion o resumen</span>
+              <span>Descripción o resumen</span>
               <textarea
                 rows={6}
                 value={values.actaDescripcion}
@@ -406,7 +406,7 @@ export function MeetingForm({
               <span>Archivo del acta</span>
               <input accept={ACTA_FILE_ACCEPT} onChange={handleActaFileChange} type="file" />
               <small className="form-help">
-                Puedes adjuntar PDF, Word, Excel, PowerPoint, texto o imagenes de
+                Puedes adjuntar PDF, Word, Excel, PowerPoint, texto o imágenes de
                 hasta 5 MB.
               </small>
             </label>
@@ -434,8 +434,8 @@ export function MeetingForm({
 
         {values.hasActa ? (
           <p className="form-help">
-            El sistema registrara el acta a nombre de {user?.nombre ?? 'tu usuario'} con el
-            rol {currentRoleName}. Puedes guardar una descripcion corta, un archivo o ambos.
+            El sistema registrará el acta a nombre de {user?.nombre ?? 'tu usuario'} con el
+            rol {currentRoleName}. Puedes guardar una descripción corta, un archivo o ambos.
           </p>
         ) : null}
       </fieldset>

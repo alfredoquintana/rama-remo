@@ -50,8 +50,8 @@ export function HomePage() {
         <div>
           <h2>Panel general</h2>
           <p>
-            Revisa rapidamente el estado del MVP y entra a los flujos principales desde
-            aqui.
+            Revisa rápidamente el estado del MVP y entra a los flujos principales desde
+            aqu?.
           </p>
         </div>
       </div>
@@ -80,7 +80,7 @@ export function HomePage() {
           <h3>Usuarios y roles</h3>
           <p>
             Registra integrantes, mantiene sus datos personales y asigna uno o
-            mas roles por usuario.
+            más roles por usuario.
           </p>
           <div className="inline-actions">
             <Link className="button button-primary" to="/usuarios">
@@ -103,20 +103,20 @@ export function HomePage() {
               Ver reuniones
             </Link>
             <Link className="button button-secondary" to="/reuniones/nueva">
-              Crear reunion
+              Crear reunión
             </Link>
           </div>
         </article>
 
         <article className="panel-card">
-          <h3>Planificacion anual</h3>
+          <h3>Planificación anual</h3>
           <p>
-            Ordena compromisos del ano, registra seguimiento y muestra avances de forma
+            Ordena compromisos del año, registra seguimiento y muestra avances de forma
             simple para la directiva.
           </p>
           <div className="inline-actions">
             <Link className="button button-primary" to="/planificacion">
-              Ver planificacion
+              Ver planificación
             </Link>
             <Link className="button button-secondary" to="/planificacion/nuevo">
               Crear plan anual
