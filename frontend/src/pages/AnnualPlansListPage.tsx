@@ -33,7 +33,7 @@ export function AnnualPlansListPage() {
 
   const handleDelete = async (plan: AnnualPlanListItem) => {
     const confirmed = window.confirm(
-      `¿Seguro que quieres eliminar el plan "${plan.nombre}" del año ${plan.anio}? Esta acción no se puede deshacer.`,
+      `Seguro que quieres eliminar el plan "${plan.nombre}" del ano ${plan.anio}? Esta accion no se puede deshacer.`,
     );
 
     if (!confirmed) {
@@ -57,9 +57,9 @@ export function AnnualPlansListPage() {
     <section className="page-section">
       <div className="page-heading">
         <div>
-          <h2>Planificación anual</h2>
+          <h2>Planificacion anual</h2>
           <p>
-            Define compromisos del año, responsables y seguimiento para transparentar
+            Define compromisos del ano, responsables y seguimiento para transparentar
             avances ante la rama.
           </p>
         </div>
@@ -80,17 +80,17 @@ export function AnnualPlansListPage() {
 
       <div className="panel-card">
         {isLoading ? (
-          <p>Cargando planificación anual...</p>
+          <p>Cargando planificacion anual...</p>
         ) : plans.length === 0 ? (
-          <p>Aún no hay planes anuales creados.</p>
+          <p>Aun no hay planes anuales creados.</p>
         ) : (
           <table className="data-table">
             <thead>
               <tr>
-                <th>Año</th>
+                <th>Ano</th>
                 <th>Plan</th>
                 <th>Estado</th>
-                <th>Ítems</th>
+                <th>Items</th>
                 <th>Cumplimiento</th>
                 <th>Atrasados</th>
                 <th>Acciones</th>
@@ -99,18 +99,18 @@ export function AnnualPlansListPage() {
             <tbody>
               {plans.map((plan) => (
                 <tr key={plan.idPlanAnual}>
-                  <td>{plan.anio}</td>
-                  <td>
+                  <td data-label="Ano">{plan.anio}</td>
+                  <td data-label="Plan">
                     <strong>{plan.nombre}</strong>
                     <div className="table-note">
                       {plan.objetivoGeneral ?? 'Sin objetivo general cargado.'}
                     </div>
                   </td>
-                  <td>{annualPlanStatusLabels[plan.estado]}</td>
-                  <td>{plan.summary.totalItems}</td>
-                  <td>{plan.summary.porcentajeCumplimiento}%</td>
-                  <td>{plan.summary.atrasados}</td>
-                  <td>
+                  <td data-label="Estado">{annualPlanStatusLabels[plan.estado]}</td>
+                  <td data-label="Items">{plan.summary.totalItems}</td>
+                  <td data-label="Cumplimiento">{plan.summary.porcentajeCumplimiento}%</td>
+                  <td data-label="Atrasados">{plan.summary.atrasados}</td>
+                  <td data-label="Acciones">
                     <div className="table-actions">
                       <Link
                         className="button button-secondary button-small"

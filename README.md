@@ -1,60 +1,116 @@
 # Sistema Rama de Remo
 
-MVP full stack para la administración de una rama de remo, orientado al trabajo de directiva.
+Aplicacion full stack para la gestion administrativa de una rama de remo. El sistema cubre autenticacion, usuarios, roles, reuniones con acta integrada, planificacion anual con seguimiento y una interfaz web protegida para trabajo interno de directiva.
 
-## Stack
+## Estado actual
 
-- Frontend: React + TypeScript + Vite
-- Backend: NestJS + TypeScript
-- Base de datos: MySQL local con XAMPP
-- ORM: TypeORM
-- Gestor de paquetes: npm
+- Backend en NestJS con TypeORM y MySQL.
+- Frontend en React + TypeScript + Vite.
+- Sesion protegida con token.
+- Seeds automaticos para catalogos y datos demo.
+- Interfaz con selector de temas inspirado en la bandera de Alemania.
+- Formato visual estandar de fechas `dd/mm/YY`.
+- Formato visual estandar de horas `HH:mm`.
 
-## MVP incluido
+## Modulos funcionales
 
-- Gestión de usuarios
-- Asignación de uno o más roles por usuario
-- Credenciales provisorias al crear usuarios
-- Cambio de clave desde la app
-- Gestión de reuniones
-- Participantes por reunión con buscador
-- Acta integrada en el flujo de reunión
-- Registro automático de quién actualizó el acta y con qué rol
-- Login básico con sesión protegida
-- Usuario administrador inicial
-- Seed inicial de roles, menús y datos demo
+### Autenticacion y sesion
+
+- Login por RUT y clave.
+- Persistencia de sesion en frontend.
+- Ruta protegida para toda la aplicacion excepto `/login`.
+- Cambio de clave desde `Mi acceso`.
+- Validacion global del backend con `ValidationPipe`:
+  - `whitelist: true`
+  - `transform: true`
+  - `forbidNonWhitelisted: true`
+
+### Usuarios y roles
+
+- Crear usuarios con clave provisoria automatica.
+- Editar datos personales y roles.
+- Asignar uno o mas roles por usuario.
+- Listado ordenado por nombre.
+- Visualizacion de roles con inicial mayuscula en frontend.
+- Protecciones de negocio:
+  - no se puede eliminar un usuario con actas registradas a su nombre
+  - no se puede eliminar el ultimo usuario con rol `admin`
+  - no se puede crear o actualizar un usuario con un RUT duplicado
+
+### Reuniones y actas
+
+- Crear, editar, listar y eliminar reuniones.
+- Asignar participantes desde buscador por nombre, RUT o rol.
+- Registrar acta en el mismo flujo de la reunion.
+- Adjuntar archivo al acta en base64.
+- El sistema registra automaticamente:
+  - usuario que actualiza el acta
+  - rol principal del usuario autenticado
+  - fecha de actualizacion
+- Reglas de negocio:
+  - la hora de fin debe ser posterior a la hora de inicio
+  - no se puede guardar un acta vacia
+  - el archivo del acta no puede superar 5 MB
+  - todos los participantes deben existir
+
+### Planificacion anual
+
+- Crear, editar, listar y eliminar planes anuales.
+- Definir areas del plan.
+- Crear y actualizar items por area.
+- Registrar seguimientos con avance porcentual y aprendizaje.
+- Resumen automatico:
+  - total de items
+  - cumplidos
+  - en curso
+  - atrasados
+  - porcentaje de cumplimiento
+- Reglas de negocio:
+  - un plan debe tener al menos un area
+  - el anio debe estar entre 2000 y 2100
+  - no se pueden repetir nombres de areas dentro del mismo plan
+  - no se puede quitar un area si ya tiene items asociados
+  - el responsable debe existir si fue informado
+  - el avance del seguimiento debe estar entre 0 y 100
+  - los estados finales pueden completar automaticamente la fecha de cumplimiento
+
+## Cambios actuales de interfaz
+
+- Modal de cuenta sobre el nombre del usuario con:
+  - cambio de tema
+  - configurar o cambiar foto
+  - quitar foto
+  - acceso a `Mi acceso`
+  - cierre de sesion
+- Menu lateral con icono de casa junto a `Inicio`.
+- Tema por defecto: `Alemania clasico`.
+- Temas disponibles:
+  - `Alemania clasico`
+  - `Alemania grafito`
+  - `Alemania marfil`
+- El tema se guarda en `localStorage` y se reaplica al volver a entrar.
+- La foto personal del usuario tambien se guarda en `localStorage`.
+
+## Stack tecnico
+
+- Frontend: React 19 + TypeScript + Vite + React Router.
+- Backend: NestJS 11 + TypeScript.
+- ORM: TypeORM.
+- Base de datos: MySQL.
+- Gestor de paquetes: npm.
 
 ## Requisitos previos
 
-- Node.js 22 o superior
-- npm 10 o superior
-- XAMPP con MySQL iniciado
-- Base de datos MySQL creada manualmente
-
-## Base de datos en XAMPP
-
-1. Abre XAMPP.
-2. Inicia `MySQL`.
-3. Entra a `http://localhost/phpmyadmin`.
-4. Crea la base de datos indicada en tu [backend/.env](c:/Users/alfre/OneDrive/Documentos/rama-remo/backend/.env).
-
-También puedes ejecutar el script [docs/database.sql](c:/Users/alfre/OneDrive/Documentos/rama-remo/docs/database.sql).
-
-Configuración esperada por defecto:
-
-- Host: `localhost`
-- Puerto: `3306`
-- Usuario: `root`
-- Password: vacío
-- Base de datos: `rama_remo`
-
-Si tu [backend/.env](c:/Users/alfre/OneDrive/Documentos/rama-remo/backend/.env) usa otro nombre, por ejemplo `remo`, crea esa base exacta.
+- Node.js 22 o superior.
+- npm 10 o superior.
+- MySQL disponible localmente.
+- XAMPP es una opcion valida para desarrollo local.
 
 ## Variables de entorno
 
 ### Backend
 
-Archivo: [backend/.env.example](c:/Users/alfre/OneDrive/Documentos/rama-remo/backend/.env.example)
+Archivo: [backend/.env.example](c:\Users\alfre\OneDrive\Documentos\rama-remo\backend\.env.example)
 
 ```env
 DB_HOST=localhost
@@ -63,28 +119,28 @@ DB_USERNAME=root
 DB_PASSWORD=
 DB_NAME=rama_remo
 PORT=3001
+FRONTEND_URL=http://localhost:5173
 APP_SECRET=rama-remo-dev-secret
 ADMIN_RUT=11111111-1
 ADMIN_PASSWORD=admin123
 DEFAULT_USER_PASSWORD=remo1234
 ```
 
+Notas:
+
+- `FRONTEND_URL` controla el origen permitido por CORS.
+- `ADMIN_RUT` y `ADMIN_PASSWORD` determinan el admin inicial.
+- `DEFAULT_USER_PASSWORD` define la clave provisoria de usuarios nuevos.
+
 ### Frontend
 
-Archivo: [frontend/.env.example](c:/Users/alfre/OneDrive/Documentos/rama-remo/frontend/.env.example)
+Archivo: [frontend/.env.example](c:\Users\alfre\OneDrive\Documentos\rama-remo\frontend\.env.example)
 
 ```env
 VITE_API_BASE_URL=http://localhost:3001
 ```
 
-## Instalación
-
-### Frontend
-
-```powershell
-cd frontend
-npm.cmd install
-```
+## Instalacion
 
 ### Backend
 
@@ -93,76 +149,282 @@ cd backend
 npm.cmd install
 ```
 
+### Frontend
+
+```powershell
+cd frontend
+npm.cmd install
+```
+
 Nota para PowerShell:
 
-- Si `npm` da error por `npm.ps1`, usa `npm.cmd` en lugar de `npm`.
+- Si `npm` falla por `npm.ps1`, usa `npm.cmd`.
 
-## Cómo levantar el proyecto
+## Puesta en marcha
 
 Orden recomendado:
 
-1. Inicia MySQL en XAMPP.
-2. Verifica que exista la base `rama_remo` o la que esté definida en `backend/.env`.
-3. Levanta el backend.
-4. Levanta el frontend.
+1. Iniciar MySQL.
+2. Crear la base configurada en `backend/.env`.
+3. Levantar backend.
+4. Levantar frontend.
 
-### Backend
+### Crear base de datos
+
+Puedes crearla desde phpMyAdmin o con el script [docs/database.sql](c:\Users\alfre\OneDrive\Documentos\rama-remo\docs\database.sql).
+
+Configuracion habitual:
+
+- host: `localhost`
+- puerto: `3306`
+- usuario: `root`
+- password: vacio
+- base: `rama_remo`
+
+### Levantar backend
 
 ```powershell
 cd backend
 npm.cmd run start:dev
 ```
 
-Backend disponible en:
+Disponible en:
 
 - `http://localhost:3001`
-- Health check: `http://localhost:3001/health`
+- health check: `http://localhost:3001/health`
 
-Al iniciar el backend:
+Al iniciar:
 
-- TypeORM sincroniza las tablas automáticamente para desarrollo.
-- Se cargan los roles base.
-- Se cargan los menús e ítems iniciales.
-- Se aseguran usuarios demo, reuniones demo y planificación demo cuando la base está vacía en esos módulos.
+- TypeORM sincroniza tablas en desarrollo.
+- Se validan variables de entorno.
+- Se aplican roles base, menus e items.
+- Se siembran usuarios demo, reuniones demo y planificacion demo si aun no existen.
 
-### Frontend
+### Levantar frontend
 
 ```powershell
 cd frontend
 npm.cmd run dev
 ```
 
-Frontend disponible en:
+Disponible en:
 
 - `http://localhost:5173`
 
 ## Acceso inicial
 
-Login del administrador sembrado automáticamente:
+Administrador inicial:
 
 - RUT: `11111111-1`
-- Contraseña: `admin123`
-- Roles: `admin`, `presidente`
+- clave: `admin123`
+- roles: `admin`, `presidente`
 
-Este usuario tiene acceso total al MVP.
-
-Clave provisoria estándar para usuarios nuevos:
+Clave provisoria por defecto para nuevos usuarios:
 
 - `remo1234`
 
-Cada usuario nuevo queda creado con login basado en su `RUT` y con esa clave provisoria por defecto.
-Luego, ya autenticado, puede cambiar su clave desde `Mi acceso`.
+Cada usuario nuevo:
+
+- inicia sesion con su RUT
+- recibe la clave provisoria definida por entorno
+- puede cambiarla desde `Mi acceso`
 
 ## Datos demo incluidos
 
-El seed deja disponible una base de demostración coherente con:
+El seed deja una base de demostracion coherente con:
 
-- 6 usuarios demo con roles reales de trabajo
+- 6 usuarios demo
+- 9 roles base
+- menus de Inicio, Usuarios, Reuniones y Planificacion
 - 2 reuniones demo
-- 1 acta demo asociada
-- 1 plan anual demo con áreas, ítems y seguimientos
+- 1 acta demo
+- 1 plan anual demo
+- areas, items y seguimientos de ejemplo
 
-## Estructura principal
+### Roles base
+
+- admin
+- presidente
+- vicepresidente
+- secretario
+- tesorero
+- director
+- apoderado
+- deportista
+- entrenador
+
+### Menus e items base
+
+- Inicio
+- Usuarios
+  - Listado de usuarios
+  - Crear usuario
+- Reuniones
+  - Listado de reuniones
+  - Crear reunion
+- Planificacion
+  - Planes anuales
+  - Crear plan anual
+
+## Rutas del frontend
+
+- `/login`
+- `/`
+- `/mi-acceso`
+- `/usuarios`
+- `/usuarios/nuevo`
+- `/usuarios/:id/editar`
+- `/reuniones`
+- `/reuniones/nueva`
+- `/reuniones/:id`
+- `/reuniones/:id/editar`
+- `/planificacion`
+- `/planificacion/nuevo`
+- `/planificacion/:id`
+- `/planificacion/:id/editar`
+
+## API principal
+
+### Base y autenticacion
+
+- `GET /health`
+- `POST /auth/login`
+- `GET /auth/me`
+- `PATCH /auth/password`
+
+### Usuarios
+
+- `GET /users`
+- `GET /users/:id`
+- `POST /users`
+- `PATCH /users/:id`
+- `DELETE /users/:id`
+
+### Reuniones
+
+- `GET /meetings`
+- `GET /meetings/:id`
+- `POST /meetings`
+- `PATCH /meetings/:id`
+- `DELETE /meetings/:id`
+
+### Planificacion
+
+- `GET /planning/annual-plans`
+- `GET /planning/annual-plans/:id`
+- `POST /planning/annual-plans`
+- `PATCH /planning/annual-plans/:id`
+- `DELETE /planning/annual-plans/:id`
+- `POST /planning/annual-plans/:id/items`
+- `PATCH /planning/annual-plans/items/:itemId`
+- `POST /planning/annual-plans/items/:itemId/follow-ups`
+
+### Catalogos autenticados
+
+- `GET /menus`
+- `GET /roles`
+
+## Validaciones relevantes
+
+### Backend
+
+#### Login
+
+- `rut`: string, maximo 20 caracteres
+- `password`: string, maximo 100 caracteres
+
+#### Cambio de clave
+
+- `newPassword`: minimo 6 y maximo 100 caracteres
+
+#### Usuarios
+
+- `rut`: string, maximo 20
+- `nombre`: string, maximo 120
+- `telefono`: string, maximo 30
+- `fechaNac`: fecha valida ISO
+- `direccion`: string, maximo 255
+- `roleIds`: arreglo unico de enteros
+- en creacion, `roleIds` no puede venir vacio
+
+#### Reuniones
+
+- `fecha`: fecha valida ISO
+- `horaInicio`: formato `HH:mm`
+- `horaFin`: formato `HH:mm`
+- `lugar`: string, maximo 150
+- `estado`: enum valido
+- `modalidad`: enum valido
+- `participantIds`: arreglo unico de enteros, opcional
+- `acta.titulo`: string, maximo 160
+- `acta.archivo.nombre`: maximo 255
+- `acta.archivo.tipo`: maximo 150
+- `acta.archivo.contenidoBase64`: base64 valido
+- `acta.archivo.tamanoBytes`: entre 1 byte y 5 MB
+
+Reglas adicionales:
+
+- `horaFin` debe ser mayor que `horaInicio`
+- el acta debe traer descripcion o archivo
+- el actor autenticado debe existir y tener al menos un rol
+
+#### Plan anual
+
+- `anio`: entero entre 2000 y 2100
+- `nombre`: string, maximo 150
+- `areas`: minimo una
+- `areas.nombre`: maximo 100
+- `areas.orden`: entero minimo 1
+
+Reglas adicionales:
+
+- no se repiten nombres de areas dentro del mismo plan
+- las areas se normalizan con `trim`
+- el sistema controla duplicados a nivel de base de datos
+
+#### Item de plan
+
+- `idAreaPlan`: entero
+- `idResponsable`: entero opcional
+- `titulo`: string, maximo 150
+- `descripcion`: requerido
+- `resultadoEsperado`: requerido
+- `prioridad`: enum opcional
+- `estado`: enum opcional
+- `fechaPlanificada`: fecha valida ISO
+- `fechaCumplimientoReal`: fecha valida ISO opcional
+- `resumenFinal`: string opcional
+
+#### Seguimiento
+
+- `estado`: enum valido
+- `avancePorcentaje`: entero entre 0 y 100
+- `comentario`: requerido
+- `bloqueos`, `proximoPaso`, `funcionoBien`, `porMejorar`: opcionales
+
+### Frontend
+
+El frontend agrega validaciones de experiencia antes de enviar al backend:
+
+- confirmacion de nueva clave debe coincidir
+- al menos un rol al crear o editar usuario
+- al menos un area al crear o editar plan
+- no repetir nombres de areas en el mismo plan
+- item de plan con titulo, descripcion, resultado esperado y fecha planificada
+- seguimiento con comentario y avance entre 0 y 100
+- acta con descripcion o archivo
+- archivo de acta con maximo 5 MB
+
+## Criterios de interfaz actuales
+
+- El frontend usa `input type="date"` y `input type="time"` para capturar datos tecnicos.
+- La visualizacion de fechas se muestra como `dd/mm/YY`.
+- La visualizacion de horas se muestra como `HH:mm`.
+- El selector de tema y la foto personal viven en el modal de cuenta.
+- `Inicio` aparece como acceso principal en el sidebar con icono de casa.
+- Los nombres de roles se muestran con inicial mayuscula.
+
+## Estructura principal del repositorio
 
 ```text
 rama-remo/
@@ -190,132 +452,10 @@ rama-remo/
 |  |  |- pages/
 |  |  |- services/
 |  |  |- types/
+|  |  |- utils/
 ```
 
-## Modelo de datos del MVP
-
-### Usuarios
-
-- `usuario`
-- `rol`
-- `usuario_rol`
-
-### Reuniones
-
-- `reunion`
-- `participantes_reu`
-- `acta`
-
-### Navegación
-
-- `menu`
-- `item`
-- `menu_rol`
-
-### Planificación
-
-- `plan_anual`
-- `plan_area`
-- `plan_item`
-- `plan_seguimiento`
-
-## Mejora aplicada al modelo
-
-El flujo del acta se simplificó para que:
-
-- no exista selección manual de tipo
-- no exista selección manual de usuario ni rol para subir el acta
-- el sistema registre automáticamente al usuario autenticado y su rol principal
-
-## Endpoints principales
-
-### Base
-
-- `GET /health`
-- `POST /auth/login`
-- `GET /auth/me`
-- `PATCH /auth/password`
-
-### Usuarios
-
-- `GET /users`
-- `GET /users/:id`
-- `POST /users`
-- `PATCH /users/:id`
-- `DELETE /users/:id`
-
-### Reuniones
-
-- `GET /meetings`
-- `GET /meetings/:id`
-- `POST /meetings`
-- `PATCH /meetings/:id`
-- `DELETE /meetings/:id`
-
-### Planificación
-
-- `GET /planning/annual-plans`
-- `GET /planning/annual-plans/:id`
-- `POST /planning/annual-plans`
-- `PATCH /planning/annual-plans/:id`
-- `DELETE /planning/annual-plans/:id`
-- `POST /planning/annual-plans/:id/items`
-- `PATCH /planning/annual-plans/items/:itemId`
-- `POST /planning/annual-plans/items/:itemId/follow-ups`
-
-### Catálogos autenticados
-
-- `GET /menus`
-- `GET /roles`
-
-## Pantallas del frontend
-
-- Inicio
-- Login
-- Mi acceso
-- Listado de usuarios
-- Crear usuario
-- Editar usuario
-- Listado de reuniones
-- Crear reunión
-- Editar reunión
-- Detalle de reunión
-- Listado de planificación anual
-- Crear plan anual
-- Editar plan anual
-- Detalle de planificación anual
-
-## Seeds incluidos
-
-### Roles
-
-- admin
-- presidente
-- vicepresidente
-- secretario
-- tesorero
-- director
-- apoderado
-- deportista
-- entrenador
-
-### Menús
-
-- Inicio
-- Usuarios
-- Reuniones
-- Planificación
-
-### Ítems
-
-- Usuarios > Listado de usuarios
-- Usuarios > Crear usuario
-- Reuniones > Listado de reuniones
-- Reuniones > Crear reunión
-- Planificación > Planes anuales
-- Planificación > Crear plan anual
-
-## Comandos útiles
+## Comandos utiles
 
 ### Frontend
 
@@ -324,6 +464,7 @@ cd frontend
 npm.cmd run dev
 npm.cmd run build
 npm.cmd run lint
+npm.cmd run preview
 ```
 
 ### Backend
@@ -335,34 +476,21 @@ npm.cmd run build
 npm.cmd run lint
 ```
 
-## Cambios recientes de interfaz
+## Verificaciones recomendadas
 
-- Visualizacion de fechas con formato `dd/mm/YY`
-- Visualizacion de horas con formato `HH:mm`
-- Roles mostrados con inicial mayuscula en formularios y vistas
-- Selector persistente de 3 temas visuales
-- Alemania clasico
-- Alemania grafito
-- Alemania marfil
-- Menu de cuenta unificado sobre el nombre del usuario para tema, foto, acceso y cierre de sesion
-- Icono de casa junto a `Inicio` en el menu lateral
-- Eliminacion de la etiqueta `MVP` en la portada y cabecera principal
+Despues de levantar el proyecto conviene probar:
 
-## Criterios visuales del frontend
+1. Login con el usuario admin inicial.
+2. Cambio de clave en `Mi acceso`.
+3. Creacion y edicion de usuario.
+4. Creacion de reunion con participantes.
+5. Carga de acta con descripcion o archivo.
+6. Creacion de plan anual, item y seguimiento.
+7. Cambio de tema desde el modal de cuenta.
 
-- Los formularios mantienen `input type="date"` y `input type="time"` para compatibilidad de captura.
-- Las vistas del sistema normalizan fechas y horas antes de mostrarlas.
-- El tema elegido se guarda en `localStorage` y se reaplica en la siguiente sesion.
+## Estado de verificacion en este repositorio
 
-## Verificaciones realizadas
-
-- Backend compila correctamente
-- Frontend compila correctamente
-- Backend responde `GET /health`
-- Backend responde login `POST /auth/login`
-- Backend responde `GET /auth/me` con token válido
-- Backend responde `PATCH /auth/password`
-- Backend responde `GET /roles` autenticado
-- Backend permite editar usuarios, reuniones y planificación
-- Backend permite eliminar usuarios, reuniones y planificación
-- Se limpió la data sucia de prueba y se dejó una base demo coherente
+- Backend compila correctamente.
+- Frontend compila correctamente.
+- Se ha verificado construccion con `npm.cmd run build` en frontend.
+- El sistema mantiene datos demo coherentes para desarrollo local.

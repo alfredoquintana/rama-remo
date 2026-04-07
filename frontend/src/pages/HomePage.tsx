@@ -46,14 +46,6 @@ export function HomePage() {
 
   return (
     <section className="page-section">
-      <div className="hero-card">
-        <h2>Gestion administrativa para la rama de remo</h2>
-        <p>
-          Base funcional para manejar usuarios, roles, reuniones de directiva y
-          actas asociadas.
-        </p>
-      </div>
-
       <div className="stats-grid">
         <article className="stat-card">
           <span>Usuarios</span>
@@ -109,7 +101,7 @@ export function HomePage() {
         <article className="panel-card">
           <h3>Planificacion anual</h3>
           <p>
-            Ordena compromisos del ano, registra cumplimiento, aprendizajes y
+            Ordena compromisos del año, registra cumplimiento, aprendizajes y
             avances para la reunion general de la rama.
           </p>
           <div className="inline-actions">

@@ -93,11 +93,11 @@ export function UsersListPage() {
             <tbody>
               {users.map((user) => (
                 <tr key={user.idUsuario}>
-                  <td>{user.nombre}</td>
-                  <td>{user.rut}</td>
-                  <td>{user.telefono}</td>
-                  <td>{formatRoleList(user.roles)}</td>
-                  <td>
+                  <td data-label="Nombre">{user.nombre}</td>
+                  <td data-label="RUT">{user.rut}</td>
+                  <td data-label="Telefono">{user.telefono}</td>
+                  <td data-label="Roles">{formatRoleList(user.roles)}</td>
+                  <td data-label="Acciones">
                     <div className="table-actions">
                       <Link
                         className="button button-secondary button-small"

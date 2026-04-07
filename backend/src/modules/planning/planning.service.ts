@@ -256,8 +256,8 @@ export class PlanningService {
         fechaCumplimientoReal:
           updatePlanItemDto.fechaCumplimientoReal !== undefined
             ? updatePlanItemDto.fechaCumplimientoReal
-            : currentItem.fechaCumplimientoReal ??
-              this.resolveCompletionDate(updatePlanItemDto.estado),
+            : (currentItem.fechaCumplimientoReal ??
+              this.resolveCompletionDate(updatePlanItemDto.estado)),
         resumenFinal:
           updatePlanItemDto.resumenFinal !== undefined
             ? updatePlanItemDto.resumenFinal.trim() || null
@@ -285,7 +285,9 @@ export class PlanningService {
 
     await this.dataSource.transaction(async (manager) => {
       const planItemsRepository = manager.getRepository(PlanItemEntity);
-      const planFollowupsRepository = manager.getRepository(PlanSeguimientoEntity);
+      const planFollowupsRepository = manager.getRepository(
+        PlanSeguimientoEntity,
+      );
 
       await planFollowupsRepository.save(
         planFollowupsRepository.create({
@@ -375,7 +377,9 @@ export class PlanningService {
         const currentArea = currentAreaById.get(area.idAreaPlan);
 
         if (!currentArea || currentArea.idPlanAnual !== planId) {
-          throw new BadRequestException('Una de las áreas no pertenece al plan.');
+          throw new BadRequestException(
+            'Una de las áreas no pertenece al plan.',
+          );
         }
 
         await planAreasRepository.save(
@@ -417,7 +421,9 @@ export class PlanningService {
     });
 
     if (!area) {
-      throw new NotFoundException('El área seleccionada no existe para este plan.');
+      throw new NotFoundException(
+        'El área seleccionada no existe para este plan.',
+      );
     }
   }
 
@@ -501,8 +507,9 @@ export class PlanningService {
           nombre: area.nombre,
           descripcion: area.descripcion,
           orden: area.orden,
-          itemCount: items.filter((item) => item.area.idAreaPlan === area.idAreaPlan)
-            .length,
+          itemCount: items.filter(
+            (item) => item.area.idAreaPlan === area.idAreaPlan,
+          ).length,
         })),
       items,
       summary,
