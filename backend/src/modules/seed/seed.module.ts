@@ -5,6 +5,7 @@ import {
   CategoriaEntity,
   DeportistaCategoriaEntity,
   DeportistaEntity,
+  EstadoBoteEntity,
   ItemEntity,
   MenuEntity,
   MenuRolEntity,
@@ -15,6 +16,7 @@ import {
   PlanSeguimientoEntity,
   ReunionEntity,
   RolEntity,
+  TipoBoteEntity,
   UsuarioEntity,
   UsuarioRolEntity,
 } from '../../database/entities';
@@ -25,6 +27,8 @@ import { SeedService } from './seed.service';
     TypeOrmModule.forFeature([
       RolEntity,
       CategoriaEntity,
+      TipoBoteEntity,
+      EstadoBoteEntity,
       MenuEntity,
       ItemEntity,
       MenuRolEntity,

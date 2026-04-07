@@ -519,6 +519,11 @@ dt {
 .app-sidebar {
   position: sticky;
   top: 24px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scroll-behavior: smooth;
   padding: 20px;
 }
 
@@ -582,8 +587,8 @@ dt {
 .app-nav__menu--section {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  min-height: 22px;
+  gap: 12px;
+  min-height: 24px;
 }
 
 .app-nav__menu--link {
@@ -593,8 +598,8 @@ dt {
 }
 
 .app-nav__icon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
 }
 
@@ -915,6 +920,14 @@ dt {
   min-width: min(420px, 100%);
 }
 
+.fleet-search-field {
+  min-width: min(420px, 100%);
+}
+
+.fleet-filter-field {
+  min-width: 180px;
+}
+
 .table-toolbar,
 .pagination-bar,
 .pagination-pages {
@@ -1025,7 +1038,8 @@ dt {
   justify-self: end;
 }
 
-.athlete-modal-backdrop {
+.athlete-modal-backdrop,
+.fleet-modal-backdrop {
   position: fixed;
   inset: 0;
   z-index: 1200;
@@ -1036,7 +1050,8 @@ dt {
   backdrop-filter: blur(8px);
 }
 
-.athlete-modal {
+.athlete-modal,
+.fleet-modal {
   width: min(760px, 100%);
   max-height: min(88dvh, 760px);
   overflow-y: auto;
@@ -1048,11 +1063,63 @@ dt {
   box-shadow: var(--shadow);
 }
 
-.athlete-modal__header {
+.athlete-modal__header,
+.fleet-modal__header {
   display: flex;
   justify-content: space-between;
   gap: 16px;
   align-items: flex-start;
+}
+
+.fleet-page__filters {
+  align-items: end;
+}
+
+.fleet-page__summary {
+  display: grid;
+  gap: 4px;
+  justify-items: end;
+}
+
+.fleet-table td:nth-child(7),
+.fleet-table th:nth-child(7) {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.fleet-table__actions {
+  flex-wrap: nowrap;
+}
+
+.fleet-modal__form,
+.fleet-detail-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.fleet-modal__switch {
+  min-height: 100%;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--field-border);
+  border-radius: 12px;
+  background: var(--surface-strong);
+}
+
+.fleet-detail-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.fleet-detail-grid .form-field input,
+.fleet-detail-grid .form-field textarea {
+  color: var(--text);
+  background: var(--interactive-surface-soft);
+  border-color: var(--interactive-border);
+  cursor: default;
+}
+
+.fleet-detail-grid .form-field textarea {
+  resize: none;
 }
 
 .tag-list {
@@ -1745,6 +1812,7 @@ dt {
   .form-grid,
   .checkbox-grid,
   .detail-grid,
+  .fleet-detail-grid,
   .athlete-detail-heading__meta {
     grid-template-columns: 1fr;
   }
@@ -1959,18 +2027,29 @@ dt {
     border-radius: 20px;
   }
 
-  .athlete-modal-backdrop {
+  .athlete-modal-backdrop,
+  .fleet-modal-backdrop {
     padding: 12px;
   }
 
-  .athlete-modal {
+  .athlete-modal,
+  .fleet-modal {
     padding: 16px;
     border-radius: 20px;
   }
 
-  .athlete-modal__header {
+  .athlete-modal__header,
+  .fleet-modal__header {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .fleet-page__summary {
+    justify-items: start;
+  }
+
+  .fleet-table__actions {
+    flex-wrap: wrap;
   }
 
   .athlete-detail-heading__actions {

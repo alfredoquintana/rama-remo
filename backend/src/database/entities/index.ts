@@ -1,7 +1,9 @@
 export * from './acta.entity';
+export * from './bote.entity';
 export * from './categoria.entity';
 export * from './deportista-categoria.entity';
 export * from './deportista.entity';
+export * from './estado-bote.entity';
 export * from './item.entity';
 export * from './menu-rol.entity';
 export * from './menu.entity';
@@ -13,5 +15,6 @@ export * from './plan-seguimiento.entity';
 export * from './planning.enums';
 export * from './reunion.entity';
 export * from './rol.entity';
+export * from './tipo-bote.entity';
 export * from './usuario-rol.entity';
 export * from './usuario.entity';
