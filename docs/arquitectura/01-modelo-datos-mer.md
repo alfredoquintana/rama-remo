@@ -1,12 +1,12 @@
-# Modelo de datos actual (MER)
+# Modelo de datos actual
 
-Este documento resume el modelo entidad-relacion actual del sistema segun las entidades TypeORM en `backend/src/database/entities` y el comportamiento observado en los servicios del backend.
+Este documento resume el modelo entidad-relacion vigente segun las entidades TypeORM y el comportamiento observado en los servicios del backend.
 
 ## Fuente de verdad actual
 
-- El esquema se deriva del codigo TypeORM, no de `docs/database.sql`.
-- En desarrollo se usa `synchronize: true`, por lo que la base se ajusta automaticamente desde las entidades.
-- `docs/database.sql` hoy solo crea la base `rama_remo`.
+- El esquema real se deriva del codigo de [backend/src/database/entities](../../backend/src/database/entities).
+- En desarrollo se usa `synchronize: true`.
+- `docs/database.sql` no documenta el modelo completo.
 
 ## MER logico actual
 
@@ -19,7 +19,7 @@ erDiagram
         VARCHAR telefono
         DATE fecha_nac
         VARCHAR direccion
-        VARCHAR clave_hash
+        VARCHAR clave_hash NULL
     }
 
     ROL {
@@ -49,6 +49,57 @@ erDiagram
         INT id_rol PK FK
     }
 
+    CATEGORIA {
+        INT id_categoria PK
+        VARCHAR nombre UK
+        INT edad_min
+        INT edad_max
+        INT orden
+        BOOLEAN activa
+    }
+
+    DEPORTISTA {
+        INT id_deportista PK
+        INT id_usuario FK UK
+        BOOLEAN activo
+    }
+
+    DEPORTISTA_CATEGORIA {
+        INT id_deportista_categoria PK
+        INT id_deportista FK
+        INT id_categoria FK
+        DATE fecha_desde
+        DATE fecha_hasta NULL
+        BOOLEAN vigente
+    }
+
+    TIPO_BOTE {
+        INT id_tipo_bote PK
+        VARCHAR codigo UK
+        VARCHAR nombre
+        BOOLEAN requiere_timonel
+        INT orden
+        BOOLEAN activo
+    }
+
+    ESTADO_BOTE {
+        INT id_estado_bote PK
+        VARCHAR nombre UK
+        BOOLEAN permite_uso
+        BOOLEAN activo
+    }
+
+    BOTE {
+        INT id_bote PK
+        INT id_tipo_bote FK
+        INT id_estado_bote FK
+        VARCHAR nombre UK
+        VARCHAR marca NULL
+        INT anio NULL
+        LONGTEXT observacion NULL
+        BOOLEAN activo
+    }
+
     REUNION {
         INT id_reunion PK
         DATE fecha
@@ -67,12 +118,12 @@ erDiagram
     ACTA {
         INT id_acta PK
         INT id_reunion FK UK
-        VARCHAR titulo
-        LONGTEXT texto
-        VARCHAR archivo_nombre
-        VARCHAR archivo_tipo
-        LONGTEXT archivo_contenido_base64
-        INT archivo_tamano_bytes
+        VARCHAR titulo NULL
+        LONGTEXT texto NULL
+        VARCHAR archivo_nombre NULL
+        VARCHAR archivo_tipo NULL
+        LONGTEXT archivo_contenido_base64 NULL
+        INT archivo_tamano_bytes NULL
         DATETIME fecha_actualizacion
         INT actualizado_por FK
         INT id_rol FK
@@ -83,14 +134,14 @@ erDiagram
         INT anio UK
         VARCHAR nombre
         ENUM estado
-        LONGTEXT objetivo_general
+        LONGTEXT objetivo_general NULL
     }
 
     PLAN_AREA {
         INT id_area_plan PK
         INT id_plan_anual FK
         VARCHAR nombre
-        LONGTEXT descripcion
+        LONGTEXT descripcion NULL
         INT orden
     }
 
@@ -98,37 +149,44 @@ erDiagram
         INT id_plan_item PK
         INT id_plan_anual FK
         INT id_area_plan FK
-        INT id_responsable FK
+        INT id_responsable FK NULL
         VARCHAR titulo
         LONGTEXT descripcion
         LONGTEXT resultado_esperado
         ENUM prioridad
         ENUM estado
         DATE fecha_planificada
-        DATE fecha_cumplimiento_real
-        LONGTEXT resumen_final
+        DATE fecha_cumplimiento_real NULL
+        LONGTEXT resumen_final NULL
     }
 
     PLAN_SEGUIMIENTO {
         INT id_plan_seguimiento PK
         INT id_plan_item FK
-        INT registrado_por FK
+        INT registrado_por FK NULL
         DATETIME fecha_seguimiento
         ENUM estado
         INT avance_porcentaje
         LONGTEXT comentario
-        LONGTEXT bloqueos
-        LONGTEXT proximo_paso
-        LONGTEXT funciono_bien
-        LONGTEXT por_mejorar
+        LONGTEXT bloqueos NULL
+        LONGTEXT proximo_paso NULL
+        LONGTEXT funciono_bien NULL
+        LONGTEXT por_mejorar NULL
     }
 
     USUARIO ||--o{ USUARIO_ROL : posee
     ROL ||--o{ USUARIO_ROL : asigna
 
     MENU ||--o{ ITEM : contiene
-    MENU ||--o{ MENU_ROL : habilita
-    ROL ||--o{ MENU_ROL : autoriza
+    MENU ||--o{ MENU_ROL : relaciona
+    ROL ||--o{ MENU_ROL : habilita
+
+    USUARIO ||--o| DEPORTISTA : puede_ser
+    CATEGORIA ||--o{ DEPORTISTA_CATEGORIA : clasifica
+    DEPORTISTA ||--o{ DEPORTISTA_CATEGORIA : registra
+
+    TIPO_BOTE ||--o{ BOTE : clasifica
+    ESTADO_BOTE ||--o{ BOTE : condiciona
 
     REUNION ||--o{ PARTICIPANTE_REUNION : convoca
     USUARIO ||--o{ PARTICIPANTE_REUNION : participa
@@ -137,35 +195,82 @@ erDiagram
     ROL ||--o{ ACTA : firma_como
 
     PLAN_ANUAL ||--o{ PLAN_AREA : organiza
-    PLAN_ANUAL ||--o{ PLAN_ITEM : agrupa
+    PLAN_ANUAL ||--o{ PLAN_ITEM : contiene
     PLAN_AREA ||--o{ PLAN_ITEM : clasifica
     USUARIO o|--o{ PLAN_ITEM : responsable
     PLAN_ITEM ||--o{ PLAN_SEGUIMIENTO : registra
     USUARIO o|--o{ PLAN_SEGUIMIENTO : reporta
 ```
 
-## Relaciones importantes
+## Relaciones y reglas mas relevantes
 
-- `usuario` y `rol` se relacionan en muchos a muchos mediante `usuario_rol`.
-- `menu` y `rol` tambien se relacionan en muchos a muchos mediante `menu_rol`.
-- `reunion` tiene muchos participantes mediante `participantes_reu`.
-- `reunion` tiene cero o un `acta`, y cada `acta` pertenece a una sola reunion.
-- `plan_anual` contiene muchas `plan_area` y muchos `plan_item`.
-- `plan_item` pertenece a una `plan_area`, puede tener un `usuario` responsable y puede registrar multiples `plan_seguimiento`.
+### Usuario y acceso
 
-## Restricciones y reglas visibles en el modelo
+- `usuario` puede existir sin roles y sin `clave_hash`.
+- Un usuario sin `clave_hash` y sin roles queda registrado, pero no puede iniciar sesion.
+- El acceso real exige `clave_hash` y al menos un rol.
+- La tabla `usuario_rol` sigue siendo la relacion formal entre usuario y rol.
 
-- `usuario.rut` es unico.
-- `rol.nombre` es unico.
-- `menu.nombre` es unico.
-- `item.ruta` es unica.
+### Deportistas
+
+- `deportista` se apoya sobre un `usuario` existente.
+- La condicion deportiva real la define la fila en `deportista`.
+- `deportista_categoria` conserva historial y vigencia.
+- Regla funcional: un deportista debe tener una sola categoria vigente.
+- El rol `deportista` no reemplaza a la entidad `deportista`.
+
+### Flota
+
+- `tipo_bote` parametriza el tipo competitivo u operativo del bote.
+- `estado_bote` parametriza el estado operativo del bote y conserva `permite_uso` para decisiones futuras.
+- `bote` depende siempre de un `tipo_bote` y un `estado_bote`.
+- Regla funcional: `bote.nombre` es unico en el sistema.
+- Regla funcional: al crear o editar un bote solo se aceptan tipos y estados activos.
+- El seed carga catalogos de flota, pero no crea botes del club.
+
+### Reuniones y actas
+
+- `participante_reunion` usa clave primaria compuesta.
 - `acta.id_reunion` es unico, lo que fuerza una sola acta por reunion.
-- `plan_anual.anio` es unico, por lo que hoy solo existe un plan anual por anio.
-- `plan_area` impone unicidad por `idPlanAnual + nombre`.
-- `usuario_rol`, `menu_rol` y `participantes_reu` usan clave primaria compuesta.
+- El archivo del acta se persiste dentro de la base en base64.
+
+### Planificacion
+
+- `plan_area` es unico por `id_plan_anual + nombre`.
+- `plan_anual.anio` es unico.
+- `plan_item` puede tener responsable opcional.
+
+## Decisiones de modelado destacadas
+
+### Separacion entre persona y acceso
+
+El sistema no modela "persona" como una tabla aparte. Esa responsabilidad queda en `usuario`, y el acceso al sistema se resuelve por la combinacion de `clave_hash` y `usuario_rol`.
+
+Consecuencia:
+
+- un usuario puede existir solo como registro personal
+- habilitar acceso es una transicion funcional, no una nueva entidad
+
+### Separacion entre usuario y deportista
+
+El sistema no usa el rol `deportista` como fuente de verdad deportiva. El modelo real distingue:
+
+- persona registrada: `usuario`
+- condicion deportiva: `deportista`
+- clasificacion historica: `deportista_categoria`
+
+### Catalogos de flota parametrizados
+
+La flota no guarda texto libre para tipo o estado. Se apoya en:
+
+- `tipo_bote`
+- `estado_bote`
+
+Eso asegura consistencia en filtros, grillas y futuros usos con regatas o asignaciones.
 
 ## Observaciones del estado actual
 
-- Los archivos adjuntos de acta se almacenan en la base como `base64`, no en disco ni en almacenamiento externo.
-- El modelo contempla autorizacion de menus por rol con `menu_rol`, pero el endpoint `/menus` hoy devuelve todos los menus autenticados sin filtrar por rol.
-- No se observan tablas de auditoria generales ni timestamps comunes en todas las entidades; la trazabilidad fuerte existe sobre todo en `acta` y `plan_seguimiento`.
+- Existe `menu_rol` en modelo, pero `GET /menus` no filtra por rol en tiempo de consulta.
+- No hay tabla de auditoria transversal ni timestamps comunes en todas las entidades.
+- La trazabilidad mas fuerte hoy esta en `deportista_categoria`, `acta` y `plan_seguimiento`.
+- El modulo `flota` ya existe, pero no hay todavia relaciones con regatas o asignacion deportiva.

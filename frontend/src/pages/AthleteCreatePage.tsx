@@ -90,19 +90,13 @@ export function AthleteCreatePage() {
 
   return (
     <section className="page-section">
-      <div className="page-heading">
-        <div>
-          <h2>Registrar deportista</h2>
-          <p>Busca una persona ya registrada y crea su ficha deportiva sin duplicar datos.</p>
-        </div>
-      </div>
 
       {errorMessage ? <StatusMessage kind="error" message={errorMessage} /> : null}
 
       <form className="form-card" onSubmit={handleSearch}>
         <div className="section-heading">
           <div>
-            <h3>Buscar usuario existente</h3>
+            <h3>Buscar usuario</h3>
             <p className="form-help">
               Puedes buscar por nombre o RUT. El usuario no debe estar registrado ya como
               deportista.
@@ -114,7 +108,7 @@ export function AthleteCreatePage() {
           <label className="form-field">
             <span>Búsqueda</span>
             <input
-              placeholder="Ejemplo: Sofía o 21.000.000"
+              placeholder="Ejemplo: Sofía o 21000000"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
             />

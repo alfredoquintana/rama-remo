@@ -8,6 +8,11 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
+
+function trimString(value: unknown) {
+  return typeof value === 'string' ? value.trim() : value;
+}
 
 export class CreateBoatDto {
   @IsInt()
@@ -18,12 +23,14 @@ export class CreateBoatDto {
   @Min(1)
   idEstadoBote!: number;
 
+  @Transform(({ value }) => trimString(value))
   @IsString()
   @IsNotEmpty()
   @MaxLength(120)
   nombre!: string;
 
   @IsOptional()
+  @Transform(({ value }) => trimString(value))
   @IsString()
   @MaxLength(120)
   marca?: string;
@@ -35,6 +42,7 @@ export class CreateBoatDto {
   anio?: number;
 
   @IsOptional()
+  @Transform(({ value }) => trimString(value))
   @IsString()
   @MaxLength(1000)
   observacion?: string;

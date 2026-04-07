@@ -46,16 +46,6 @@ export function HomePage() {
 
   return (
     <section className="page-section">
-      <div className="page-heading">
-        <div>
-          <h2>Panel general</h2>
-          <p>
-            Revisa rápidamente el estado del MVP y entra a los flujos principales desde
-            aqu?.
-          </p>
-        </div>
-      </div>
-
       <div className="stats-grid">
         <article className="stat-card">
           <span>Usuarios</span>

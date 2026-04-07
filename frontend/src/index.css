@@ -5,8 +5,9 @@
   line-height: 1.5;
   font-weight: 400;
   color: #1b1512;
-  background:
+  --app-background:
     radial-gradient(circle at top, #ffe39a 0%, #fff7df 36%, #f5d2cc 100%);
+  background: var(--app-background);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -44,13 +45,16 @@
   --theme-option-text: #1b1512;
   --page-heading-text: var(--text);
   --page-heading-muted: var(--muted);
+  --native-color-scheme: light;
+  color-scheme: var(--native-color-scheme);
 }
 
 :root[data-theme='alemania-clasico'] {
   color: #171313;
-  background:
+  --app-background:
     linear-gradient(180deg, rgba(16, 16, 16, 0.94) 0%, rgba(16, 16, 16, 0.82) 18%, rgba(138, 16, 24, 0.3) 48%, rgba(255, 206, 0, 0.18) 100%),
     #f6efe3;
+  background: var(--app-background);
   --surface: rgba(255, 248, 237, 0.9);
   --surface-strong: #fffdf7;
   --surface-border: rgba(33, 20, 16, 0.14);
@@ -65,15 +69,16 @@
   --success: #9c6a00;
   --success-soft: #fff1b3;
   --shadow: 0 24px 52px rgba(23, 19, 19, 0.16);
-  --page-heading-text: #fff6ee;
-  --page-heading-muted: #f0ddd0;
+  --page-heading-text: #171313;
+  --page-heading-muted: #614a43;
 }
 
 :root[data-theme='alemania-grafito'] {
   color: #f5efe4;
-  background:
+  --app-background:
     radial-gradient(circle at top, rgba(255, 205, 35, 0.16) 0%, rgba(121, 14, 20, 0.12) 30%, rgba(17, 17, 17, 0.95) 72%),
     #111111;
+  background: var(--app-background);
   --surface: rgba(27, 27, 27, 0.86);
   --surface-strong: #242424;
   --surface-border: rgba(255, 255, 255, 0.08);
@@ -105,13 +110,15 @@
   --progress-track: rgba(255, 255, 255, 0.08);
   --theme-option-surface: #262626;
   --theme-option-text: #f5efe4;
+  --native-color-scheme: dark;
 }
 
 :root[data-theme='alemania-marfil'] {
   color: #251a15;
-  background:
+  --app-background:
     linear-gradient(180deg, rgba(255, 242, 214, 0.84) 0%, rgba(255, 255, 255, 0.92) 28%, rgba(179, 18, 23, 0.08) 65%, rgba(255, 206, 0, 0.15) 100%),
     #fbf6ec;
+  background: var(--app-background);
   --surface: rgba(255, 252, 245, 0.92);
   --surface-strong: #fffefa;
   --surface-border: rgba(37, 26, 21, 0.11);
@@ -143,6 +150,11 @@ body,
 body {
   margin: 0;
   overflow-x: hidden;
+  background: var(--app-background);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+  color: var(--text);
 }
 
 button,
@@ -415,7 +427,7 @@ dt {
   border-radius: 12px;
   background: var(--surface-strong);
   color: var(--text);
-  color-scheme: light;
+  color-scheme: var(--native-color-scheme);
 }
 
 .app-header__theme-select option {
@@ -772,9 +784,13 @@ dt {
 }
 
 .button-danger {
-  background: var(--danger-soft);
-  border-color: rgba(180, 35, 24, 0.12);
+  background: color-mix(in srgb, var(--danger) 14%, var(--surface-strong) 86%);
+  border-color: color-mix(in srgb, var(--danger) 34%, transparent 66%);
   color: var(--danger);
+}
+
+.button-danger:hover {
+  background: color-mix(in srgb, var(--danger) 20%, var(--surface-strong) 80%);
 }
 
 .button-small {
@@ -802,6 +818,7 @@ dt {
   letter-spacing: 0.06em;
   color: var(--muted);
 }
+
 
 .table-note {
   margin-top: 6px;

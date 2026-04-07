@@ -47,10 +47,6 @@ export function LoginPage() {
           <img alt="Rudern" className="auth-card__logo" src="/rudern-icon.jpeg" />
           <span className="auth-card__eyebrow">Acceso interno</span>
           <h2>Sistema Rama de Remo</h2>
-          <p className="auth-card__text">
-            Ingresa con tu RUT y clave para gestionar usuarios, reuniones y
-            planificación anual.
-          </p>
         </div>
 
         <label className="form-field">
@@ -83,11 +79,6 @@ export function LoginPage() {
         <button className="button button-primary" disabled={isSubmitting} type="submit">
           {isSubmitting ? 'Ingresando...' : 'Entrar'}
         </button>
-
-        <p className="auth-card__hint">
-          Si estás usando credenciales demo, entra con el RUT y clave entregados para la
-          presentación.
-        </p>
       </form>
     </section>
   );

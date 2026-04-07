@@ -1,124 +1,213 @@
 # Arquitectura y funcionamiento actual
 
-Este documento resume la arquitectura actual del sistema y el flujo real entre frontend, backend y base de datos.
+Este documento resume la arquitectura real actual del sistema y como fluyen frontend, backend y base de datos.
 
 ## Diagrama de arquitectura
 
 ```mermaid
 flowchart LR
-    U[Usuario interno] --> FE[Frontend React 19 + Vite]
+    U[Usuario interno] --> FE[Frontend React + Vite]
 
     subgraph Frontend
         FE --> ROUTER[React Router]
         FE --> AUTHCTX[AuthContext]
-        FE --> PROTECTED[ProtectedRoute]
+        FE --> GUARD[ProtectedRoute]
         FE --> API[ApiClient fetch]
-        FE --> PAGES[Paginas y formularios]
+        FE --> PAGES[Pages, tablas, modales y formularios]
     end
 
-    API -->|Bearer JWT| BE[NestJS 11 API]
+    API -->|Bearer JWT| BE[NestJS API]
 
     subgraph Backend
-        BE --> GUARD[AuthGuard global]
+        BE --> AUTHGUARD[AuthGuard global]
         BE --> CTRL[Controllers]
         CTRL --> AUTHSVC[AuthService]
         CTRL --> USERSVC[UsersService]
+        CTRL --> ATHSVC[AthletesService]
+        CTRL --> CATSVC[CategoriesService]
+        CTRL --> FLEETSVC[FleetService]
         CTRL --> MEETSVC[MeetingsService]
         CTRL --> PLANSVC[PlanningService]
-        CTRL --> CATALOGSVC[MenusService y RolesService]
-        BE --> SEED[SeedService al iniciar]
+        CTRL --> MENUSVC[MenusService]
+        CTRL --> ROLSVC[RolesService]
+        BE --> SEED[SeedService bootstrap]
         AUTHSVC --> ORM[TypeORM]
         USERSVC --> ORM
+        ATHSVC --> ORM
+        CATSVC --> ORM
+        FLEETSVC --> ORM
         MEETSVC --> ORM
         PLANSVC --> ORM
-        CATALOGSVC --> ORM
+        MENUSVC --> ORM
+        ROLSVC --> ORM
         SEED --> ORM
     end
 
     ORM --> DB[(MySQL)]
 ```
 
-## Como funciona hoy
+## Funcionamiento actual
 
 ### 1. Autenticacion y sesion
 
-- El usuario inicia sesion con RUT y clave desde `/login`.
-- El backend valida credenciales, carga roles del usuario y genera un JWT.
-- El frontend guarda el token y lo reutiliza en cada request mediante `Authorization: Bearer`.
-- `ProtectedRoute` bloquea la aplicacion si no hay sesion valida.
-- Al recargar, `AuthContext` intenta reconstruir la sesion consultando `GET /auth/me`.
+- El usuario ingresa con RUT y clave desde `/login`.
+- El backend valida `clave_hash`, roles y genera JWT.
+- El frontend guarda token y reconstruye sesion con `GET /auth/me`.
+- Toda la aplicacion queda protegida salvo el login.
 
-## Flujo de sesion
+### 2. Usuarios y acceso
 
-```mermaid
-sequenceDiagram
-    actor U as Usuario
-    participant F as Frontend
-    participant A as Auth API
-    participant DB as MySQL
+- El sistema distingue entre persona registrada y usuario con acceso.
+- Crear usuario puede dejar a la persona sin acceso.
+- Habilitar acceso es un flujo independiente.
+- Un usuario con acceso debe tener al menos un rol.
+- Un usuario sin acceso puede existir sin roles.
+- El login rechaza usuarios sin clave o sin roles efectivos.
 
-    U->>F: Ingresa RUT y clave
-    F->>A: POST /auth/login
-    A->>DB: Busca usuario + roles
-    DB-->>A: Usuario encontrado
-    A-->>F: JWT + user
-    F->>F: Guarda token
-    F->>A: GET /auth/me
-    A-->>F: Usuario autenticado
-```
+### 3. Modulo deportivo
 
-### 2. Backend por modulos
+- El modulo trabaja sobre usuarios ya existentes.
+- `searchUsers` permite buscar usuarios por nombre o RUT.
+- `create` registra deportista sobre usuario existente.
+- `findActive` lista deportistas activos con categoria vigente.
+- `changeCategory` cierra categoria vigente y crea nueva fila historica.
+- La grilla de deportistas usa busqueda por nombre, RUT y categoria, mas paginacion.
 
-- `auth`: login, perfil autenticado y cambio de clave.
-- `users`: CRUD de usuarios y asignacion de roles.
-- `meetings`: CRUD de reuniones, participantes y acta asociada.
-- `planning`: CRUD de planes anuales, areas, items y seguimientos.
-- `roles`: catalogo de roles.
-- `menus`: catalogo de menus e items de navegacion.
-- `seed`: carga catalogos y datos demo al iniciar la aplicacion.
-- `health`: endpoint de verificacion simple.
+### 4. Modulo de flota
 
-### 3. Persistencia
+- La gestion de flota vive en una sola pantalla `/flota`.
+- La pantalla carga catalogos de tipo y estado desde `GET /fleet/catalogs`.
+- La grilla usa busqueda inteligente y filtros.
+- El alta, edicion y detalle se resuelven con modales.
+- El backend valida:
+  - tipo de bote existente y activo
+  - estado de bote existente y activo
+  - nombre unico para el bote
+- El seed deja listos los catalogos, pero no crea botes demo.
 
-- TypeORM usa `autoLoadEntities: true`.
-- En desarrollo se usa `synchronize: true`, por lo que el esquema se crea o ajusta desde las entidades.
-- No hay migraciones versionadas dentro del repo.
-- La base contiene tanto catalogos como datos operacionales y datos demo.
+### 5. Reuniones y actas
 
-### 4. Navegacion y autorizacion actual
+- El formulario de reuniones valida fecha, horas, lugar y participantes.
+- El acta se maneja dentro del mismo flujo de la reunion.
+- Si se adjunta archivo, se guarda en base64 dentro de la base.
+- El backend resuelve automaticamente actor y rol principal del acta.
 
-- Toda la API queda protegida por `AuthGuard`, salvo endpoints publicos.
-- El token incluye `sub`, `rut` y `roles`.
-- Hoy no existe una capa RBAC por endpoint basada en esos roles.
-- El frontend consume `/menus` para poblar el sidebar.
-- Aunque existe `menu_rol` en el modelo, hoy `MenusService` devuelve menus autenticados sin filtrar por roles del usuario.
+### 6. Planificacion anual
 
-## Componentes funcionales principales
+- El plan contiene areas.
+- Cada area contiene items.
+- Cada item puede tener responsable.
+- Cada item puede registrar seguimientos.
+- El backend recompone resumen de cumplimiento al consultar el plan.
 
-### Gestion de usuarios
+## Modulos backend vigentes
 
-- Crea usuarios con clave provisoria desde configuracion.
-- Mantiene relacion muchos a muchos con roles.
-- Evita duplicar RUT.
-- Evita eliminar usuarios con actas registradas.
-- Evita eliminar al ultimo usuario con rol `admin`.
+- `auth`
+- `users`
+- `athletes`
+- `categories`
+- `fleet`
+- `meetings`
+- `planning`
+- `roles`
+- `menus`
+- `seed`
+- `health`
 
-### Gestion de reuniones y actas
+## Navegacion actual
 
-- Una reunion puede registrar muchos participantes.
-- El acta se crea o actualiza dentro del mismo flujo de la reunion.
-- El sistema registra automaticamente quien actualizo el acta, su rol principal y la fecha.
-- El archivo adjunto se almacena en base64 dentro de la base.
+El frontend hoy expone estas areas:
 
-### Gestion de planificacion anual
+- Inicio
+- Usuarios
+- Deportistas
+- Flota
+- Reuniones
+- Planificacion
+- Mi acceso
 
-- Un plan anual tiene areas, items y seguimientos.
-- Cada item puede tener responsable y fecha planificada.
-- Cada seguimiento actualiza trazabilidad y estado del item.
-- El backend calcula resumen de cumplimiento y atrasos al consultar el plan.
+Rutas activas:
 
-## Hallazgos tecnicos relevantes
+- `/login`
+- `/`
+- `/mi-acceso`
+- `/usuarios`
+- `/usuarios/nuevo`
+- `/usuarios/:id/editar`
+- `/usuarios/:id/habilitar-acceso`
+- `/deportistas`
+- `/deportistas/nuevo`
+- `/deportistas/:id`
+- `/flota`
+- `/reuniones`
+- `/reuniones/nueva`
+- `/reuniones/:id`
+- `/reuniones/:id/editar`
+- `/planificacion`
+- `/planificacion/nuevo`
+- `/planificacion/:id`
+- `/planificacion/:id/editar`
 
-- La documentacion SQL no representa el esquema completo actual.
-- El control de acceso es autenticado, pero no aun autorizado por rol a nivel de endpoint o menu.
-- La semilla automatica es parte importante del entorno de desarrollo porque deja el sistema listo para pruebas funcionales.
+## Capas y responsabilidades
+
+### Frontend
+
+- `pages`: resuelven vistas y flujos de modulo.
+- `services`: concentran llamadas HTTP.
+- `types`: describen payloads y respuestas.
+- `components`: reutilizan layout, tablas, modales y mensajes.
+- `layouts`: contienen la estructura protegida de la app.
+
+### Backend
+
+- `controllers`: exponen rutas HTTP.
+- `services`: concentran reglas de negocio.
+- `entities`: definen el modelo persistente real.
+- `seed`: prepara catalogos y datos demo para desarrollo.
+
+## Persistencia
+
+- TypeORM trabaja con `autoLoadEntities: true`.
+- En desarrollo se usa `synchronize: true`.
+- No hay migraciones versionadas en el repositorio.
+- La semilla automatica es parte importante del entorno de desarrollo.
+
+## Decisiones tecnicas que afectan flujos
+
+### Usuario sin acceso
+
+No existe una tabla separada para "acceso". El acceso depende de:
+
+- `usuario.clave_hash`
+- existencia de filas en `usuario_rol`
+
+Por eso los flujos de crear usuario y habilitar acceso se resuelven sobre la misma entidad.
+
+### Deportistas con historial
+
+La categoria vigente no vive como columna directa en `deportista`. Se reconstruye desde `deportista_categoria` usando `vigente = true`.
+
+Consecuencia:
+
+- hay trazabilidad historica real
+- cambiar categoria implica cerrar la fila vigente y crear otra
+
+### Flota parametrizada
+
+`bote` no guarda textos libres para tipo y estado. Usa relaciones a catalogos:
+
+- `tipo_bote`
+- `estado_bote`
+
+Consecuencia:
+
+- filtros y grillas consistentes
+- validaciones mas simples
+- base lista para evolucionar a asignacion de botes o regatas
+
+## Hallazgos tecnicos vigentes
+
+- El sistema ya tiene autenticacion, pero no autorizacion por rol a nivel de endpoint.
+- `menu_rol` existe en el modelo, pero `MenusService` devuelve menus autenticados sin filtro efectivo por rol.
+- El seed es parte del comportamiento operativo del backend en desarrollo.
+- `docs/database.sql` no representa el esquema funcional completo.
