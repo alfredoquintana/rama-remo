@@ -109,7 +109,7 @@ export function HomePage() {
         <article className="panel-card">
           <h3>Planificacion anual</h3>
           <p>
-            Ordena compromisos del ano, registra cumplimiento, aprendizajes y
+            Ordena compromisos del año, registra cumplimiento, aprendizajes y
             avances para la reunion general de la rama.
           </p>
           <div className="inline-actions">

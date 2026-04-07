@@ -96,16 +96,16 @@ export function MeetingsListPage() {
             <tbody>
               {meetings.map((meeting) => (
                 <tr key={meeting.idReunion}>
-                  <td>{formatDate(meeting.fecha)}</td>
-                  <td>
+                  <td data-label="Fecha">{formatDate(meeting.fecha)}</td>
+                  <td data-label="Horario">
                     {formatTime(meeting.horaInicio)} - {formatTime(meeting.horaFin)}
                   </td>
-                  <td>{meeting.lugar}</td>
-                  <td>{meetingStateLabels[meeting.estado]}</td>
-                  <td>{meetingModeLabels[meeting.modalidad]}</td>
-                  <td>{meeting.participantCount}</td>
-                  <td>{meeting.hasActa ? 'Si' : 'No'}</td>
-                  <td>
+                  <td data-label="Lugar">{meeting.lugar}</td>
+                  <td data-label="Estado">{meetingStateLabels[meeting.estado]}</td>
+                  <td data-label="Modalidad">{meetingModeLabels[meeting.modalidad]}</td>
+                  <td data-label="Participantes">{meeting.participantCount}</td>
+                  <td data-label="Acta">{meeting.hasActa ? 'Si' : 'No'}</td>
+                  <td data-label="Acciones">
                     <div className="table-actions">
                       <Link
                         className="button button-secondary button-small"

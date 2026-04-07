@@ -99,18 +99,18 @@ export function AnnualPlansListPage() {
             <tbody>
               {plans.map((plan) => (
                 <tr key={plan.idPlanAnual}>
-                  <td>{plan.anio}</td>
-                  <td>
+                  <td data-label="Ano">{plan.anio}</td>
+                  <td data-label="Plan">
                     <strong>{plan.nombre}</strong>
                     <div className="table-note">
                       {plan.objetivoGeneral ?? 'Sin objetivo general cargado.'}
                     </div>
                   </td>
-                  <td>{annualPlanStatusLabels[plan.estado]}</td>
-                  <td>{plan.summary.totalItems}</td>
-                  <td>{plan.summary.porcentajeCumplimiento}%</td>
-                  <td>{plan.summary.atrasados}</td>
-                  <td>
+                  <td data-label="Estado">{annualPlanStatusLabels[plan.estado]}</td>
+                  <td data-label="Items">{plan.summary.totalItems}</td>
+                  <td data-label="Cumplimiento">{plan.summary.porcentajeCumplimiento}%</td>
+                  <td data-label="Atrasados">{plan.summary.atrasados}</td>
+                  <td data-label="Acciones">
                     <div className="table-actions">
                       <Link
                         className="button button-secondary button-small"

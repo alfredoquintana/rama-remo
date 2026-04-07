@@ -7,10 +7,75 @@ import {
   setStoredTheme,
   setStoredUserPhoto,
 } from '../app/session';
-import { defaultThemeId, isThemeId, themeOptions, type ThemeId } from '../app/theme';
+import {
+  defaultThemeId,
+  isThemeId,
+  themeOptions,
+  type ThemeId,
+} from '../app/theme';
 import { useAuth } from '../app/useAuth';
 
 const MAX_PHOTO_SIZE_BYTES = 1024 * 1024;
+const MOBILE_NAV_ID = 'app-primary-navigation';
+
+type AppHeaderProps = {
+  isMobileNavOpen: boolean;
+  onOpenMobileNav: () => void;
+};
+
+function MenuIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="app-header__icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 7h16" />
+      <path d="M4 12h16" />
+      <path d="M4 17h16" />
+    </svg>
+  );
+}
+
+function ChevronDownIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="app-header__icon app-header__icon--small"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="app-header__icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M6 6l12 12" />
+      <path d="M18 6 6 18" />
+    </svg>
+  );
+}
 
 function getUserInitials(name?: string) {
   if (!name) {
@@ -22,7 +87,12 @@ function getUserInitials(name?: string) {
     .map((word) => word.trim())
     .filter(Boolean);
 
-  return words.slice(0, 2).map((word) => word[0]?.toUpperCase() ?? '').join('') || 'SR';
+  return (
+    words
+      .slice(0, 2)
+      .map((word) => word[0]?.toUpperCase() ?? '')
+      .join('') || 'SR'
+  );
 }
 
 function getInitialTheme() {
@@ -30,13 +100,16 @@ function getInitialTheme() {
   return isThemeId(storedTheme) ? storedTheme : defaultThemeId;
 }
 
-export function AppHeader() {
+export function AppHeader({
+  isMobileNavOpen,
+  onOpenMobileNav,
+}: AppHeaderProps) {
   const { logout, user } = useAuth();
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [photoMessage, setPhotoMessage] = useState('');
-  const [photoMessageKind, setPhotoMessageKind] = useState<'success' | 'error' | null>(
-    null,
-  );
+  const [photoMessageKind, setPhotoMessageKind] = useState<
+    'success' | 'error' | null
+  >(null);
   const [themeId, setThemeId] = useState<ThemeId>(getInitialTheme);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const photoInputId = useId();
@@ -154,15 +227,31 @@ export function AppHeader() {
     <>
       <header className="app-header">
         <div className="app-header__content">
-          <div>
-            <p className="app-header__eyebrow">Administracion</p>
+          <div className="app-header__brand">
+            <button
+              aria-controls={MOBILE_NAV_ID}
+              aria-expanded={isMobileNavOpen}
+              aria-label="Abrir menu principal"
+              className="app-header__menu-button"
+              type="button"
+              onClick={onOpenMobileNav}
+            >
+              <MenuIcon />
+            </button>
+
             <div className="app-header__title-row">
-              <img className="app-header__logo" src="/rudern-icon.jpeg" alt="Icono Rudern" />
-              <h1 className="app-header__title">Sistema Rama de Remo</h1>
+              <img
+                className="app-header__logo"
+                src="/rudern-icon.jpeg"
+                alt="Icono Rudern"
+              />
+              <div>
+                <h1 className="app-header__title">Sistema Rama de Remo</h1>
+                <p className="app-header__subtitle">
+                  Usuarios, roles, reuniones y actas para la directiva.
+                </p>
+              </div>
             </div>
-            <p className="app-header__subtitle">
-              Usuarios, roles, reuniones y actas para la directiva.
-            </p>
           </div>
 
           <div className="app-header__session">
@@ -184,7 +273,11 @@ export function AppHeader() {
               >
                 <span
                   className="app-header__avatar-picker"
-                  title={photoUrl ? 'Foto personal configurada' : 'Sin foto personal'}
+                  title={
+                    photoUrl
+                      ? 'Foto personal configurada'
+                      : 'Sin foto personal'
+                  }
                 >
                   {photoUrl ? (
                     <img
@@ -201,10 +294,14 @@ export function AppHeader() {
 
                 <span className="app-header__account-copy">
                   <span className="app-header__account-label">Cuenta</span>
-                  <span className="app-header__account-name">{user?.nombre ?? 'Sin sesion'}</span>
+                  <span className="app-header__account-name">
+                    {user?.nombre ?? 'Sin sesion'}
+                  </span>
                 </span>
 
-                <span className="app-header__account-caret">▼</span>
+                <span className="app-header__account-caret">
+                  <ChevronDownIcon />
+                </span>
               </button>
             </div>
           </div>
@@ -252,7 +349,7 @@ export function AppHeader() {
                 type="button"
                 onClick={closeAccountModal}
               >
-                ×
+                <CloseIcon />
               </button>
             </div>
 
@@ -287,7 +384,11 @@ export function AppHeader() {
                   Quitar foto
                 </button>
               ) : null}
-              <Link className="button button-secondary" to="/mi-acceso" onClick={closeAccountModal}>
+              <Link
+                className="button button-secondary"
+                to="/mi-acceso"
+                onClick={closeAccountModal}
+              >
                 Mi acceso
               </Link>
               <button className="button button-secondary" type="button" onClick={logout}>

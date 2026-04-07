@@ -142,6 +142,7 @@ body,
 
 body {
   margin: 0;
+  overflow-x: hidden;
 }
 
 button,
@@ -192,6 +193,37 @@ dt {
   align-items: flex-start;
 }
 
+.app-header__brand {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.app-header__menu-button {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--field-border);
+  border-radius: 14px;
+  background: var(--surface-strong);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+
+.app-header__icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.app-header__icon--small {
+  width: 16px;
+  height: 16px;
+}
+
 .app-header__eyebrow {
   margin-bottom: 8px;
   font-size: 0.78rem;
@@ -205,6 +237,7 @@ dt {
   display: flex;
   align-items: center;
   gap: 14px;
+  min-width: 0;
 }
 
 .app-header__logo {
@@ -221,11 +254,13 @@ dt {
   font-size: clamp(1.8rem, 2.5vw, 2.8rem);
   line-height: 1.05;
   margin: 0;
+  text-wrap: balance;
 }
 
 .app-header__subtitle {
   margin-top: 10px;
   color: var(--muted);
+  max-width: 60ch;
 }
 
 .app-header__session {
@@ -234,6 +269,7 @@ dt {
   align-items: center;
   flex-wrap: wrap;
   justify-content: flex-end;
+  min-width: 0;
 }
 
 .app-header__account {
@@ -245,12 +281,14 @@ dt {
   align-items: center;
   gap: 12px;
   min-width: 260px;
+  width: 100%;
   padding: 10px 14px;
   border: 1px solid var(--surface-border);
   border-radius: 20px;
   background: var(--surface-strong);
   color: var(--text);
   box-shadow: var(--shadow);
+  cursor: pointer;
 }
 
 .app-header__account-copy {
@@ -270,12 +308,14 @@ dt {
 
 .app-header__account-name {
   font-weight: 700;
+  word-break: break-word;
 }
 
 .app-header__account-caret {
-  font-size: 0.8rem;
   color: var(--muted);
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
 }
 
 .app-header__account-modal-backdrop {
@@ -473,6 +513,44 @@ dt {
   padding: 20px;
 }
 
+.app-sidebar__backdrop,
+.app-sidebar__mobile-header {
+  display: none;
+}
+
+.app-sidebar__mobile-header {
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.app-sidebar__mobile-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.app-sidebar__close-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--field-border);
+  border-radius: 12px;
+  background: var(--surface-strong);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.app-sidebar__close-icon {
+  width: 18px;
+  height: 18px;
+}
+
 .app-nav {
   display: grid;
   gap: 20px;
@@ -531,6 +609,7 @@ dt {
 .page-section {
   display: grid;
   gap: 20px;
+  min-width: 0;
 }
 
 .page-heading {
@@ -693,6 +772,7 @@ dt {
   margin-top: 6px;
   color: var(--muted);
   font-size: 0.92rem;
+  overflow-wrap: anywhere;
 }
 
 .form-grid {
@@ -774,6 +854,7 @@ dt {
   border-radius: 999px;
   background: var(--elevated-surface-strong);
   border: 1px solid var(--interactive-border);
+  max-width: 100%;
 }
 
 .tag-chip button {
@@ -867,6 +948,7 @@ dt {
   margin-top: 4px;
   color: var(--muted);
   font-size: 0.92rem;
+  word-break: break-word;
 }
 
 .file-card {
@@ -1108,7 +1190,16 @@ dt {
   }
 
   .app-sidebar {
-    position: static;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1100;
+    width: min(360px, calc(100vw - 24px));
+    height: 100dvh;
+    overflow-y: auto;
+    border-radius: 0 24px 24px 0;
+    transform: translateX(calc(-100% - 24px));
+    transition: transform 180ms ease;
   }
 
   .content-grid,
@@ -1132,13 +1223,46 @@ dt {
 
   .app-header__session {
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-start;
+  }
+
+  .app-header__account {
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .app-header__menu-button {
+    display: inline-flex;
+  }
+
+  .app-sidebar.is-mobile-open {
+    transform: translateX(0);
+  }
+
+  .app-sidebar__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1090;
+    background: rgba(7, 7, 7, 0.42);
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease;
+  }
+
+  .app-sidebar__backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .app-sidebar__mobile-header {
+    display: flex;
   }
 }
 
 @media (max-width: 768px) {
   .app-shell {
-    padding: 16px;
+    padding: 12px 12px 24px;
   }
 
   .app-header,
@@ -1155,18 +1279,34 @@ dt {
     flex-direction: column;
   }
 
+  .page-heading > .button,
+  .page-heading > a.button,
+  .page-heading > button.button {
+    width: 100%;
+  }
+
   .app-header__title-row {
     align-items: flex-start;
+    gap: 12px;
   }
 
   .app-header__logo {
-    width: 52px;
-    height: 52px;
+    width: 46px;
+    height: 46px;
     border-radius: 14px;
   }
 
-  .app-header__session {
-    justify-content: flex-start;
+  .app-header__title {
+    font-size: clamp(1.4rem, 8vw, 1.95rem);
+  }
+
+  .app-header__subtitle {
+    font-size: 0.95rem;
+  }
+
+  .app-header__session,
+  .app-header__account {
+    width: 100%;
   }
 
   .app-header__account,
@@ -1175,8 +1315,13 @@ dt {
     width: 100%;
   }
 
+  .app-header__account-trigger {
+    min-width: 0;
+    padding: 10px 12px;
+  }
+
   .app-header__account-modal-backdrop {
-    padding: 16px;
+    padding: 12px;
   }
 
   .app-header__account-modal-top,
@@ -1194,6 +1339,28 @@ dt {
   .subform-card__header,
   .planning-followup-card__header {
     flex-direction: column;
+  }
+
+  .selection-row,
+  .switch-field,
+  .participant-chip,
+  .planning-progress__label,
+  .panel-card__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .inline-actions,
+  .form-actions,
+  .table-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .inline-actions > *,
+  .form-actions > *,
+  .table-actions > * {
+    width: 100%;
   }
 
   .file-card {
@@ -1216,12 +1383,29 @@ dt {
   }
 
   .data-table tr {
-    padding: 12px 0;
+    display: grid;
+    gap: 10px;
+    padding: 14px 0;
     border-bottom: 1px solid rgba(148, 163, 184, 0.2);
   }
 
   .data-table td {
-    padding: 6px 0;
+    display: grid;
+    gap: 4px;
+    padding: 0;
     border: 0;
+  }
+
+  .data-table td::before {
+    content: attr(data-label);
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .table-note {
+    margin-top: 2px;
   }
 }
