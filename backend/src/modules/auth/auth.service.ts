@@ -39,6 +39,10 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas.');
     }
 
+    if ((user.usuarioRoles?.length ?? 0) === 0) {
+      throw new UnauthorizedException('El usuario no tiene acceso habilitado.');
+    }
+
     return this.buildAuthResponse(user);
   }
 

@@ -9,6 +9,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
+import { EnableUserAccessDto } from './dto/enable-user-access.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
 
@@ -37,6 +38,14 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
   ) {
     return this.usersService.update(id, updateUserDto);
+  }
+
+  @Post(':id/enable-access')
+  enableAccess(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() enableUserAccessDto: EnableUserAccessDto,
+  ) {
+    return this.usersService.enableAccess(id, enableUserAccessDto);
   }
 
   @Delete(':id')

@@ -1,4 +1,7 @@
 export * from './acta.entity';
+export * from './categoria.entity';
+export * from './deportista-categoria.entity';
+export * from './deportista.entity';
 export * from './item.entity';
 export * from './menu-rol.entity';
 export * from './menu.entity';

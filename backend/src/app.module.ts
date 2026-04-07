@@ -5,7 +5,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import appConfig from './config/app.config';
 import { validateEnvironment } from './config/env.validation';
 import { typeOrmConfigFactory } from './database/typeorm.config';
+import { AthletesModule } from './modules/athletes/athletes.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { CategoriesModule } from './modules/categories/categories.module';
 import { HealthModule } from './modules/health/health.module';
 import { MeetingsModule } from './modules/meetings/meetings.module';
 import { MenusModule } from './modules/menus/menus.module';
@@ -25,6 +27,8 @@ import { AuthGuard } from './modules/auth/auth.guard';
       validate: validateEnvironment,
     }),
     TypeOrmModule.forRootAsync(typeOrmConfigFactory),
+    CategoriesModule,
+    AthletesModule,
     AuthModule,
     HealthModule,
     RolesModule,

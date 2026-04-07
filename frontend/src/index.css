@@ -725,6 +725,10 @@ dt {
   margin-top: 18px;
 }
 
+.form-actions {
+  margin-top: 24px;
+}
+
 .button {
   display: inline-flex;
   align-items: center;
@@ -801,6 +805,36 @@ dt {
   overflow-wrap: anywhere;
 }
 
+.meetings-table .meetings-table__date,
+.meetings-table .meetings-table__time {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.meetings-table .meetings-table__actions {
+  width: 190px;
+  white-space: nowrap;
+}
+
+.meetings-table .meetings-table__place {
+  min-width: 220px;
+}
+
+.meetings-table__time-range {
+  white-space: nowrap;
+}
+
+.meetings-table__actions-group {
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.meetings-table__actions-group > * {
+  flex: 0 0 auto;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -875,6 +909,150 @@ dt {
 
 .selection-row .form-field {
   flex: 1 1 280px;
+}
+
+.athlete-search-field {
+  min-width: min(420px, 100%);
+}
+
+.table-toolbar,
+.pagination-bar,
+.pagination-pages {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.table-toolbar,
+.pagination-bar {
+  align-items: center;
+  justify-content: space-between;
+}
+
+.table-toolbar {
+  margin: 18px 0 14px;
+}
+
+.pagination-bar {
+  margin-top: 18px;
+}
+
+.pagination-pages {
+  align-items: center;
+  justify-content: center;
+}
+
+.athlete-detail-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  width: 100%;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.athlete-detail-heading > * {
+  width: 100%;
+  min-width: 0;
+  justify-self: stretch;
+}
+
+.athlete-detail-heading__actions,
+.athlete-detail-heading__meta,
+.athlete-modal,
+.athlete-modal__form {
+  display: grid;
+  gap: 14px;
+}
+
+.athlete-detail-heading__top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 24px;
+  width: 100%;
+}
+
+.athlete-detail-heading__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+}
+
+.athlete-detail-heading__top h2 {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.athlete-detail-heading__title-row .pill {
+  flex-shrink: 0;
+}
+
+.athlete-detail-heading__meta {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.athlete-detail-heading__meta .form-field input,
+.athlete-detail-heading__meta .form-field textarea {
+  color: var(--text);
+  background: var(--interactive-surface-soft);
+  border-color: var(--interactive-border);
+  cursor: default;
+}
+
+.athlete-detail-heading__meta .form-field textarea {
+  resize: none;
+}
+
+.athlete-detail-heading__actions {
+  align-content: start;
+  justify-items: end;
+  min-width: 220px;
+}
+
+.athlete-detail-heading__actions .button {
+  width: min(220px, 100%);
+}
+
+.athlete-detail-heading__actions .pill {
+  justify-self: end;
+}
+
+.athlete-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(7, 7, 7, 0.56);
+  backdrop-filter: blur(8px);
+}
+
+.athlete-modal {
+  width: min(760px, 100%);
+  max-height: min(88dvh, 760px);
+  overflow-y: auto;
+  padding: 22px;
+  border: 1px solid var(--surface-border);
+  border-radius: 26px;
+  background: var(--surface);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow);
+}
+
+.athlete-modal__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
 }
 
 .tag-list {
@@ -1566,8 +1744,17 @@ dt {
   .stats-grid,
   .form-grid,
   .checkbox-grid,
-  .detail-grid {
+  .detail-grid,
+  .athlete-detail-heading__meta {
     grid-template-columns: 1fr;
+  }
+
+  .athlete-detail-heading__top {
+    grid-template-columns: 1fr;
+  }
+
+  .athlete-detail-heading__title-row {
+    flex-wrap: wrap;
   }
 
   .planning-area-grid,
@@ -1735,7 +1922,9 @@ dt {
   .switch-field,
   .participant-chip,
   .planning-progress__label,
-  .panel-card__header {
+  .panel-card__header,
+  .table-toolbar,
+  .pagination-bar {
     flex-direction: column;
     align-items: stretch;
   }
@@ -1768,6 +1957,26 @@ dt {
   .planning-item-modal {
     padding: 16px;
     border-radius: 20px;
+  }
+
+  .athlete-modal-backdrop {
+    padding: 12px;
+  }
+
+  .athlete-modal {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .athlete-modal__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .athlete-detail-heading__actions {
+    width: 100%;
+    justify-items: stretch;
+    min-width: 0;
   }
 
   .planning-item-modal__header {

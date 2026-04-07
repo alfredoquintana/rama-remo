@@ -3,12 +3,16 @@ import { StatusMessage } from './StatusMessage';
 import type { Role, UserPayload } from '../types/users';
 import { toTitleCaseLabel } from '../utils/text';
 
+type AccessSectionMode = 'optional' | 'required' | 'hidden';
+
 type UserFormProps = {
   roles: Role[];
   initialValues: UserPayload;
   submitLabel: string;
   isSubmitting: boolean;
   errorMessage?: string;
+  accessSectionMode?: AccessSectionMode;
+  disablePersonalFields?: boolean;
   onSubmit: (values: UserPayload) => Promise<void>;
 };
 
@@ -18,14 +22,20 @@ export function UserForm({
   submitLabel,
   isSubmitting,
   errorMessage,
+  accessSectionMode = 'required',
+  disablePersonalFields = false,
   onSubmit,
 }: UserFormProps) {
   const [values, setValues] = useState<UserPayload>(initialValues);
   const [localError, setLocalError] = useState('');
   const [pendingRoleId, setPendingRoleId] = useState('');
+  const [isAccessEnabled, setIsAccessEnabled] = useState(
+    accessSectionMode === 'required' ? true : initialValues.roleIds.length > 0,
+  );
 
   const selectedRoles = roles.filter((role) => values.roleIds.includes(role.idRol));
   const availableRoles = roles.filter((role) => !values.roleIds.includes(role.idRol));
+  const shouldShowRoles = accessSectionMode !== 'hidden' && isAccessEnabled;
   const currentPendingRoleId =
     pendingRoleId && availableRoles.some((role) => String(role.idRol) === pendingRoleId)
       ? pendingRoleId
@@ -44,6 +54,11 @@ export function UserForm({
 
   const handleRoleSelectChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setPendingRoleId(event.target.value);
+  };
+
+  const handleAccessToggle = (event: ChangeEvent<HTMLInputElement>) => {
+    setIsAccessEnabled(event.target.checked);
+    setLocalError('');
   };
 
   const handleAddRole = () => {
@@ -71,13 +86,16 @@ export function UserForm({
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (values.roleIds.length === 0) {
+    if (shouldShowRoles && values.roleIds.length === 0) {
       setLocalError('Debes seleccionar al menos un rol.');
       return;
     }
 
     setLocalError('');
-    await onSubmit(values);
+    await onSubmit({
+      ...values,
+      roleIds: shouldShowRoles ? values.roleIds : [],
+    });
   };
 
   return (
@@ -85,12 +103,18 @@ export function UserForm({
       <div className="form-grid">
         <label className="form-field">
           <span>RUT</span>
-          <input required value={values.rut} onChange={handleChange('rut')} />
+          <input
+            disabled={disablePersonalFields}
+            required
+            value={values.rut}
+            onChange={handleChange('rut')}
+          />
         </label>
 
         <label className="form-field">
           <span>Nombre</span>
           <input
+            disabled={disablePersonalFields}
             required
             value={values.nombre}
             onChange={handleChange('nombre')}
@@ -100,6 +124,7 @@ export function UserForm({
         <label className="form-field">
           <span>Teléfono</span>
           <input
+            disabled={disablePersonalFields}
             required
             value={values.telefono}
             onChange={handleChange('telefono')}
@@ -109,6 +134,7 @@ export function UserForm({
         <label className="form-field">
           <span>Fecha de nacimiento</span>
           <input
+            disabled={disablePersonalFields}
             required
             type="date"
             value={values.fechaNac}
@@ -119,6 +145,7 @@ export function UserForm({
         <label className="form-field form-field--full">
           <span>Dirección</span>
           <textarea
+            disabled={disablePersonalFields}
             required
             rows={3}
             value={values.direccion}
@@ -127,53 +154,73 @@ export function UserForm({
         </label>
       </div>
 
-      <fieldset className="form-section">
-        <legend>Roles</legend>
-        <div className="selection-row">
-          <label className="form-field">
-            <span>Selecciona un rol</span>
-            <select
+      {accessSectionMode === 'optional' ? (
+        <label className="switch-field">
+          <input checked={isAccessEnabled} type="checkbox" onChange={handleAccessToggle} />
+          <span>Habilitar acceso al sistema de inmediato</span>
+        </label>
+      ) : null}
+
+      {accessSectionMode === 'hidden' ? (
+        <p className="form-help">
+          Este usuario sigue registrado sin acceso. Si necesitas que inicie sesión,
+          usa la opción habilitar acceso.
+        </p>
+      ) : null}
+
+      {shouldShowRoles ? (
+        <fieldset className="form-section">
+          <legend>Roles</legend>
+          <div className="selection-row">
+            <label className="form-field">
+              <span>Selecciona un rol</span>
+              <select
+                disabled={availableRoles.length === 0}
+                value={currentPendingRoleId}
+                onChange={handleRoleSelectChange}
+              >
+                {availableRoles.length === 0 ? (
+                  <option value="">No quedan roles por agregar</option>
+                ) : (
+                  availableRoles.map((role) => (
+                    <option key={role.idRol} value={role.idRol}>
+                      {toTitleCaseLabel(role.nombre)}
+                    </option>
+                  ))
+                )}
+              </select>
+            </label>
+
+            <button
+              className="button button-secondary"
               disabled={availableRoles.length === 0}
-              value={currentPendingRoleId}
-              onChange={handleRoleSelectChange}
+              onClick={handleAddRole}
+              type="button"
             >
-              {availableRoles.length === 0 ? (
-                <option value="">No quedan roles por agregar</option>
-              ) : (
-                availableRoles.map((role) => (
-                  <option key={role.idRol} value={role.idRol}>
-                    {toTitleCaseLabel(role.nombre)}
-                  </option>
-                ))
-              )}
-            </select>
-          </label>
-
-          <button
-            className="button button-secondary"
-            disabled={availableRoles.length === 0}
-            onClick={handleAddRole}
-            type="button"
-          >
-            Agregar rol
-          </button>
-        </div>
-
-        {selectedRoles.length === 0 ? (
-          <p className="form-help">Aún no has seleccionado roles para este usuario.</p>
-        ) : (
-          <div className="tag-list">
-            {selectedRoles.map((role) => (
-              <div key={role.idRol} className="tag-chip">
-                <span>{toTitleCaseLabel(role.nombre)}</span>
-                <button onClick={() => handleRemoveRole(role.idRol)} type="button">
-                  Quitar
-                </button>
-              </div>
-            ))}
+              Agregar rol
+            </button>
           </div>
-        )}
-      </fieldset>
+
+          {selectedRoles.length === 0 ? (
+            <p className="form-help">Aún no has seleccionado roles para este usuario.</p>
+          ) : (
+            <div className="tag-list">
+              {selectedRoles.map((role) => (
+                <div key={role.idRol} className="tag-chip">
+                  <span>{toTitleCaseLabel(role.nombre)}</span>
+                  <button onClick={() => handleRemoveRole(role.idRol)} type="button">
+                    Quitar
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </fieldset>
+      ) : (
+        <p className="form-help">
+          El usuario quedará registrado como persona del club, pero sin acceso al sistema.
+        </p>
+      )}
 
       {localError ? <StatusMessage kind="error" message={localError} /> : null}
       {errorMessage ? <StatusMessage kind="error" message={errorMessage} /> : null}

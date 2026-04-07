@@ -41,9 +41,13 @@ export function UserCreatePage() {
 
     try {
       const createdUser = await createUser(values);
+      const message = createdUser.provisionalPassword
+        ? `Usuario creado correctamente. Clave provisoria para ${createdUser.rut}: ${createdUser.provisionalPassword}`
+        : 'Usuario creado correctamente sin acceso al sistema.';
+
       navigate('/usuarios', {
         state: {
-          message: `Usuario creado correctamente. Clave provisoria para ${createdUser.rut}: ${createdUser.provisionalPassword}`,
+          message,
         },
       });
     } catch (error) {
@@ -58,7 +62,7 @@ export function UserCreatePage() {
       <div className="page-heading">
         <div>
           <h2>Crear usuario</h2>
-          <p>Registra una nueva persona y asigna sus roles.</p>
+          <p>Registra una nueva persona y decide si tendrá acceso al sistema.</p>
         </div>
       </div>
 
@@ -73,6 +77,7 @@ export function UserCreatePage() {
         />
       ) : (
         <UserForm
+          accessSectionMode="optional"
           errorMessage={errorMessage}
           initialValues={initialValues}
           isSubmitting={isSubmitting}

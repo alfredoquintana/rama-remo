@@ -4,6 +4,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import {
   ActaEntity,
+  CategoriaEntity,
+  DeportistaCategoriaEntity,
+  DeportistaEntity,
   EstadoPlanAnual,
   EstadoPlanItem,
   EstadoReunion,
@@ -23,6 +26,10 @@ import {
   UsuarioRolEntity,
 } from '../../database/entities';
 import { hashPassword } from '../auth/password.util';
+import {
+  buildClubAthleteSeedUsers,
+  CATEGORY_SEED_DEFINITIONS,
+} from './athlete-seed.data';
 
 const ROLE_NAMES = [
   'admin',
@@ -43,6 +50,17 @@ const MANAGEMENT_ROLE_NAMES = [
   'secretario',
   'tesorero',
   'director',
+] as const;
+
+const SPORTS_MENU_ROLE_NAMES = [
+  'admin',
+  'presidente',
+  'vicepresidente',
+  'secretario',
+  'tesorero',
+  'director',
+  'deportista',
+  'entrenador',
 ] as const;
 
 const DEMO_USERS = [
@@ -96,6 +114,8 @@ const DEMO_USERS = [
   },
 ] as const;
 
+const CLUB_ATHLETE_CATEGORY_START_DATE = '2026-03-01';
+
 @Injectable()
 export class SeedService implements OnApplicationBootstrap {
   private readonly logger = new Logger(SeedService.name);
@@ -104,6 +124,8 @@ export class SeedService implements OnApplicationBootstrap {
     private readonly configService: ConfigService,
     @InjectRepository(RolEntity)
     private readonly rolesRepository: Repository<RolEntity>,
+    @InjectRepository(CategoriaEntity)
+    private readonly categoriesRepository: Repository<CategoriaEntity>,
     @InjectRepository(MenuEntity)
     private readonly menusRepository: Repository<MenuEntity>,
     @InjectRepository(ItemEntity)
@@ -114,6 +136,10 @@ export class SeedService implements OnApplicationBootstrap {
     private readonly usersRepository: Repository<UsuarioEntity>,
     @InjectRepository(UsuarioRolEntity)
     private readonly userRolesRepository: Repository<UsuarioRolEntity>,
+    @InjectRepository(DeportistaEntity)
+    private readonly athletesRepository: Repository<DeportistaEntity>,
+    @InjectRepository(DeportistaCategoriaEntity)
+    private readonly athleteCategoriesRepository: Repository<DeportistaCategoriaEntity>,
     @InjectRepository(ReunionEntity)
     private readonly meetingsRepository: Repository<ReunionEntity>,
     @InjectRepository(ParticipanteReunionEntity)
@@ -132,8 +158,10 @@ export class SeedService implements OnApplicationBootstrap {
 
   async onApplicationBootstrap() {
     await this.seedRoles();
+    await this.seedCategories();
     await this.seedMenus();
     const seededUsers = await this.seedUsers();
+    await this.seedClubAthletes();
     await this.seedDemoMeetings(seededUsers);
     await this.seedDemoPlanning(seededUsers);
   }
@@ -145,9 +173,35 @@ export class SeedService implements OnApplicationBootstrap {
     );
   }
 
+  private async seedCategories() {
+    const existingCategories = await this.categoriesRepository.find();
+    const existingCategoryByName = new Map(
+      existingCategories.map(
+        (category) => [category.nombre, category] as const,
+      ),
+    );
+
+    await this.categoriesRepository.save(
+      CATEGORY_SEED_DEFINITIONS.map((categoryDefinition) => {
+        const existingCategory = existingCategoryByName.get(
+          categoryDefinition.nombre,
+        );
+
+        return this.categoriesRepository.create({
+          idCategoria: existingCategory?.idCategoria,
+          ...categoryDefinition,
+        });
+      }),
+    );
+    this.logger.log('Categorías deportivas listas.');
+  }
+
   private async seedMenus() {
     const inicioMenu = await this.ensureMenu('Inicio', ['Inicio']);
     const usuariosMenu = await this.ensureMenu('Usuarios', ['Usuarios']);
+    const deportistasMenu = await this.ensureMenu('Deportistas', [
+      'Deportistas',
+    ]);
     const reunionesMenu = await this.ensureMenu('Reuniones', ['Reuniones']);
     const planificacionMenu = await this.ensureMenu('Planificación', [
       'Planificación',
@@ -166,6 +220,16 @@ export class SeedService implements OnApplicationBootstrap {
       'Crear usuario',
       '/usuarios/nuevo',
       usuariosMenu.idMenu,
+    );
+    await this.ensureItem(
+      'Listado de deportistas',
+      '/deportistas',
+      deportistasMenu.idMenu,
+    );
+    await this.ensureItem(
+      'Registrar deportista',
+      '/deportistas/nuevo',
+      deportistasMenu.idMenu,
     );
     await this.ensureItem(
       'Listado de reuniones',
@@ -222,6 +286,17 @@ export class SeedService implements OnApplicationBootstrap {
       }
     }
 
+    for (const roleName of SPORTS_MENU_ROLE_NAMES) {
+      const role = roleByName.get(roleName);
+
+      if (role) {
+        menuRoles.push({
+          idMenu: deportistasMenu.idMenu,
+          idRol: role.idRol,
+        } as MenuRolEntity);
+      }
+    }
+
     await this.menuRolesRepository.upsert(menuRoles, ['idMenu', 'idRol']);
     this.logger.log('Catálogo base aplicado.');
   }
@@ -239,8 +314,9 @@ export class SeedService implements OnApplicationBootstrap {
       'app.defaultUserPassword',
       'remo1234',
     );
+    const clubAthletes = buildClubAthleteSeedUsers();
 
-    const usersToUpsert = DEMO_USERS.map((user) => ({
+    const demoUsersToUpsert = DEMO_USERS.map((user) => ({
       rut: user.rut,
       nombre: user.rut === adminRut ? 'Alejandro Muñoz' : user.nombre,
       telefono: user.telefono,
@@ -251,7 +327,16 @@ export class SeedService implements OnApplicationBootstrap {
       ),
     }));
 
-    await this.usersRepository.upsert(usersToUpsert, ['rut']);
+    const athleteUsersToUpsert = clubAthletes.map((user) => ({
+      rut: user.rut,
+      nombre: user.nombre,
+      telefono: user.telefono,
+      fechaNac: user.fechaNac,
+      direccion: user.direccion,
+    }));
+
+    await this.usersRepository.upsert(demoUsersToUpsert, ['rut']);
+    await this.usersRepository.upsert(athleteUsersToUpsert, ['rut']);
 
     const users = await this.usersRepository.findBy({
       rut: In(DEMO_USERS.map((user) => user.rut)),
@@ -270,13 +355,12 @@ export class SeedService implements OnApplicationBootstrap {
 
     const userRoles = DEMO_USERS.flatMap((user) => {
       const currentUser = userByRut.get(user.rut);
-      const roleNames = [...user.roles] as string[];
 
       if (!currentUser) {
         return [];
       }
 
-      return roleNames
+      return [...user.roles]
         .map((roleName) => roleByName.get(roleName))
         .filter((role): role is RolEntity => Boolean(role))
         .map((role) =>
@@ -288,8 +372,85 @@ export class SeedService implements OnApplicationBootstrap {
     });
 
     await this.userRolesRepository.save(userRoles);
-    this.logger.log(`Usuarios demo listos: ${users.length}`);
+    this.logger.log(
+      `Usuarios base listos: ${users.length}. Personas del club: ${clubAthletes.length}.`,
+    );
+
     return userByRut;
+  }
+
+  private async seedClubAthletes() {
+    const clubAthletes = buildClubAthleteSeedUsers();
+    const athleteUsers = await this.usersRepository.findBy({
+      rut: In(clubAthletes.map((athlete) => athlete.rut)),
+    });
+    const userByRut = new Map(
+      athleteUsers.map((user) => [user.rut, user] as const),
+    );
+    const categories = await this.categoriesRepository.find();
+    const categoryByName = new Map(
+      categories.map((category) => [category.nombre, category] as const),
+    );
+
+    const existingAthletes = await this.athletesRepository.findBy({
+      idUsuario: In(athleteUsers.map((user) => user.idUsuario)),
+    });
+    const existingAthleteByUserId = new Map(
+      existingAthletes.map((athlete) => [athlete.idUsuario, athlete] as const),
+    );
+
+    await this.athletesRepository.save(
+      athleteUsers.map((user) => {
+        const existingAthlete = existingAthleteByUserId.get(user.idUsuario);
+
+        return this.athletesRepository.create({
+          idDeportista: existingAthlete?.idDeportista,
+          idUsuario: user.idUsuario,
+          activo: true,
+        });
+      }),
+    );
+
+    const athletes = await this.athletesRepository.findBy({
+      idUsuario: In(athleteUsers.map((user) => user.idUsuario)),
+    });
+    const athleteByUserId = new Map(
+      athletes.map((athlete) => [athlete.idUsuario, athlete] as const),
+    );
+
+    if (athletes.length > 0) {
+      await this.athleteCategoriesRepository.delete({
+        idDeportista: In(athletes.map((athlete) => athlete.idDeportista)),
+      });
+    }
+
+    const assignments = clubAthletes.flatMap((athleteSeed) => {
+      const user = userByRut.get(athleteSeed.rut);
+      const athlete = user ? athleteByUserId.get(user.idUsuario) : null;
+      const category = categoryByName.get(athleteSeed.categoryName);
+
+      if (!user || !athlete || !category) {
+        return [];
+      }
+
+      return this.athleteCategoriesRepository.create({
+        idDeportista: athlete.idDeportista,
+        idCategoria: category.idCategoria,
+        fechaDesde: CLUB_ATHLETE_CATEGORY_START_DATE,
+        fechaHasta: null,
+        vigente: true,
+      });
+    });
+
+    await this.athleteCategoriesRepository.save(assignments);
+
+    const masterCount = clubAthletes.filter(
+      (athlete) => athlete.categoryName === 'Master',
+    ).length;
+
+    this.logger.log(
+      `Deportistas demo listos: ${assignments.length}. Master: ${masterCount}.`,
+    );
   }
 
   private async seedDemoMeetings(userByRut: Map<string, UsuarioEntity>) {

@@ -10,6 +10,7 @@ export type User = {
   telefono: string;
   fechaNac: string;
   direccion: string;
+  accesoHabilitado: boolean;
   roles: Role[];
   roleIds: number[];
 };
@@ -24,5 +25,9 @@ export type UserPayload = {
 };
 
 export type UserCreatedResponse = User & {
-  provisionalPassword: string;
+  provisionalPassword: string | null;
+};
+
+export type EnableUserAccessPayload = {
+  roleIds: number[];
 };

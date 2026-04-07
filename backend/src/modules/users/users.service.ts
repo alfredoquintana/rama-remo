@@ -13,6 +13,7 @@ import {
 } from '../../database/entities';
 import { hashPassword } from '../auth/password.util';
 import { CreateUserDto } from './dto/create-user.dto';
+import { EnableUserAccessDto } from './dto/enable-user-access.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
@@ -61,11 +62,13 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto) {
-    const roles = await this.loadRoles(createUserDto.roleIds);
-    const provisionalPassword = this.configService.get<string>(
-      'app.defaultUserPassword',
-      'remo1234',
-    );
+    const roles = createUserDto.roleIds?.length
+      ? await this.loadRoles(createUserDto.roleIds)
+      : [];
+    const provisionalPassword =
+      roles.length > 0
+        ? this.configService.get<string>('app.defaultUserPassword', 'remo1234')
+        : null;
 
     try {
       const userId = await this.dataSource.transaction(async (manager) => {
@@ -79,18 +82,22 @@ export class UsersService {
             telefono: createUserDto.telefono,
             fechaNac: createUserDto.fechaNac,
             direccion: createUserDto.direccion,
-            claveHash: hashPassword(provisionalPassword),
+            claveHash: provisionalPassword
+              ? hashPassword(provisionalPassword)
+              : null,
           }),
         );
 
-        await userRoleRepository.save(
-          roles.map((role) =>
-            userRoleRepository.create({
-              idUsuario: user.idUsuario,
-              idRol: role.idRol,
-            }),
-          ),
-        );
+        if (roles.length > 0) {
+          await userRoleRepository.save(
+            roles.map((role) =>
+              userRoleRepository.create({
+                idUsuario: user.idUsuario,
+                idRol: role.idRol,
+              }),
+            ),
+          );
+        }
 
         return user.idUsuario;
       });
@@ -107,17 +114,17 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    const existingUser = await this.usersRepository.findOne({
-      where: { idUsuario: id },
-    });
+    const existingUser = await this.findUserWithAccessState(id);
 
     if (!existingUser) {
       throw new NotFoundException('Usuario no encontrado.');
     }
 
-    const roles = updateUserDto.roleIds
-      ? await this.loadRoles(updateUserDto.roleIds)
-      : null;
+    const hasAccess = this.hasAccessEnabled(existingUser);
+    const roles =
+      updateUserDto.roleIds !== undefined
+        ? await this.resolveRolesForUpdate(updateUserDto.roleIds, hasAccess)
+        : null;
 
     try {
       await this.dataSource.transaction(async (manager) => {
@@ -126,12 +133,13 @@ export class UsersService {
 
         await userRepository.save(
           userRepository.create({
-            ...existingUser,
+            idUsuario: existingUser.idUsuario,
             rut: updateUserDto.rut ?? existingUser.rut,
             nombre: updateUserDto.nombre ?? existingUser.nombre,
             telefono: updateUserDto.telefono ?? existingUser.telefono,
             fechaNac: updateUserDto.fechaNac ?? existingUser.fechaNac,
             direccion: updateUserDto.direccion ?? existingUser.direccion,
+            claveHash: existingUser.claveHash ?? null,
           }),
         );
 
@@ -155,6 +163,53 @@ export class UsersService {
     } catch (error) {
       this.handleDuplicateUser(error);
     }
+  }
+
+  async enableAccess(id: number, enableUserAccessDto: EnableUserAccessDto) {
+    const existingUser = await this.findUserWithAccessState(id);
+
+    if (!existingUser) {
+      throw new NotFoundException('Usuario no encontrado.');
+    }
+
+    if (this.hasAccessEnabled(existingUser)) {
+      throw new ConflictException('El usuario ya tiene acceso habilitado.');
+    }
+
+    const roles = await this.loadRoles(enableUserAccessDto.roleIds);
+    const provisionalPassword = this.configService.get<string>(
+      'app.defaultUserPassword',
+      'remo1234',
+    );
+
+    await this.dataSource.transaction(async (manager) => {
+      const userRepository = manager.getRepository(UsuarioEntity);
+      const userRoleRepository = manager.getRepository(UsuarioRolEntity);
+
+      await userRepository.save(
+        userRepository.create({
+          idUsuario: id,
+          claveHash: hashPassword(provisionalPassword),
+        }),
+      );
+
+      await userRoleRepository.delete({ idUsuario: id });
+      await userRoleRepository.save(
+        roles.map((role) =>
+          userRoleRepository.create({
+            idUsuario: id,
+            idRol: role.idRol,
+          }),
+        ),
+      );
+    });
+
+    const updatedUser = await this.findOne(id);
+
+    return {
+      ...updatedUser,
+      provisionalPassword,
+    };
   }
 
   async delete(id: number) {
@@ -230,9 +285,56 @@ export class UsersService {
       telefono: user.telefono,
       fechaNac: user.fechaNac,
       direccion: user.direccion,
+      accesoHabilitado: roles.length > 0,
       roles,
       roleIds: roles.map((rol) => rol.idRol),
     };
+  }
+
+  private async findUserWithAccessState(id: number) {
+    return this.usersRepository.findOne({
+      where: { idUsuario: id },
+      select: {
+        idUsuario: true,
+        rut: true,
+        nombre: true,
+        telefono: true,
+        fechaNac: true,
+        direccion: true,
+        claveHash: true,
+      },
+      relations: {
+        usuarioRoles: {
+          rol: true,
+        },
+      },
+    });
+  }
+
+  private hasAccessEnabled(
+    user: UsuarioEntity & { claveHash?: string | null },
+  ) {
+    return Boolean(user.claveHash) || (user.usuarioRoles?.length ?? 0) > 0;
+  }
+
+  private async resolveRolesForUpdate(roleIds: number[], hasAccess: boolean) {
+    if (roleIds.length === 0) {
+      if (hasAccess) {
+        throw new ConflictException(
+          'No se puede dejar sin roles a un usuario con acceso habilitado.',
+        );
+      }
+
+      return [];
+    }
+
+    if (!hasAccess) {
+      throw new ConflictException(
+        'Para asignar roles a un usuario sin acceso debes usar la opción habilitar acceso.',
+      );
+    }
+
+    return this.loadRoles(roleIds);
   }
 
   private handleDuplicateUser(error: unknown): never {
