@@ -8,6 +8,7 @@ import { typeOrmConfigFactory } from './database/typeorm.config';
 import { AthletesModule } from './modules/athletes/athletes.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CategoriesModule } from './modules/categories/categories.module';
+import { FleetModule } from './modules/fleet/fleet.module';
 import { HealthModule } from './modules/health/health.module';
 import { MeetingsModule } from './modules/meetings/meetings.module';
 import { MenusModule } from './modules/menus/menus.module';
@@ -28,6 +29,7 @@ import { AuthGuard } from './modules/auth/auth.guard';
     }),
     TypeOrmModule.forRootAsync(typeOrmConfigFactory),
     CategoriesModule,
+    FleetModule,
     AthletesModule,
     AuthModule,
     HealthModule,
