@@ -31,7 +31,7 @@ export function LoginPage() {
     setErrorMessage('');
 
     try {
-      await login({ rut, password });
+      await login({ rut: rut.trim(), password });
       navigate(nextPath, { replace: true });
     } catch (error) {
       setErrorMessage((error as Error).message);
@@ -45,14 +45,20 @@ export function LoginPage() {
       <form className="auth-card" onSubmit={handleSubmit}>
         <div className="auth-card__intro">
           <img alt="Rudern" className="auth-card__logo" src="/rudern-icon.jpeg" />
-          <h2>Iniciar sesion</h2>
+          <span className="auth-card__eyebrow">Acceso interno</span>
+          <h2>Sistema Rama de Remo</h2>
+          <p className="auth-card__text">
+            Ingresa con tu RUT y clave para gestionar usuarios, reuniones y
+            planificacion anual.
+          </p>
         </div>
 
         <label className="form-field">
+          <span>RUT</span>
           <input
             aria-label="RUT"
             autoComplete="username"
-            placeholder="RUT"
+            placeholder="11111111-1"
             required
             value={rut}
             onChange={(event) => setRut(event.target.value)}
@@ -60,10 +66,11 @@ export function LoginPage() {
         </label>
 
         <label className="form-field">
+          <span>Clave</span>
           <input
-            aria-label="Contrasena"
+            aria-label="Clave"
             autoComplete="current-password"
-            placeholder="Contrasena"
+            placeholder="Tu clave"
             required
             type="password"
             value={password}
@@ -76,6 +83,11 @@ export function LoginPage() {
         <button className="button button-primary" disabled={isSubmitting} type="submit">
           {isSubmitting ? 'Ingresando...' : 'Entrar'}
         </button>
+
+        <p className="auth-card__hint">
+          Si estas usando credenciales demo, entra con el RUT y clave entregados para la
+          presentacion.
+        </p>
       </form>
     </section>
   );

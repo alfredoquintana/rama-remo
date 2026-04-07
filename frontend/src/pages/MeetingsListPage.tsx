@@ -59,7 +59,7 @@ export function MeetingsListPage() {
       <div className="page-heading">
         <div>
           <h2>Reuniones</h2>
-          <p>Control de agenda, participantes y actas de la directiva.</p>
+          <p>Controla agenda, participantes y actas de la directiva.</p>
         </div>
         <Link className="button button-primary" to="/reuniones/nueva">
           Crear reunion

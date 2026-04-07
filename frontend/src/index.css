@@ -152,6 +152,15 @@ select {
   font: inherit;
 }
 
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--secondary) 72%, white 28%);
+  outline-offset: 3px;
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -626,10 +635,17 @@ dt {
   justify-content: space-between;
   gap: 16px;
   align-items: flex-start;
+  padding: 22px 24px;
+  border: 1px solid var(--surface-border);
+  border-radius: 24px;
+  background: var(--surface);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow);
 }
 
 .page-heading h2 {
   color: var(--page-heading-text);
+  margin-bottom: 4px;
 }
 
 .page-heading p {
@@ -718,6 +734,7 @@ dt {
   border: 1px solid transparent;
   border-radius: 12px;
   cursor: pointer;
+  box-shadow: 0 10px 24px rgba(24, 24, 24, 0.08);
   transition:
     transform 120ms ease,
     background-color 120ms ease,
@@ -810,6 +827,17 @@ dt {
   border-radius: 12px;
   background: var(--surface-strong);
   color: var(--text);
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    background-color 120ms ease;
+}
+
+.form-field input:focus,
+.form-field textarea:focus,
+.form-field select:focus {
+  border-color: rgba(179, 18, 23, 0.34);
+  box-shadow: 0 0 0 4px rgba(255, 208, 77, 0.22);
 }
 
 .form-help {
@@ -1384,18 +1412,23 @@ dt {
 }
 
 .status-message {
+  display: grid;
+  gap: 4px;
   padding: 14px 16px;
+  border: 1px solid transparent;
   border-radius: 14px;
   font-weight: 500;
 }
 
 .status-message.success {
   background: var(--success-soft);
+  border-color: rgba(168, 121, 0, 0.18);
   color: var(--success);
 }
 
 .status-message.error {
   background: var(--danger-soft);
+  border-color: rgba(179, 18, 23, 0.18);
   color: var(--danger);
 }
 
@@ -1462,12 +1495,12 @@ dt {
 }
 
 .auth-card {
-  width: min(460px, 100%);
+  width: min(520px, 100%);
   display: grid;
-  gap: 18px;
-  padding: 28px;
+  gap: 20px;
+  padding: 32px 30px;
   border: 1px solid var(--surface-border);
-  border-radius: 24px;
+  border-radius: 28px;
   background: var(--surface);
   backdrop-filter: blur(14px);
   box-shadow: var(--shadow);
@@ -1476,18 +1509,35 @@ dt {
 .auth-card__intro {
   display: grid;
   justify-items: center;
-  gap: 14px;
+  gap: 10px;
   text-align: center;
 }
 
 .auth-card__logo {
-  width: 150px;
-  height: 150px;
+  width: 96px;
+  height: 96px;
   object-fit: cover;
-  border-radius: 16px;
+  border-radius: 22px;
   background: #fff;
   border: 1px solid var(--surface-border);
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.1);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
+}
+
+.auth-card__eyebrow {
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.auth-card__text,
+.auth-card__hint {
+  color: var(--muted);
+}
+
+.auth-card__hint {
+  font-size: 0.92rem;
 }
 
 .auth-card__intro h2 {
@@ -1611,6 +1661,7 @@ dt {
 
   .page-heading {
     flex-direction: column;
+    padding: 18px;
   }
 
   .page-heading > .button,
@@ -1669,8 +1720,8 @@ dt {
   }
 
   .auth-card__logo {
-    width: 50px;
-    height: 50px;
+    width: 72px;
+    height: 72px;
   }
 
   .planning-item-card__header,

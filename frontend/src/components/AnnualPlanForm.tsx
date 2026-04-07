@@ -81,6 +81,7 @@ export function AnnualPlanForm({
 
     const anio = Number(values.anio);
     const nombre = values.nombre.trim();
+    const objetivoGeneral = values.objetivoGeneral.trim();
     const normalizedAreas = values.areas
       .map((area) => ({
         idAreaPlan: area.idAreaPlan,
@@ -89,13 +90,13 @@ export function AnnualPlanForm({
       }))
       .filter((area) => area.nombre || area.descripcion);
 
-    if (!anio) {
-      setLocalError('Debes indicar un año válido para el plan.');
+    if (!Number.isInteger(anio)) {
+      setLocalError('Debes indicar un ano valido para el plan.');
       return;
     }
 
     if (anio < 2000 || anio > 2100) {
-      setLocalError('El año debe estar entre 2000 y 2100.');
+      setLocalError('El ano debe estar entre 2000 y 2100.');
       return;
     }
 
@@ -104,20 +105,25 @@ export function AnnualPlanForm({
       return;
     }
 
+    if (!objetivoGeneral) {
+      setLocalError('Debes ingresar el objetivo general del plan.');
+      return;
+    }
+
     if (normalizedAreas.length === 0) {
-      setLocalError('Debes agregar al menos un área para ordenar la planificación.');
+      setLocalError('Debes agregar al menos un area para ordenar la planificacion.');
       return;
     }
 
     if (normalizedAreas.some((area) => !area.nombre)) {
-      setLocalError('Todas las áreas deben tener nombre.');
+      setLocalError('Todas las areas deben tener nombre.');
       return;
     }
 
     const normalizedNames = normalizedAreas.map((area) => area.nombre.toLowerCase());
 
     if (new Set(normalizedNames).size !== normalizedNames.length) {
-      setLocalError('No puedes repetir nombres de áreas dentro del mismo plan.');
+      setLocalError('No puedes repetir nombres de areas dentro del mismo plan.');
       return;
     }
 
@@ -127,7 +133,7 @@ export function AnnualPlanForm({
       anio,
       nombre,
       estado: values.estado,
-      objetivoGeneral: values.objetivoGeneral.trim() || undefined,
+      objetivoGeneral,
       areas: normalizedAreas.map((area, index) => ({
         idAreaPlan: area.idAreaPlan,
         nombre: area.nombre,
@@ -141,7 +147,7 @@ export function AnnualPlanForm({
     <form className="form-card" onSubmit={handleSubmit}>
       <div className="form-grid">
         <label className="form-field">
-          <span>Año</span>
+          <span>Ano</span>
           <input
             required
             max="2100"
@@ -175,6 +181,7 @@ export function AnnualPlanForm({
         <label className="form-field form-field--full">
           <span>Objetivo general</span>
           <textarea
+            required
             rows={4}
             value={values.objetivoGeneral}
             onChange={handleChange('objetivoGeneral')}
@@ -184,13 +191,13 @@ export function AnnualPlanForm({
 
       <fieldset className="form-section">
         <div className="section-heading">
-        <legend>Áreas del plan</legend>
+          <legend>Areas del plan</legend>
           <button
             className="button button-secondary button-small"
             onClick={addArea}
             type="button"
           >
-            Agregar área
+            Agregar area
           </button>
         </div>
 
@@ -198,7 +205,7 @@ export function AnnualPlanForm({
           {values.areas.map((area, index) => (
             <div key={area.idAreaPlan ?? `new-${index}`} className="subform-card">
               <div className="subform-card__header">
-                <strong>Área {index + 1}</strong>
+                <strong>Area {index + 1}</strong>
                 <button
                   className="button button-secondary button-small"
                   disabled={values.areas.length === 1}
@@ -220,7 +227,7 @@ export function AnnualPlanForm({
                 </label>
 
                 <label className="form-field">
-                  <span>Descripción</span>
+                  <span>Descripcion</span>
                   <input
                     value={area.descripcion}
                     onChange={handleAreaChange(index, 'descripcion')}

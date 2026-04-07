@@ -101,6 +101,14 @@ export class PlanningService {
   }
 
   async create(createPlanDto: CreatePlanDto) {
+    const planName = this.normalizeRequiredText(
+      createPlanDto.nombre,
+      'Debes ingresar un nombre para el plan.',
+    );
+    const objective = this.normalizeRequiredText(
+      createPlanDto.objetivoGeneral,
+      'Debes ingresar el objetivo general del plan.',
+    );
     const normalizedAreas = this.normalizeAreas(createPlanDto.areas);
 
     try {
@@ -111,9 +119,9 @@ export class PlanningService {
         const plan = await annualPlansRepository.save(
           annualPlansRepository.create({
             anio: createPlanDto.anio,
-            nombre: createPlanDto.nombre.trim(),
+            nombre: planName,
             estado: createPlanDto.estado,
-            objetivoGeneral: createPlanDto.objetivoGeneral?.trim() || null,
+            objetivoGeneral: objective,
           }),
         );
 
@@ -146,6 +154,20 @@ export class PlanningService {
       throw new NotFoundException('Plan anual no encontrado.');
     }
 
+    const nextName =
+      updatePlanDto.nombre !== undefined
+        ? this.normalizeRequiredText(
+            updatePlanDto.nombre,
+            'Debes ingresar un nombre para el plan.',
+          )
+        : currentPlan.nombre;
+    const nextObjective =
+      updatePlanDto.objetivoGeneral !== undefined
+        ? this.normalizeRequiredText(
+            updatePlanDto.objetivoGeneral,
+            'Debes ingresar el objetivo general del plan.',
+          )
+        : currentPlan.objetivoGeneral;
     const normalizedAreas = updatePlanDto.areas
       ? this.normalizeAreas(updatePlanDto.areas)
       : null;
@@ -159,12 +181,9 @@ export class PlanningService {
           annualPlansRepository.create({
             ...currentPlan,
             anio: updatePlanDto.anio ?? currentPlan.anio,
-            nombre: updatePlanDto.nombre?.trim() ?? currentPlan.nombre,
+            nombre: nextName,
             estado: updatePlanDto.estado ?? currentPlan.estado,
-            objetivoGeneral:
-              updatePlanDto.objetivoGeneral !== undefined
-                ? updatePlanDto.objetivoGeneral.trim() || null
-                : currentPlan.objetivoGeneral,
+            objetivoGeneral: nextObjective,
           }),
         );
 
@@ -199,15 +218,27 @@ export class PlanningService {
     await this.ensurePlanExists(planId);
     await this.ensureAreaBelongsToPlan(planId, createPlanItemDto.idAreaPlan);
     await this.ensureUserExistsIfNeeded(createPlanItemDto.idResponsable);
+    const titulo = this.normalizeRequiredText(
+      createPlanItemDto.titulo,
+      'Debes ingresar un titulo para el item.',
+    );
+    const descripcion = this.normalizeRequiredText(
+      createPlanItemDto.descripcion,
+      'Debes ingresar una descripcion para el item.',
+    );
+    const resultadoEsperado = this.normalizeRequiredText(
+      createPlanItemDto.resultadoEsperado,
+      'Debes ingresar el resultado esperado del item.',
+    );
 
     const item = await this.planItemsRepository.save(
       this.planItemsRepository.create({
         idPlanAnual: planId,
         idAreaPlan: createPlanItemDto.idAreaPlan,
         idResponsable: createPlanItemDto.idResponsable ?? null,
-        titulo: createPlanItemDto.titulo.trim(),
-        descripcion: createPlanItemDto.descripcion.trim(),
-        resultadoEsperado: createPlanItemDto.resultadoEsperado.trim(),
+        titulo,
+        descripcion,
+        resultadoEsperado,
         prioridad: createPlanItemDto.prioridad,
         estado: createPlanItemDto.estado,
         fechaPlanificada: createPlanItemDto.fechaPlanificada,
@@ -227,10 +258,31 @@ export class PlanningService {
     });
 
     if (!currentItem) {
-      throw new NotFoundException('Ítem de planificación no encontrado.');
+      throw new NotFoundException('Item de planificacion no encontrado.');
     }
 
     const nextAreaId = updatePlanItemDto.idAreaPlan ?? currentItem.idAreaPlan;
+    const nextTitle =
+      updatePlanItemDto.titulo !== undefined
+        ? this.normalizeRequiredText(
+            updatePlanItemDto.titulo,
+            'Debes ingresar un titulo para el item.',
+          )
+        : currentItem.titulo;
+    const nextDescription =
+      updatePlanItemDto.descripcion !== undefined
+        ? this.normalizeRequiredText(
+            updatePlanItemDto.descripcion,
+            'Debes ingresar una descripcion para el item.',
+          )
+        : currentItem.descripcion;
+    const nextExpectedResult =
+      updatePlanItemDto.resultadoEsperado !== undefined
+        ? this.normalizeRequiredText(
+            updatePlanItemDto.resultadoEsperado,
+            'Debes ingresar el resultado esperado del item.',
+          )
+        : currentItem.resultadoEsperado;
 
     await this.ensureAreaBelongsToPlan(currentItem.idPlanAnual, nextAreaId);
     await this.ensureUserExistsIfNeeded(updatePlanItemDto.idResponsable);
@@ -243,12 +295,9 @@ export class PlanningService {
           updatePlanItemDto.idResponsable !== undefined
             ? updatePlanItemDto.idResponsable
             : currentItem.idResponsable,
-        titulo: updatePlanItemDto.titulo?.trim() ?? currentItem.titulo,
-        descripcion:
-          updatePlanItemDto.descripcion?.trim() ?? currentItem.descripcion,
-        resultadoEsperado:
-          updatePlanItemDto.resultadoEsperado?.trim() ??
-          currentItem.resultadoEsperado,
+        titulo: nextTitle,
+        descripcion: nextDescription,
+        resultadoEsperado: nextExpectedResult,
         prioridad: updatePlanItemDto.prioridad ?? currentItem.prioridad,
         estado: updatePlanItemDto.estado ?? currentItem.estado,
         fechaPlanificada:
@@ -278,10 +327,14 @@ export class PlanningService {
     });
 
     if (!currentItem) {
-      throw new NotFoundException('Ítem de planificación no encontrado.');
+      throw new NotFoundException('Item de planificacion no encontrado.');
     }
 
     await this.ensureUserExists(actorUserId);
+    const comentario = this.normalizeRequiredText(
+      createPlanFollowupDto.comentario,
+      'Debes ingresar un comentario de seguimiento.',
+    );
 
     await this.dataSource.transaction(async (manager) => {
       const planItemsRepository = manager.getRepository(PlanItemEntity);
@@ -296,7 +349,7 @@ export class PlanningService {
           fechaSeguimiento: new Date(),
           estado: createPlanFollowupDto.estado,
           avancePorcentaje: createPlanFollowupDto.avancePorcentaje,
-          comentario: createPlanFollowupDto.comentario.trim(),
+          comentario,
           bloqueos: createPlanFollowupDto.bloqueos?.trim() || null,
           proximoPaso: createPlanFollowupDto.proximoPaso?.trim() || null,
           funcionoBien: createPlanFollowupDto.funcionoBien?.trim() || null,
@@ -324,7 +377,7 @@ export class PlanningService {
     });
 
     if (!item) {
-      throw new NotFoundException('Ítem de planificación no encontrado.');
+      throw new NotFoundException('Item de planificacion no encontrado.');
     }
 
     return this.findOne(item.idPlanAnual);
@@ -364,7 +417,7 @@ export class PlanningService {
       if (!nextAreaIds.has(area.idAreaPlan)) {
         if ((area.items?.length ?? 0) > 0) {
           throw new BadRequestException(
-            `No se puede quitar el área "${area.nombre}" porque ya tiene ítems asociados.`,
+            `No se puede quitar el area "${area.nombre}" porque ya tiene items asociados.`,
           );
         }
 
@@ -378,7 +431,7 @@ export class PlanningService {
 
         if (!currentArea || currentArea.idPlanAnual !== planId) {
           throw new BadRequestException(
-            'Una de las áreas no pertenece al plan.',
+            'Una de las areas no pertenece al plan.',
           );
         }
 
@@ -422,7 +475,7 @@ export class PlanningService {
 
     if (!area) {
       throw new NotFoundException(
-        'El área seleccionada no existe para este plan.',
+        'El area seleccionada no existe para este plan.',
       );
     }
   }
@@ -445,6 +498,19 @@ export class PlanningService {
     }
   }
 
+  private normalizeRequiredText(
+    value: string | null | undefined,
+    message: string,
+  ) {
+    const normalizedValue = value?.trim() ?? '';
+
+    if (!normalizedValue) {
+      throw new BadRequestException(message);
+    }
+
+    return normalizedValue;
+  }
+
   private normalizeAreas(
     areas: Array<{
       idAreaPlan?: number;
@@ -461,7 +527,7 @@ export class PlanningService {
     }));
 
     if (normalizedAreas.some((area) => !area.nombre)) {
-      throw new BadRequestException('Todas las áreas deben tener nombre.');
+      throw new BadRequestException('Todas las areas deben tener nombre.');
     }
 
     const seenNames = new Set<string>();
@@ -471,7 +537,7 @@ export class PlanningService {
 
       if (seenNames.has(normalizedName)) {
         throw new BadRequestException(
-          'No puedes repetir nombres de áreas dentro del mismo plan.',
+          'No puedes repetir nombres de areas dentro del mismo plan.',
         );
       }
 
@@ -517,8 +583,8 @@ export class PlanningService {
         cumplidoVsTotal: `${summary.cumplidos} de ${summary.totalItems} compromisos cerrados como cumplidos`,
         pendientesCriticos:
           summary.atrasados > 0
-            ? `${summary.atrasados} ítems están atrasados y requieren seguimiento`
-            : 'No hay ítems atrasados al día de hoy',
+            ? `${summary.atrasados} items estan atrasados y requieren seguimiento`
+            : 'No hay items atrasados al dia de hoy',
       },
     };
   }
@@ -650,7 +716,7 @@ export class PlanningService {
       driverError.code === 'ER_DUP_ENTRY'
     ) {
       throw new BadRequestException(
-        'Ya existe un plan anual o un área con esos datos.',
+        'Ya existe un plan anual o un area con esos datos.',
       );
     }
 

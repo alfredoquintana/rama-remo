@@ -105,7 +105,6 @@ export function AppHeader({
   onOpenMobileNav,
 }: AppHeaderProps) {
   const { logout, user } = useAuth();
-  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [photoMessage, setPhotoMessage] = useState('');
   const [photoMessageKind, setPhotoMessageKind] = useState<
     'success' | 'error' | null
@@ -114,25 +113,12 @@ export function AppHeader({
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const photoInputId = useId();
   const themeSelectId = useId();
+  const photoUrl = user ? getStoredUserPhoto(user.idUsuario) : null;
 
   useEffect(() => {
     document.documentElement.dataset.theme = themeId;
     setStoredTheme(themeId);
   }, [themeId]);
-
-  useEffect(() => {
-    if (!user) {
-      setPhotoUrl(null);
-      setPhotoMessage('');
-      setPhotoMessageKind(null);
-      setIsAccountModalOpen(false);
-      return;
-    }
-
-    setPhotoUrl(getStoredUserPhoto(user.idUsuario));
-    setPhotoMessage('');
-    setPhotoMessageKind(null);
-  }, [user]);
 
   useEffect(() => {
     if (!isAccountModalOpen) {
@@ -163,7 +149,7 @@ export function AppHeader({
     }
 
     if (!file.type.startsWith('image/')) {
-      setPhotoMessage('Selecciona un archivo de imagen valido.');
+      setPhotoMessage('Selecciona una imagen valida.');
       setPhotoMessageKind('error');
       event.target.value = '';
       return;
@@ -186,7 +172,6 @@ export function AppHeader({
       }
 
       setStoredUserPhoto(user.idUsuario, reader.result);
-      setPhotoUrl(reader.result);
       setPhotoMessage('Foto personal actualizada.');
       setPhotoMessageKind('success');
     };
@@ -206,7 +191,6 @@ export function AppHeader({
     }
 
     clearStoredUserPhoto(user.idUsuario);
-    setPhotoUrl(null);
     setPhotoMessage('Foto personal eliminada.');
     setPhotoMessageKind('success');
   };

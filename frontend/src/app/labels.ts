@@ -35,5 +35,5 @@ export const meetingStateLabels: Record<MeetingState, string> = {
 export const meetingModeLabels: Record<MeetingMode, string> = {
   presencial: 'Presencial',
   online: 'Online',
-  hibrida: 'Híbrida',
+  hibrida: 'Hibrida',
 };

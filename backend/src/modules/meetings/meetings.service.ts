@@ -79,17 +79,20 @@ export class MeetingsService {
     });
 
     if (!meeting) {
-      throw new NotFoundException('Reunión no encontrada.');
+      throw new NotFoundException('Reunion no encontrada.');
     }
 
     return this.mapMeetingDetail(meeting);
   }
 
   async create(createMeetingDto: CreateMeetingDto, actorUserId: number) {
+    const lugar = this.normalizeMeetingPlace(createMeetingDto.lugar);
+
     this.validateMeetingTimes(
       createMeetingDto.horaInicio,
       createMeetingDto.horaFin,
     );
+    this.ensureMeetingPlaceIsValid(lugar);
 
     const participantIds = this.uniqueIds(
       createMeetingDto.participantIds ?? [],
@@ -112,7 +115,7 @@ export class MeetingsService {
           fecha: createMeetingDto.fecha,
           horaInicio: createMeetingDto.horaInicio,
           horaFin: createMeetingDto.horaFin,
-          lugar: createMeetingDto.lugar,
+          lugar,
           estado: createMeetingDto.estado,
           modalidad: createMeetingDto.modalidad,
         }),
@@ -149,14 +152,19 @@ export class MeetingsService {
     });
 
     if (!currentMeeting) {
-      throw new NotFoundException('Reunión no encontrada.');
+      throw new NotFoundException('Reunion no encontrada.');
     }
 
     const nextHoraInicio =
       updateMeetingDto.horaInicio ?? currentMeeting.horaInicio;
     const nextHoraFin = updateMeetingDto.horaFin ?? currentMeeting.horaFin;
+    const nextLugar =
+      updateMeetingDto.lugar !== undefined
+        ? this.normalizeMeetingPlace(updateMeetingDto.lugar)
+        : currentMeeting.lugar;
 
     this.validateMeetingTimes(nextHoraInicio, nextHoraFin);
+    this.ensureMeetingPlaceIsValid(nextLugar);
 
     const participantIds =
       updateMeetingDto.participantIds !== undefined
@@ -184,7 +192,7 @@ export class MeetingsService {
           fecha: updateMeetingDto.fecha ?? currentMeeting.fecha,
           horaInicio: nextHoraInicio,
           horaFin: nextHoraFin,
-          lugar: updateMeetingDto.lugar ?? currentMeeting.lugar,
+          lugar: nextLugar,
           estado: updateMeetingDto.estado ?? currentMeeting.estado,
           modalidad: updateMeetingDto.modalidad ?? currentMeeting.modalidad,
         }),
@@ -217,18 +225,30 @@ export class MeetingsService {
     });
 
     if (!currentMeeting) {
-      throw new NotFoundException('Reunión no encontrada.');
+      throw new NotFoundException('Reunion no encontrada.');
     }
 
     await this.meetingsRepository.delete({ idReunion: id });
 
     return {
-      message: 'Reunión eliminada correctamente.',
+      message: 'Reunion eliminada correctamente.',
     };
   }
 
   private uniqueIds(ids: number[]) {
     return [...new Set(ids)];
+  }
+
+  private normalizeMeetingPlace(value: string) {
+    return value.trim();
+  }
+
+  private ensureMeetingPlaceIsValid(lugar: string) {
+    if (!lugar) {
+      throw new BadRequestException(
+        'Debes indicar el lugar o medio donde se realizara la reunion.',
+      );
+    }
   }
 
   private async ensureUsersExist(userIds: number[]) {
@@ -241,7 +261,7 @@ export class MeetingsService {
     });
 
     if (users.length !== userIds.length) {
-      throw new NotFoundException('Uno o más participantes no existen.');
+      throw new NotFoundException('Uno o mas participantes no existen.');
     }
   }
 
@@ -256,7 +276,7 @@ export class MeetingsService {
 
     if (!hasDescripcion && !hasArchivo) {
       throw new BadRequestException(
-        'Debes ingresar una descripción o adjuntar un archivo para el acta.',
+        'Debes ingresar una descripcion o adjuntar un archivo para el acta.',
       );
     }
 
@@ -273,7 +293,7 @@ export class MeetingsService {
   private validateMeetingTimes(horaInicio: string, horaFin: string) {
     if (horaFin <= horaInicio) {
       throw new BadRequestException(
-        'La hora de fin debe ser posterior a la hora de inicio.',
+        'La hora de termino debe ser posterior a la hora de inicio.',
       );
     }
   }

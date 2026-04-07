@@ -77,19 +77,20 @@ export function PlanItemForm({
     const titulo = values.titulo.trim();
     const descripcion = values.descripcion.trim();
     const resultadoEsperado = values.resultadoEsperado.trim();
+    const resumenFinal = values.resumenFinal.trim();
 
     if (!areaId) {
-      setLocalError('Debes seleccionar un área.');
+      setLocalError('Debes seleccionar un area.');
       return;
     }
 
     if (!titulo) {
-      setLocalError('Debes ingresar un título para el ítem.');
+      setLocalError('Debes ingresar un titulo para el item.');
       return;
     }
 
     if (!descripcion) {
-      setLocalError('Debes ingresar una descripción para el ítem.');
+      setLocalError('Debes ingresar una descripcion para el item.');
       return;
     }
 
@@ -115,7 +116,7 @@ export function PlanItemForm({
       estado: values.estado,
       fechaPlanificada: values.fechaPlanificada,
       fechaCumplimientoReal: values.fechaCumplimientoReal || undefined,
-      resumenFinal: values.resumenFinal.trim() || undefined,
+      resumenFinal: resumenFinal || undefined,
     });
   };
 
@@ -136,7 +137,7 @@ export function PlanItemForm({
 
       <div className="form-grid">
         <label className="form-field">
-          <span>Área</span>
+          <span>Area</span>
           <select value={values.idAreaPlan} onChange={handleChange('idAreaPlan')}>
             {areas.map((area) => (
               <option key={area.idAreaPlan} value={area.idAreaPlan}>
@@ -159,12 +160,12 @@ export function PlanItemForm({
         </label>
 
         <label className="form-field form-field--full">
-          <span>Título</span>
+          <span>Titulo</span>
           <input required value={values.titulo} onChange={handleChange('titulo')} />
         </label>
 
         <label className="form-field form-field--full">
-          <span>Descripción</span>
+          <span>Descripcion</span>
           <textarea
             required
             rows={3}

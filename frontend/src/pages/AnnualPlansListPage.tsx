@@ -59,8 +59,7 @@ export function AnnualPlansListPage() {
         <div>
           <h2>Planificacion anual</h2>
           <p>
-            Define compromisos del ano, responsables y seguimiento para transparentar
-            avances ante la rama.
+            Ordena compromisos, responsables y seguimiento para mostrar avances del ano.
           </p>
         </div>
         <Link className="button button-primary" to="/planificacion/nuevo">

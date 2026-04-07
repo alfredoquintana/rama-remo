@@ -189,7 +189,7 @@ export class UsersService {
 
       if (adminAssignments <= 1) {
         throw new ConflictException(
-          'No se puede eliminar el último usuario con rol admin.',
+          'No se puede eliminar el ultimo usuario con rol admin.',
         );
       }
     }
@@ -208,7 +208,7 @@ export class UsersService {
     });
 
     if (roles.length !== uniqueRoleIds.length) {
-      throw new NotFoundException('Uno o más roles no existen.');
+      throw new NotFoundException('Uno o mas roles no existen.');
     }
 
     return roles;

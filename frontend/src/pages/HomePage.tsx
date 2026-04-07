@@ -46,6 +46,16 @@ export function HomePage() {
 
   return (
     <section className="page-section">
+      <div className="page-heading">
+        <div>
+          <h2>Panel general</h2>
+          <p>
+            Revisa rapidamente el estado del MVP y entra a los flujos principales desde
+            aqui.
+          </p>
+        </div>
+      </div>
+
       <div className="stats-grid">
         <article className="stat-card">
           <span>Usuarios</span>
@@ -86,7 +96,7 @@ export function HomePage() {
           <h3>Reuniones y actas</h3>
           <p>
             Planifica reuniones, define participantes y registra el acta como
-            resumen u oficial.
+            respaldo del directorio.
           </p>
           <div className="inline-actions">
             <Link className="button button-primary" to="/reuniones">
@@ -101,8 +111,8 @@ export function HomePage() {
         <article className="panel-card">
           <h3>Planificacion anual</h3>
           <p>
-            Ordena compromisos del año, registra cumplimiento, aprendizajes y
-            avances para la reunion general de la rama.
+            Ordena compromisos del ano, registra seguimiento y muestra avances de forma
+            simple para la directiva.
           </p>
           <div className="inline-actions">
             <Link className="button button-primary" to="/planificacion">

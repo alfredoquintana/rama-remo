@@ -48,7 +48,7 @@ export function MeetingCreatePage() {
     try {
       const meeting = await createMeeting(values);
       navigate(`/reuniones/${meeting.idReunion}`, {
-        state: { message: 'Reunión creada correctamente.' },
+        state: { message: 'Reunion creada correctamente.' },
       });
     } catch (error) {
       setErrorMessage((error as Error).message);
@@ -61,8 +61,8 @@ export function MeetingCreatePage() {
     <section className="page-section">
       <div className="page-heading">
         <div>
-          <h2>Crear reunión</h2>
-          <p>Define agenda, participantes y acta inicial si corresponde.</p>
+          <h2>Crear reunion</h2>
+          <p>Define horario, participantes y acta inicial si corresponde.</p>
         </div>
       </div>
 
@@ -81,7 +81,7 @@ export function MeetingCreatePage() {
           initialValues={initialValues}
           isSubmitting={isSubmitting}
           onSubmit={handleSubmit}
-          submitLabel="Guardar reunión"
+          submitLabel="Guardar reunion"
           users={users}
         />
       )}

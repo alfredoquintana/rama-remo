@@ -63,7 +63,7 @@ export function MeetingDetailPage() {
       <div className="page-heading">
         <div>
           <h2>Detalle de reunion</h2>
-          <p>Vista completa de participantes y acta asociada.</p>
+          <p>Revisa participantes, horario y acta asociada.</p>
         </div>
         {meeting ? (
           <div className="table-actions">

@@ -189,8 +189,38 @@ export function MeetingForm({
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    const fecha = values.fecha.trim();
+    const horaInicio = values.horaInicio.trim();
+    const horaFin = values.horaFin.trim();
+    const lugar = values.lugar.trim();
+
     if (isReadingFile) {
       setLocalError('Espera a que termine de cargarse el archivo del acta.');
+      return;
+    }
+
+    if (!fecha) {
+      setLocalError('Debes indicar la fecha de la reunion.');
+      return;
+    }
+
+    if (!horaInicio) {
+      setLocalError('Debes indicar la hora de inicio.');
+      return;
+    }
+
+    if (!horaFin) {
+      setLocalError('Debes indicar la hora de termino.');
+      return;
+    }
+
+    if (horaFin <= horaInicio) {
+      setLocalError('La hora de termino debe ser posterior a la hora de inicio.');
+      return;
+    }
+
+    if (!lugar) {
+      setLocalError('Debes indicar el lugar o medio de la reunion.');
       return;
     }
 
@@ -199,7 +229,7 @@ export function MeetingForm({
 
       if (!descripcion && !values.actaArchivo) {
         setLocalError(
-          'Si agregas un acta, debes escribir una descripción o adjuntar un archivo.',
+          'Si agregas un acta, debes escribir una descripcion o adjuntar un archivo.',
         );
         return;
       }
@@ -208,10 +238,10 @@ export function MeetingForm({
     setLocalError('');
 
     await onSubmit({
-      fecha: values.fecha,
-      horaInicio: values.horaInicio,
-      horaFin: values.horaFin,
-      lugar: values.lugar,
+      fecha,
+      horaInicio,
+      horaFin,
+      lugar,
       estado: values.estado,
       modalidad: values.modalidad,
       participantIds: values.participantIds,
@@ -249,7 +279,7 @@ export function MeetingForm({
         </label>
 
         <label className="form-field">
-          <span>Hora de fin</span>
+          <span>Hora de termino</span>
           <input
             required
             type="time"
@@ -312,27 +342,24 @@ export function MeetingForm({
               >
                 <strong>{participant.nombre}</strong>
                 <span>
-                  {participant.rut} -{' '}
-                  {formatRoleList(participant.roles)}
+                  {participant.rut} - {formatRoleList(participant.roles)}
                 </span>
               </button>
             ))}
           </div>
         ) : participantQuery.trim() ? (
-          <p className="form-help">No hay coincidencias para esa búsqueda.</p>
+          <p className="form-help">No hay coincidencias para esa busqueda.</p>
         ) : null}
 
         <div className="selected-participants">
           {selectedParticipants.length === 0 ? (
-            <p className="form-help">Aún no has agregado participantes.</p>
+            <p className="form-help">Aun no has agregado participantes.</p>
           ) : (
             selectedParticipants.map((participant) => (
               <div key={participant.idUsuario} className="participant-chip">
                 <div>
                   <strong>{participant.nombre}</strong>
-                  <span>
-                    {formatRoleList(participant.roles)}
-                  </span>
+                  <span>{formatRoleList(participant.roles)}</span>
                 </div>
                 <button
                   className="button button-secondary button-small"
@@ -352,22 +379,22 @@ export function MeetingForm({
 
         <label className="switch-field">
           <input checked={values.hasActa} onChange={toggleActa} type="checkbox" />
-          <span>Agregar o actualizar acta en esta reunión</span>
+          <span>Agregar o actualizar acta en esta reunion</span>
         </label>
 
         {values.hasActa ? (
           <div className="form-grid">
             <label className="form-field form-field--full">
-              <span>Título del acta</span>
+              <span>Titulo del acta</span>
               <input
-                placeholder="Ej: Reunión ordinaria de directiva"
+                placeholder="Ej: Reunion ordinaria de directiva"
                 value={values.actaTitulo}
                 onChange={handleChange('actaTitulo')}
               />
             </label>
 
             <label className="form-field form-field--full">
-              <span>Descripción o resumen</span>
+              <span>Descripcion o resumen</span>
               <textarea
                 rows={6}
                 value={values.actaDescripcion}
@@ -379,7 +406,7 @@ export function MeetingForm({
               <span>Archivo del acta</span>
               <input accept={ACTA_FILE_ACCEPT} onChange={handleActaFileChange} type="file" />
               <small className="form-help">
-                Puedes adjuntar PDF, Word, Excel, PowerPoint, texto o imágenes de
+                Puedes adjuntar PDF, Word, Excel, PowerPoint, texto o imagenes de
                 hasta 5 MB.
               </small>
             </label>
@@ -407,8 +434,8 @@ export function MeetingForm({
 
         {values.hasActa ? (
           <p className="form-help">
-            El sistema registrará el acta a nombre de {user?.nombre ?? 'tu usuario'} con el
-            rol {currentRoleName}. Puedes guardar una descripción corta, un archivo o ambos.
+            El sistema registrara el acta a nombre de {user?.nombre ?? 'tu usuario'} con el
+            rol {currentRoleName}. Puedes guardar una descripcion corta, un archivo o ambos.
           </p>
         ) : null}
       </fieldset>

@@ -4,5 +4,13 @@ type StatusMessageProps = {
 };
 
 export function StatusMessage({ kind, message }: StatusMessageProps) {
-  return <div className={`status-message ${kind}`}>{message}</div>;
+  return (
+    <div
+      aria-live={kind === 'error' ? 'assertive' : 'polite'}
+      className={`status-message ${kind}`}
+      role={kind === 'error' ? 'alert' : 'status'}
+    >
+      {message}
+    </div>
+  );
 }

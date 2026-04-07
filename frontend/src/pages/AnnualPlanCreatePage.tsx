@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   AnnualPlanForm,
@@ -5,7 +6,6 @@ import {
 } from '../components/AnnualPlanForm';
 import { createAnnualPlan } from '../services/planning';
 import type { AnnualPlanPayload } from '../types/planning';
-import { useState } from 'react';
 
 const initialValues: AnnualPlanFormValues = {
   anio: String(new Date().getFullYear()),
@@ -45,8 +45,8 @@ export function AnnualPlanCreatePage() {
         <div>
           <h2>Crear plan anual</h2>
           <p>
-            Define el objetivo general, las áreas del año y deja lista la base para el
-            seguimiento.
+            Define el objetivo general, las areas y la base para dar seguimiento durante
+            el ano.
           </p>
         </div>
       </div>

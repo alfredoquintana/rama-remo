@@ -103,9 +103,13 @@ class ApiClient {
         return data.message.join(', ');
       }
 
-      return data.message ?? data.error ?? `API request failed with status ${response.status}`;
+      return (
+        data.message ??
+        data.error ??
+        `No se pudo completar la solicitud. Codigo ${response.status}.`
+      );
     } catch {
-      return `API request failed with status ${response.status}`;
+      return `No se pudo completar la solicitud. Codigo ${response.status}.`;
     }
   }
 }
