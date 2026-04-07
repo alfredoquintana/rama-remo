@@ -1,7 +1,9 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { StatusMessage } from '../components/StatusMessage';
+import { useDebouncedValue } from '../hooks';
 import {
   createBoat,
+  deleteBoat,
   getBoat,
   getFleet,
   getFleetCatalogs,
@@ -103,6 +105,48 @@ function describeActiveFilter(value: string) {
   return 'Todos';
 }
 
+function areFiltersEqual(first: FleetFilterForm, second: FleetFilterForm) {
+  return (
+    first.search === second.search &&
+    first.idTipoBote === second.idTipoBote &&
+    first.idEstadoBote === second.idEstadoBote &&
+    first.activo === second.activo
+  );
+}
+
+function describeAppliedFilters(
+  filters: FleetFilterForm,
+  catalogs: FleetCatalogsResponse | null,
+) {
+  const descriptions: string[] = [];
+
+  if (filters.idTipoBote) {
+    const selectedType = catalogs?.tiposBote.find(
+      (tipoBote) => String(tipoBote.idTipoBote) === filters.idTipoBote,
+    );
+
+    if (selectedType) {
+      descriptions.push(`Tipo: ${selectedType.codigo} - ${selectedType.nombre}`);
+    }
+  }
+
+  if (filters.idEstadoBote) {
+    const selectedState = catalogs?.estadosBote.find(
+      (estadoBote) => String(estadoBote.idEstadoBote) === filters.idEstadoBote,
+    );
+
+    if (selectedState) {
+      descriptions.push(`Estado: ${selectedState.nombre}`);
+    }
+  }
+
+  if (filters.activo) {
+    descriptions.push(describeActiveFilter(filters.activo));
+  }
+
+  return descriptions.join(' · ');
+}
+
 export function FleetPage() {
   const [boats, setBoats] = useState<Boat[]>([]);
   const [catalogs, setCatalogs] = useState<FleetCatalogsResponse | null>(null);
@@ -134,6 +178,7 @@ export function FleetPage() {
   );
   const [isModalLoading, setIsModalLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const debouncedFilters = useDebouncedValue(filters, 350);
 
   useEffect(() => {
     getFleetCatalogs()
@@ -150,6 +195,24 @@ export function FleetPage() {
   }, []);
 
   useEffect(() => {
+    const nextAppliedFilters = {
+      search: debouncedFilters.search.trim(),
+      idTipoBote: debouncedFilters.idTipoBote,
+      idEstadoBote: debouncedFilters.idEstadoBote,
+      activo: debouncedFilters.activo,
+    };
+
+    if (areFiltersEqual(nextAppliedFilters, appliedFilters)) {
+      return;
+    }
+
+    setIsLoading(true);
+    setPage(1);
+    setAppliedFilters(nextAppliedFilters);
+  }, [appliedFilters, debouncedFilters]);
+
+  useEffect(() => {
+    let cancelled = false;
     setIsLoading(true);
 
     getFleet({
@@ -168,6 +231,10 @@ export function FleetPage() {
           : appliedFilters.activo === 'true',
     })
       .then((data) => {
+        if (cancelled) {
+          return;
+        }
+
         setBoats(data.items);
         setPagination({
           page: data.page,
@@ -182,26 +249,22 @@ export function FleetPage() {
         setErrorMessage('');
       })
       .catch((error: Error) => {
-        setErrorMessage(error.message);
+        if (!cancelled) {
+          setErrorMessage(error.message);
+        }
       })
       .finally(() => {
-        setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, [appliedFilters, page, refreshToken]);
 
   const pages = buildPagination(page, pagination?.totalPages ?? 1);
-
-  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsLoading(true);
-    setPage(1);
-    setAppliedFilters({
-      search: filters.search.trim(),
-      idTipoBote: filters.idTipoBote,
-      idEstadoBote: filters.idEstadoBote,
-      activo: filters.activo,
-    });
-  };
 
   const handleClearFilters = () => {
     const clearedFilters = {
@@ -297,6 +360,34 @@ export function FleetPage() {
     }
   };
 
+  const handleDeleteBoat = async (boat: Boat) => {
+    const confirmed = window.confirm(
+      `¿Seguro que quieres eliminar el bote ${toTitleCaseLabel(boat.nombre)}? Esta acción no se puede deshacer.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const response = await deleteBoat(boat.idBote);
+      setSuccessMessage(response.message);
+      setErrorMessage('');
+
+      if (boats.length === 1 && page > 1) {
+        setIsLoading(true);
+        setPage((current) => Math.max(current - 1, 1));
+        return;
+      }
+
+      setIsLoading(true);
+      setRefreshToken((current) => current + 1);
+    } catch (error) {
+      setErrorMessage((error as Error).message);
+      setSuccessMessage('');
+    }
+  };
+
   return (
     <section className="page-section">
       <div className="page-heading">
@@ -318,7 +409,7 @@ export function FleetPage() {
       {errorMessage ? <StatusMessage kind="error" message={errorMessage} /> : null}
 
       <div className="panel-card">
-        <form className="selection-row fleet-page__filters" onSubmit={handleSearchSubmit}>
+        <div className="selection-row fleet-page__filters">
           <label className="form-field fleet-search-field">
             <span>Buscar bote</span>
             <input
@@ -395,25 +486,20 @@ export function FleetPage() {
             </select>
           </label>
 
-          <button className="button button-primary" disabled={isLoading} type="submit">
-            Buscar
-          </button>
-
           <button
             className="button button-secondary"
             disabled={
-              isLoading ||
-              (!filters.search &&
+              !filters.search &&
                 !filters.idTipoBote &&
                 !filters.idEstadoBote &&
-                !filters.activo)
+                !filters.activo
             }
             type="button"
             onClick={handleClearFilters}
           >
             Limpiar
           </button>
-        </form>
+        </div>
 
         <div className="table-toolbar">
           <p className="form-help">
@@ -430,7 +516,7 @@ export function FleetPage() {
             ) : null}
             {(appliedFilters.idTipoBote || appliedFilters.idEstadoBote || appliedFilters.activo) ? (
               <p className="form-help">
-                Filtros: {describeActiveFilter(appliedFilters.activo)}
+                Filtros: {describeAppliedFilters(appliedFilters, catalogs)}
               </p>
             ) : null}
           </div>
@@ -461,9 +547,7 @@ export function FleetPage() {
                   boats.map((boat) => (
                     <tr key={boat.idBote}>
                       <td data-label="Nombre">{toTitleCaseLabel(boat.nombre)}</td>
-                      <td data-label="Tipo">
-                        {boat.tipoBote.codigo} - {boat.tipoBote.nombre}
-                      </td>
+                      <td data-label="Tipo">{boat.tipoBote.codigo}</td>
                       <td data-label="Estado">{boat.estadoBote.nombre}</td>
                       <td data-label="Marca">
                         {boat.marca ? boat.marca.toUpperCase() : '-'}
@@ -489,6 +573,13 @@ export function FleetPage() {
                             onClick={() => void openEditModal(boat.idBote)}
                           >
                             Editar
+                          </button>
+                          <button
+                            className="button button-danger button-small"
+                            type="button"
+                            onClick={() => void handleDeleteBoat(boat)}
+                          >
+                            Eliminar
                           </button>
                         </div>
                       </td>

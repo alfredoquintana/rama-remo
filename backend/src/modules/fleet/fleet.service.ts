@@ -10,6 +10,7 @@ import {
   EstadoBoteEntity,
   TipoBoteEntity,
 } from '../../database/entities';
+import { normalizeFreeText, normalizeLabelText, normalizeCodeText } from '../../common/text.util';
 import { CreateBoatDto } from './dto/create-boat.dto';
 import { ListBoatsQueryDto } from './dto/list-boats-query.dto';
 import { UpdateBoatDto } from './dto/update-boat.dto';
@@ -151,10 +152,10 @@ export class FleetService {
         this.boatsRepository.create({
           idTipoBote: createBoatDto.idTipoBote,
           idEstadoBote: createBoatDto.idEstadoBote,
-          nombre: createBoatDto.nombre.trim(),
-          marca: this.normalizeOptionalText(createBoatDto.marca),
+          nombre: normalizeLabelText(createBoatDto.nombre),
+          marca: this.normalizeOptionalText(createBoatDto.marca, 'code'),
           anio: createBoatDto.anio ?? null,
-          observacion: this.normalizeOptionalText(createBoatDto.observacion),
+          observacion: this.normalizeOptionalText(createBoatDto.observacion, 'free'),
           activo: createBoatDto.activo ?? true,
         }),
       );
@@ -185,10 +186,13 @@ export class FleetService {
           idBote: currentBoat.idBote,
           idTipoBote,
           idEstadoBote,
-          nombre: updateBoatDto.nombre?.trim() ?? currentBoat.nombre,
+          nombre:
+            updateBoatDto.nombre !== undefined
+              ? normalizeLabelText(updateBoatDto.nombre)
+              : currentBoat.nombre,
           marca:
             updateBoatDto.marca !== undefined
-              ? this.normalizeOptionalText(updateBoatDto.marca)
+              ? this.normalizeOptionalText(updateBoatDto.marca, 'code')
               : currentBoat.marca,
           anio:
             updateBoatDto.anio !== undefined
@@ -196,7 +200,7 @@ export class FleetService {
               : currentBoat.anio,
           observacion:
             updateBoatDto.observacion !== undefined
-              ? this.normalizeOptionalText(updateBoatDto.observacion)
+              ? this.normalizeOptionalText(updateBoatDto.observacion, 'free')
               : currentBoat.observacion,
           activo: updateBoatDto.activo ?? currentBoat.activo,
         }),
@@ -207,6 +211,20 @@ export class FleetService {
       this.handleDuplicateBoatError(error);
       throw error;
     }
+  }
+
+  async delete(id: number) {
+    const boat = await this.boatsRepository.findOneBy({ idBote: id });
+
+    if (!boat) {
+      throw new NotFoundException('Bote no encontrado.');
+    }
+
+    await this.boatsRepository.delete({ idBote: id });
+
+    return {
+      message: 'Bote eliminado correctamente.',
+    };
   }
 
   private async findBoatTypeOrFail(idTipoBote: number, requireActive: boolean) {
@@ -246,8 +264,18 @@ export class FleetService {
     return boatState;
   }
 
-  private normalizeOptionalText(value?: string | null) {
-    const normalizedValue = value?.trim();
+  private normalizeOptionalText(
+    value?: string | null,
+    mode: 'label' | 'free' | 'code' = 'free',
+  ) {
+    const normalizedValue =
+      value == null
+        ? ''
+        : mode === 'label'
+          ? normalizeLabelText(value)
+          : mode === 'code'
+            ? normalizeCodeText(value)
+            : normalizeFreeText(value);
 
     return normalizedValue ? normalizedValue : null;
   }

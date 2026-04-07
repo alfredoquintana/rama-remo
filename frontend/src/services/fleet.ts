@@ -60,3 +60,7 @@ export function createBoat(payload: BoatPayload) {
 export function updateBoat(id: number, payload: Partial<BoatPayload>) {
   return apiClient.patch<BoatDetail>(`/fleet/${id}`, payload);
 }
+
+export function deleteBoat(id: number) {
+  return apiClient.delete<{ message: string }>(`/fleet/${id}`);
+}

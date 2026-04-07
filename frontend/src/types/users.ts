@@ -15,6 +15,15 @@ export type User = {
   roleIds: number[];
 };
 
+export type UsersListResponse = {
+  items: User[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+  search: string;
+};
+
 export type UserPayload = {
   rut: string;
   nombre: string;

@@ -1,7 +1,15 @@
-import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
+import { DatePickerField } from './DatePickerField';
 import { StatusMessage } from './StatusMessage';
 import type { Role, UserPayload } from '../types/users';
 import { toTitleCaseLabel } from '../utils/text';
+import {
+  formatPhone,
+  isValidPhone,
+  isValidRut,
+  normalizePhone,
+  normalizeRut,
+} from '../utils/validation';
 
 type AccessSectionMode = 'optional' | 'required' | 'hidden';
 
@@ -32,6 +40,19 @@ export function UserForm({
   const [isAccessEnabled, setIsAccessEnabled] = useState(
     accessSectionMode === 'required' ? true : initialValues.roleIds.length > 0,
   );
+
+  useEffect(() => {
+    setValues({
+      ...initialValues,
+      rut: normalizeRut(initialValues.rut),
+      telefono: formatPhone(initialValues.telefono),
+    });
+    setLocalError('');
+    setPendingRoleId('');
+    setIsAccessEnabled(
+      accessSectionMode === 'required' ? true : initialValues.roleIds.length > 0,
+    );
+  }, [accessSectionMode, initialValues]);
 
   const selectedRoles = roles.filter((role) => values.roleIds.includes(role.idRol));
   const availableRoles = roles.filter((role) => !values.roleIds.includes(role.idRol));
@@ -86,14 +107,38 @@ export function UserForm({
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    const normalizedRut = normalizeRut(values.rut);
+    const normalizedPhone = normalizePhone(values.telefono);
+
     if (shouldShowRoles && values.roleIds.length === 0) {
       setLocalError('Debes seleccionar al menos un rol.');
+      return;
+    }
+
+    if (!isValidRut(normalizedRut)) {
+      setLocalError(
+        'Debes ingresar un RUT válido en formato 12345678-5.',
+      );
+      return;
+    }
+
+    if (!isValidPhone(normalizedPhone)) {
+      setLocalError(
+        'Debes ingresar un teléfono válido en formato chileno, por ejemplo +56 9 1234 5678.',
+      );
+      return;
+    }
+
+    if (!values.fechaNac) {
+      setLocalError('Debes ingresar la fecha de nacimiento.');
       return;
     }
 
     setLocalError('');
     await onSubmit({
       ...values,
+      rut: normalizedRut,
+      telefono: normalizedPhone,
       roleIds: shouldShowRoles ? values.roleIds : [],
     });
   };
@@ -105,9 +150,18 @@ export function UserForm({
           <span>RUT</span>
           <input
             disabled={disablePersonalFields}
+            inputMode="text"
+            maxLength={12}
+            placeholder="12345678-5"
             required
             value={values.rut}
             onChange={handleChange('rut')}
+            onBlur={() =>
+              setValues((current) => ({
+                ...current,
+                rut: normalizeRut(current.rut),
+              }))
+            }
           />
         </label>
 
@@ -125,22 +179,33 @@ export function UserForm({
           <span>Teléfono</span>
           <input
             disabled={disablePersonalFields}
+            inputMode="tel"
+            maxLength={16}
+            placeholder="+56 9 1234 5678"
             required
             value={values.telefono}
             onChange={handleChange('telefono')}
+            onBlur={() =>
+              setValues((current) => ({
+                ...current,
+                telefono: formatPhone(current.telefono),
+              }))
+            }
           />
         </label>
 
-        <label className="form-field">
-          <span>Fecha de nacimiento</span>
-          <input
-            disabled={disablePersonalFields}
-            required
-            type="date"
-            value={values.fechaNac}
-            onChange={handleChange('fechaNac')}
-          />
-        </label>
+        <DatePickerField
+          disabled={disablePersonalFields}
+          label="Fecha de nacimiento"
+          required
+          value={values.fechaNac}
+          onChange={(nextValue) =>
+            setValues((current) => ({
+              ...current,
+              fechaNac: nextValue,
+            }))
+          }
+        />
 
         <label className="form-field form-field--full">
           <span>Dirección</span>

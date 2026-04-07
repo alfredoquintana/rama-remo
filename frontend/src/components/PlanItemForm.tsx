@@ -3,6 +3,7 @@ import {
   planningItemPriorityLabels,
   planningItemStatusLabels,
 } from '../app/labels';
+import { DatePickerField } from './DatePickerField';
 import { StatusMessage } from './StatusMessage';
 import type {
   AnnualPlanArea,
@@ -206,24 +207,28 @@ export function PlanItemForm({
           </select>
         </label>
 
-        <label className="form-field">
-          <span>Fecha planificada</span>
-          <input
-            required
-            type="date"
-            value={values.fechaPlanificada}
-            onChange={handleChange('fechaPlanificada')}
-          />
-        </label>
+        <DatePickerField
+          label="Fecha planificada"
+          required
+          value={values.fechaPlanificada}
+          onChange={(nextValue) =>
+            setValues((current) => ({
+              ...current,
+              fechaPlanificada: nextValue,
+            }))
+          }
+        />
 
-        <label className="form-field">
-          <span>Fecha de cumplimiento real</span>
-          <input
-            type="date"
-            value={values.fechaCumplimientoReal}
-            onChange={handleChange('fechaCumplimientoReal')}
-          />
-        </label>
+        <DatePickerField
+          label="Fecha de cumplimiento real"
+          value={values.fechaCumplimientoReal}
+          onChange={(nextValue) =>
+            setValues((current) => ({
+              ...current,
+              fechaCumplimientoReal: nextValue,
+            }))
+          }
+        />
 
         <label className="form-field form-field--full">
           <span>Resumen final</span>

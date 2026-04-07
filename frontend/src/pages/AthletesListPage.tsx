@@ -1,6 +1,7 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { StatusMessage } from '../components/StatusMessage';
+import { useDebouncedValue } from '../hooks';
 import { getAthletes } from '../services/athletes';
 import type { Athlete, AthletesListResponse } from '../types/athletes';
 import { formatDate } from '../utils/dateTime';
@@ -39,6 +40,19 @@ export function AthletesListPage() {
   > | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  const debouncedSearchInput = useDebouncedValue(searchInput, 350);
+
+  useEffect(() => {
+    const nextSearch = debouncedSearchInput.trim();
+
+    if (nextSearch === activeSearch) {
+      return;
+    }
+
+    setIsLoading(true);
+    setPage(1);
+    setActiveSearch(nextSearch);
+  }, [activeSearch, debouncedSearchInput]);
 
   useEffect(() => {
     getAthletes({
@@ -68,13 +82,6 @@ export function AthletesListPage() {
   const navigationState = (location.state as NavigationState | null) ?? null;
   const pages = buildPagination(page, pagination?.totalPages ?? 1);
 
-  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsLoading(true);
-    setPage(1);
-    setActiveSearch(searchInput.trim());
-  };
-
   const handleClearSearch = () => {
     setIsLoading(true);
     setSearchInput('');
@@ -101,7 +108,7 @@ export function AthletesListPage() {
       {errorMessage ? <StatusMessage kind="error" message={errorMessage} /> : null}
 
       <div className="panel-card">
-        <form className="selection-row" onSubmit={handleSearchSubmit}>
+        <div className="selection-row">
           <label className="form-field athlete-search-field">
             <span>Buscar deportista</span>
             <input
@@ -111,25 +118,21 @@ export function AthletesListPage() {
             />
           </label>
 
-          <button className="button button-primary" disabled={isLoading} type="submit">
-            Buscar
-          </button>
-
           <button
             className="button button-secondary"
-            disabled={isLoading || (!activeSearch && !searchInput)}
+            disabled={!activeSearch && !searchInput}
             type="button"
             onClick={handleClearSearch}
           >
             Limpiar
           </button>
-        </form>
+        </div>
 
         <div className="table-toolbar">
           <p className="form-help">
-            {pagination
-              ? `${pagination.total} deportista${pagination.total === 1 ? '' : 's'} encontrados`
-              : 'Cargando resultados...'}
+            {isLoading && !pagination
+              ? 'Cargando resultados...'
+              : `${pagination?.total ?? 0} deportista${pagination?.total === 1 ? '' : 's'} encontrados`}
           </p>
           {activeSearch ? (
             <p className="form-help">

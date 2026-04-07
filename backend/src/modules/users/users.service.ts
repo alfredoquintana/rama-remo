@@ -1,19 +1,29 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, In, QueryFailedError, Repository } from 'typeorm';
+import {
+  Brackets,
+  DataSource,
+  In,
+  QueryFailedError,
+  Repository,
+} from 'typeorm';
 import {
   RolEntity,
   UsuarioEntity,
   UsuarioRolEntity,
 } from '../../database/entities';
+import { isValidPhone, isValidRut, normalizePhone, normalizeRut } from '../../common/contact.util';
+import { normalizeFreeText, normalizePersonName } from '../../common/text.util';
 import { hashPassword } from '../auth/password.util';
 import { CreateUserDto } from './dto/create-user.dto';
 import { EnableUserAccessDto } from './dto/enable-user-access.dto';
+import { ListUsersQueryDto } from './dto/list-users-query.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
@@ -29,19 +39,118 @@ export class UsersService {
     private readonly rolesRepository: Repository<RolEntity>,
   ) {}
 
-  async findAll() {
-    const users = await this.usersRepository.find({
-      relations: {
-        usuarioRoles: {
-          rol: true,
+  async findAll(query: ListUsersQueryDto) {
+    const search = query.search?.trim().toLowerCase() ?? '';
+    const tokens = search.split(/\s+/).filter(Boolean);
+    const page = Math.max(query.page ?? 1, 1);
+    const pageSize = Math.min(Math.max(query.pageSize ?? 10, 1), 50);
+
+    if (
+      query.page === undefined &&
+      query.pageSize === undefined &&
+      tokens.length === 0
+    ) {
+      const users = await this.usersRepository.find({
+        relations: {
+          usuarioRoles: {
+            rol: true,
+          },
         },
-      },
-      order: {
-        nombre: 'ASC',
-      },
+        order: {
+          nombre: 'ASC',
+        },
+      });
+
+      return users.map((user) => this.mapUser(user));
+    }
+
+    if (tokens.length === 0) {
+      const [users, total] = await this.usersRepository.findAndCount({
+        relations: {
+          usuarioRoles: {
+            rol: true,
+          },
+        },
+        order: {
+          nombre: 'ASC',
+        },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      });
+
+      return {
+        items: users.map((user) => this.mapUser(user)),
+        page,
+        pageSize,
+        total,
+        totalPages: Math.max(Math.ceil(total / pageSize), 1),
+        search: query.search?.trim() ?? '',
+      };
+    }
+
+    const idsQueryBuilder = this.usersRepository
+      .createQueryBuilder('usuario')
+      .select('usuario.idUsuario', 'idUsuario')
+      .distinct(true)
+      .leftJoin('usuario.usuarioRoles', 'usuarioRol')
+      .leftJoin('usuarioRol.rol', 'rol');
+
+    tokens.forEach((token, index) => {
+      idsQueryBuilder.andWhere(
+        new Brackets((builder) => {
+          builder
+            .where(`LOWER(usuario.nombre) LIKE :nombre${index}`, {
+              [`nombre${index}`]: `%${token}%`,
+            })
+            .orWhere(`LOWER(usuario.rut) LIKE :rut${index}`, {
+              [`rut${index}`]: `%${token}%`,
+            })
+            .orWhere(`LOWER(usuario.telefono) LIKE :telefono${index}`, {
+              [`telefono${index}`]: `%${token}%`,
+            })
+            .orWhere(`LOWER(COALESCE(rol.nombre, '')) LIKE :rol${index}`, {
+              [`rol${index}`]: `%${token}%`,
+            });
+        }),
+      );
     });
 
-    return users.map((user) => this.mapUser(user));
+    const total = await idsQueryBuilder.getCount();
+
+    const pagedIdRows = await idsQueryBuilder
+      .orderBy('usuario.nombre', 'ASC')
+      .skip((page - 1) * pageSize)
+      .take(pageSize)
+      .getRawMany<{ idUsuario: number }>();
+
+    const userIds = pagedIdRows.map((row) => Number(row.idUsuario));
+    const users =
+      userIds.length > 0
+        ? await this.usersRepository.find({
+            where: {
+              idUsuario: In(userIds),
+            },
+            relations: {
+              usuarioRoles: {
+                rol: true,
+              },
+            },
+          })
+        : [];
+
+    const usersById = new Map(users.map((user) => [user.idUsuario, user] as const));
+    const orderedUsers = userIds
+      .map((idUsuario) => usersById.get(idUsuario))
+      .filter((user): user is UsuarioEntity => Boolean(user));
+
+    return {
+      items: orderedUsers.map((user) => this.mapUser(user)),
+      page,
+      pageSize,
+      total,
+      totalPages: Math.max(Math.ceil(total / pageSize), 1),
+      search: query.search?.trim() ?? '',
+    };
   }
 
   async findOne(id: number) {
@@ -62,6 +171,7 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto) {
+    const normalizedUserData = this.normalizeUserData(createUserDto);
     const roles = createUserDto.roleIds?.length
       ? await this.loadRoles(createUserDto.roleIds)
       : [];
@@ -77,11 +187,11 @@ export class UsersService {
 
         const user = await userRepository.save(
           userRepository.create({
-            rut: createUserDto.rut,
-            nombre: createUserDto.nombre,
-            telefono: createUserDto.telefono,
+            rut: normalizedUserData.rut,
+            nombre: normalizedUserData.nombre,
+            telefono: normalizedUserData.telefono,
             fechaNac: createUserDto.fechaNac,
-            direccion: createUserDto.direccion,
+            direccion: normalizedUserData.direccion,
             claveHash: provisionalPassword
               ? hashPassword(provisionalPassword)
               : null,
@@ -121,6 +231,7 @@ export class UsersService {
     }
 
     const hasAccess = this.hasAccessEnabled(existingUser);
+    const normalizedUserData = this.normalizeUserData(updateUserDto, true);
     const roles =
       updateUserDto.roleIds !== undefined
         ? await this.resolveRolesForUpdate(updateUserDto.roleIds, hasAccess)
@@ -134,11 +245,11 @@ export class UsersService {
         await userRepository.save(
           userRepository.create({
             idUsuario: existingUser.idUsuario,
-            rut: updateUserDto.rut ?? existingUser.rut,
-            nombre: updateUserDto.nombre ?? existingUser.nombre,
-            telefono: updateUserDto.telefono ?? existingUser.telefono,
+            rut: normalizedUserData.rut ?? existingUser.rut,
+            nombre: normalizedUserData.nombre ?? existingUser.nombre,
+            telefono: normalizedUserData.telefono ?? existingUser.telefono,
             fechaNac: updateUserDto.fechaNac ?? existingUser.fechaNac,
-            direccion: updateUserDto.direccion ?? existingUser.direccion,
+            direccion: normalizedUserData.direccion ?? existingUser.direccion,
             claveHash: existingUser.claveHash ?? null,
           }),
         );
@@ -229,7 +340,7 @@ export class UsersService {
 
     if ((user.actasActualizadas?.length ?? 0) > 0) {
       throw new ConflictException(
-        'No se puede eliminar el usuario porque tiene actas registradas a su nombre.',
+        'No se puede eliminar este usuario porque tiene actas registradas a su nombre.',
       );
     }
 
@@ -244,7 +355,7 @@ export class UsersService {
 
       if (adminAssignments <= 1) {
         throw new ConflictException(
-          'No se puede eliminar el ultimo usuario con rol admin.',
+          'No se puede eliminar este usuario porque es el último con rol admin.',
         );
       }
     }
@@ -254,6 +365,65 @@ export class UsersService {
     return {
       message: 'Usuario eliminado correctamente.',
     };
+  }
+
+  private normalizeUserData(
+    payload: Partial<Pick<CreateUserDto, 'rut' | 'nombre' | 'telefono' | 'direccion'>>,
+    allowPartial = false,
+  ) {
+    const normalizedData = {
+      rut: payload.rut !== undefined ? normalizeRut(payload.rut) : undefined,
+      nombre:
+        payload.nombre !== undefined ? normalizePersonName(payload.nombre) : undefined,
+      telefono:
+        payload.telefono !== undefined ? normalizePhone(payload.telefono) : undefined,
+      direccion:
+        payload.direccion !== undefined
+          ? normalizeFreeText(payload.direccion)
+          : undefined,
+    };
+
+    if ((!allowPartial || normalizedData.rut !== undefined) && !normalizedData.rut) {
+      throw new BadRequestException('Debes ingresar un RUT.');
+    }
+
+    if (
+      normalizedData.rut !== undefined &&
+      !isValidRut(normalizedData.rut)
+    ) {
+      throw new BadRequestException(
+        'Debes ingresar un RUT válido en formato 12345678-5.',
+      );
+    }
+
+    if ((!allowPartial || normalizedData.nombre !== undefined) && !normalizedData.nombre) {
+      throw new BadRequestException('Debes ingresar el nombre completo.');
+    }
+
+    if (
+      (!allowPartial || normalizedData.telefono !== undefined) &&
+      !normalizedData.telefono
+    ) {
+      throw new BadRequestException('Debes ingresar un teléfono.');
+    }
+
+    if (
+      normalizedData.telefono !== undefined &&
+      !isValidPhone(normalizedData.telefono)
+    ) {
+      throw new BadRequestException(
+        'Debes ingresar un teléfono válido en formato chileno, por ejemplo +56912345678.',
+      );
+    }
+
+    if (
+      (!allowPartial || normalizedData.direccion !== undefined) &&
+      !normalizedData.direccion
+    ) {
+      throw new BadRequestException('Debes ingresar una dirección.');
+    }
+
+    return normalizedData;
   }
 
   private async loadRoles(roleIds: number[]) {

@@ -84,10 +84,12 @@ function normalizeMenus(data: Menu[]) {
     const normalizedName = normalizeMenuName(menu.nombre);
     const menuKey = createMenuKey(normalizedName);
     const currentMenu = groupedMenus.get(menuKey);
-    const normalizedItems = (menu.items ?? []).map((item) => ({
-      ...item,
-      nombre: normalizeMenuItemName(item.nombre),
-    }));
+    const normalizedItems = (menu.items ?? [])
+      .filter((item) => !isCreateMenuRoute(item.ruta))
+      .map((item) => ({
+        ...item,
+        nombre: normalizeMenuItemName(item.nombre),
+      }));
 
     if (!currentMenu) {
       groupedMenus.set(menuKey, {

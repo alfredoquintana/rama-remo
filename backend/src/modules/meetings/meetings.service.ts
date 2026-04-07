@@ -11,6 +11,7 @@ import {
   ReunionEntity,
   UsuarioEntity,
 } from '../../database/entities';
+import { normalizeFreeText, normalizeLabelText } from '../../common/text.util';
 import { CreateMeetingDto } from './dto/create-meeting.dto';
 import { UpdateMeetingDto } from './dto/update-meeting.dto';
 import { UpsertActaDto } from './dto/upsert-acta.dto';
@@ -240,7 +241,7 @@ export class MeetingsService {
   }
 
   private normalizeMeetingPlace(value: string) {
-    return value.trim();
+    return normalizeLabelText(value);
   }
 
   private ensureMeetingPlaceIsValid(lugar: string) {
@@ -329,14 +330,14 @@ export class MeetingsService {
     const currentActa = await minutesRepository.findOneBy({
       idReunion: meetingId,
     });
-    const descripcion = acta.descripcion?.trim() ?? '';
+    const descripcion = acta.descripcion ? normalizeFreeText(acta.descripcion) : '';
     const archivo = acta.archivo;
 
     await minutesRepository.save(
       minutesRepository.create({
         idActa: currentActa?.idActa,
         idReunion: meetingId,
-        titulo: acta.titulo?.trim() || null,
+        titulo: acta.titulo ? normalizeLabelText(acta.titulo) : null,
         texto: descripcion,
         archivoNombre: archivo?.nombre ?? null,
         archivoTipo: archivo?.tipo ?? null,
