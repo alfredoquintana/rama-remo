@@ -1,7 +1,9 @@
 import { useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
 import { meetingModeLabels, meetingStateLabels } from '../app/labels';
 import { useAuth } from '../app/useAuth';
+import { DatePickerField } from './DatePickerField';
 import { StatusMessage } from './StatusMessage';
+import { TimePickerField } from './TimePickerField';
 import type {
   MeetingMinutesFile,
   MeetingMode,
@@ -258,35 +260,41 @@ export function MeetingForm({
   return (
     <form className="form-card" onSubmit={handleSubmit}>
       <div className="form-grid">
-        <label className="form-field">
-          <span>Fecha</span>
-          <input
-            required
-            type="date"
-            value={values.fecha}
-            onChange={handleChange('fecha')}
-          />
-        </label>
+        <DatePickerField
+          label="Fecha"
+          required
+          value={values.fecha}
+          onChange={(nextValue) =>
+            setValues((current) => ({
+              ...current,
+              fecha: nextValue,
+            }))
+          }
+        />
 
-        <label className="form-field">
-          <span>Hora de inicio</span>
-          <input
-            required
-            type="time"
-            value={values.horaInicio}
-            onChange={handleChange('horaInicio')}
-          />
-        </label>
+        <TimePickerField
+          label="Hora de inicio"
+          required
+          value={values.horaInicio}
+          onChange={(nextValue) =>
+            setValues((current) => ({
+              ...current,
+              horaInicio: nextValue,
+            }))
+          }
+        />
 
-        <label className="form-field">
-          <span>Hora de término</span>
-          <input
-            required
-            type="time"
-            value={values.horaFin}
-            onChange={handleChange('horaFin')}
-          />
-        </label>
+        <TimePickerField
+          label="Hora de termino"
+          required
+          value={values.horaFin}
+          onChange={(nextValue) =>
+            setValues((current) => ({
+              ...current,
+              horaFin: nextValue,
+            }))
+          }
+        />
 
         <label className="form-field">
           <span>Lugar</span>
@@ -385,7 +393,7 @@ export function MeetingForm({
         {values.hasActa ? (
           <div className="form-grid">
             <label className="form-field form-field--full">
-              <span>Título del acta</span>
+              <span>Titulo del acta</span>
               <input
                 placeholder="Ej: Reunión ordinaria de directiva"
                 value={values.actaTitulo}
@@ -394,7 +402,7 @@ export function MeetingForm({
             </label>
 
             <label className="form-field form-field--full">
-              <span>Descripción o resumen</span>
+              <span>Descripcion o resumen</span>
               <textarea
                 rows={6}
                 value={values.actaDescripcion}

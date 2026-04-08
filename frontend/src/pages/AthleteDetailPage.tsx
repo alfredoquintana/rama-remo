@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
+import { DatePickerField } from '../components/DatePickerField';
 import { StatusMessage } from '../components/StatusMessage';
 import { changeAthleteCategory, getAthlete } from '../services/athletes';
 import { getCategories } from '../services/categories';
@@ -81,6 +82,11 @@ export function AthleteDetailPage() {
 
     if (!selectedCategoryId) {
       setErrorMessage('Debes seleccionar una categoría.');
+      return;
+    }
+
+    if (!fechaDesde) {
+      setErrorMessage('Debes indicar la fecha desde.');
       return;
     }
 
@@ -261,15 +267,12 @@ export function AthleteDetailPage() {
                       </select>
                     </label>
 
-                    <label className="form-field">
-                      <span>Fecha desde</span>
-                      <input
-                        required
-                        type="date"
-                        value={fechaDesde}
-                        onChange={(event) => setFechaDesde(event.target.value)}
-                      />
-                    </label>
+                    <DatePickerField
+                      label="Fecha desde"
+                      required
+                      value={fechaDesde}
+                      onChange={setFechaDesde}
+                    />
                   </div>
 
                   <div className="form-actions">

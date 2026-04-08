@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -43,5 +44,10 @@ export class FleetController {
     @Body() updateBoatDto: UpdateBoatDto,
   ) {
     return this.fleetService.update(id, updateBoatDto);
+  }
+
+  @Delete(':id')
+  delete(@Param('id', ParseIntPipe) id: number) {
+    return this.fleetService.delete(id);
   }
 }

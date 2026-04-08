@@ -4,10 +4,35 @@ import type {
   User,
   UserCreatedResponse,
   UserPayload,
+  UsersListResponse,
 } from '../types/users';
 
 export function getUsers() {
   return apiClient.get<User[]>('/users');
+}
+
+export function getUsersPage(options?: {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+}) {
+  const query = new URLSearchParams();
+
+  if (options?.page) {
+    query.set('page', String(options.page));
+  }
+
+  if (options?.pageSize) {
+    query.set('pageSize', String(options.pageSize));
+  }
+
+  if (options?.search?.trim()) {
+    query.set('search', options.search.trim());
+  }
+
+  const suffix = query.toString() ? `?${query.toString()}` : '';
+
+  return apiClient.get<UsersListResponse>(`/users${suffix}`);
 }
 
 export function getUser(id: number) {

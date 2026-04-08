@@ -13,6 +13,7 @@ import {
   PlanSeguimientoEntity,
   UsuarioEntity,
 } from '../../database/entities';
+import { normalizeFreeText, normalizeLabelText } from '../../common/text.util';
 import { CreatePlanFollowupDto } from './dto/create-plan-followup.dto';
 import { CreatePlanItemDto } from './dto/create-plan-item.dto';
 import { CreatePlanDto } from './dto/create-plan.dto';
@@ -104,10 +105,12 @@ export class PlanningService {
     const planName = this.normalizeRequiredText(
       createPlanDto.nombre,
       'Debes ingresar un nombre para el plan.',
+      'label',
     );
     const objective = this.normalizeRequiredText(
       createPlanDto.objetivoGeneral,
       'Debes ingresar el objetivo general del plan.',
+      'free',
     );
     const normalizedAreas = this.normalizeAreas(createPlanDto.areas);
 
@@ -159,6 +162,7 @@ export class PlanningService {
         ? this.normalizeRequiredText(
             updatePlanDto.nombre,
             'Debes ingresar un nombre para el plan.',
+            'label',
           )
         : currentPlan.nombre;
     const nextObjective =
@@ -166,6 +170,7 @@ export class PlanningService {
         ? this.normalizeRequiredText(
             updatePlanDto.objetivoGeneral,
             'Debes ingresar el objetivo general del plan.',
+            'free',
           )
         : currentPlan.objetivoGeneral;
     const normalizedAreas = updatePlanDto.areas
@@ -501,14 +506,31 @@ export class PlanningService {
   private normalizeRequiredText(
     value: string | null | undefined,
     message: string,
+    mode: 'label' | 'free' = 'free',
   ) {
-    const normalizedValue = value?.trim() ?? '';
+    const rawValue = value ?? '';
+    const normalizedValue =
+      mode === 'label' ? normalizeLabelText(rawValue) : normalizeFreeText(rawValue);
 
     if (!normalizedValue) {
       throw new BadRequestException(message);
     }
 
     return normalizedValue;
+  }
+
+  private normalizeOptionalText(
+    value: string | null | undefined,
+    mode: 'label' | 'free' = 'free',
+  ) {
+    if (!value) {
+      return null;
+    }
+
+    const normalizedValue =
+      mode === 'label' ? normalizeLabelText(value) : normalizeFreeText(value);
+
+    return normalizedValue || null;
   }
 
   private normalizeAreas(
@@ -521,8 +543,8 @@ export class PlanningService {
   ) {
     const normalizedAreas = areas.map((area, index) => ({
       idAreaPlan: area.idAreaPlan,
-      nombre: area.nombre.trim(),
-      descripcion: area.descripcion?.trim() || null,
+      nombre: normalizeLabelText(area.nombre),
+      descripcion: this.normalizeOptionalText(area.descripcion, 'free'),
       orden: area.orden ?? index + 1,
     }));
 
