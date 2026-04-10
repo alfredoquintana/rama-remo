@@ -10,6 +10,8 @@ import { AnnualPlanCreatePage } from '../pages/AnnualPlanCreatePage';
 import { AnnualPlanDetailPage } from '../pages/AnnualPlanDetailPage';
 import { AnnualPlanEditPage } from '../pages/AnnualPlanEditPage';
 import { AnnualPlansListPage } from '../pages/AnnualPlansListPage';
+import { CompetitionManagementPage } from '../pages/CompetitionManagementPage';
+import { CompetitionsPage } from '../pages/CompetitionsPage';
 import { HomePage } from '../pages/HomePage';
 import { FleetPage } from '../pages/FleetPage';
 import { LoginPage } from '../pages/LoginPage';
@@ -36,6 +38,8 @@ export function App() {
               <Route path="/deportistas/nuevo" element={<AthleteCreatePage />} />
               <Route path="/deportistas/:id" element={<AthleteDetailPage />} />
               <Route path="/flota" element={<FleetPage />} />
+              <Route path="/competencias" element={<CompetitionsPage />} />
+              <Route path="/competencias/:id" element={<CompetitionManagementPage />} />
               <Route path="/usuarios" element={<UsersListPage />} />
               <Route path="/usuarios/nuevo" element={<UserCreatePage />} />
               <Route path="/usuarios/:id/editar" element={<UserEditPage />} />

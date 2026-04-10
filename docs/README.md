@@ -17,6 +17,7 @@ Estos documentos no son un complemento decorativo del proyecto. Se usan para:
 - [Arquitectura y funcionamiento](./arquitectura/02-arquitectura-y-funcionamiento.md)
 - [Procesos clave](./arquitectura/03-bpmn-procesos-clave.md)
 - [Desarrollo actual](./arquitectura/04-desarrollo-actual.md)
+- [Modulo de competencias](./arquitectura/05-modulo-competencias.md)
 
 ## Criterio de actualizacion
 
@@ -33,6 +34,7 @@ La documentacion actual cubre:
 - usuarios con y sin acceso
 - deportistas, categorias e historial
 - flota de botes del club
+- competencias, pruebas e inscripciones
 - reuniones con acta
 - planificacion anual con seguimiento
 

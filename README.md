@@ -10,6 +10,7 @@ Aplicacion full stack para la gestion interna de una rama de remo. El estado act
 - Usuarios que pueden existir con o sin acceso al sistema.
 - Modulo deportivo basado en `usuario`, `deportista`, `categoria` y `deportista_categoria`.
 - Modulo de flota basado en `tipo_bote`, `estado_bote` y `bote`.
+- Modulo de competencias basado en `competencia`, `competencia_prueba`, `competencia_inscripcion` e `integrantes`.
 - Reuniones con participantes y acta asociada.
 - Planificacion anual con areas, items y seguimientos.
 - Seed automatico para catalogos y datos demo de desarrollo.
@@ -21,6 +22,7 @@ Aplicacion full stack para la gestion interna de una rama de remo. El estado act
 - [Arquitectura y funcionamiento](./docs/arquitectura/02-arquitectura-y-funcionamiento.md)
 - [Procesos clave](./docs/arquitectura/03-bpmn-procesos-clave.md)
 - [Desarrollo actual](./docs/arquitectura/04-desarrollo-actual.md)
+- [Modulo de competencias](./docs/arquitectura/05-modulo-competencias.md)
 
 ## Estandar de idioma y codificacion
 
@@ -72,9 +74,23 @@ Aplicacion full stack para la gestion interna de una rama de remo. El estado act
 - Paginacion en el listado.
 - Regla actual:
   - `tipo_bote` y `estado_bote` se cargan por seed
-  - los botes del club se ingresan manualmente
-  - `nombre` de bote es unico
-  - solo se permite crear o editar usando catalogos activos
+- los botes del club se ingresan manualmente
+- `nombre` de bote es unico
+- solo se permite crear o editar usando catalogos activos
+
+### Competencias
+
+- Entrada por grilla en `/competencias`.
+- Gestion detallada en `/competencias/:id`.
+- Cada competencia contiene pruebas.
+- Cada prueba puede tener una sola inscripcion del club.
+- La inscripcion guarda integrantes, bote y calculos master.
+- Regla actual:
+  - el backend valida dotacion, timonel y compatibilidad de bote
+  - la categoria de la prueba se normaliza con `id_categoria` y conserva nombre como snapshot operativo
+  - las inscripciones trabajan con estados `presuntiva` y `nominativa`
+  - una competencia `ergometro` no puede mantener pruebas que requieran bote
+  - se guardan snapshots de los deportistas al inscribir
 
 ### Reuniones y actas
 
@@ -113,6 +129,10 @@ Entidades principales:
 - `tipo_bote`
 - `estado_bote`
 - `bote`
+- `competencia`
+- `competencia_prueba`
+- `competencia_inscripcion`
+- `competencia_inscripcion_integrante`
 - `reunion`
 - `participante_reunion`
 - `acta`
@@ -266,6 +286,8 @@ npm.cmd run dev
 - `/deportistas/nuevo`
 - `/deportistas/:id`
 - `/flota`
+- `/competencias`
+- `/competencias/:id`
 - `/reuniones`
 - `/reuniones/nueva`
 - `/reuniones/:id`
@@ -314,6 +336,17 @@ npm.cmd run dev
 - `POST /fleet`
 - `PATCH /fleet/:id`
 
+### Competencias
+
+- `GET /competitions/catalogs`
+- `GET /competitions`
+- `GET /competitions/:id`
+- `POST /competitions`
+- `PATCH /competitions/:id`
+- `POST /competitions/:id/tests`
+- `PATCH /competitions/tests/:testId`
+- `PATCH /competitions/tests/:testId/registration`
+
 ### Reuniones
 
 - `GET /meetings`
@@ -351,6 +384,13 @@ npm.cmd run dev
 - No se puede crear un bote sin estado de bote valido.
 - No se puede repetir el nombre de un bote.
 - No se puede usar un tipo o estado de bote inactivo al guardar.
+- No se puede crear una competencia sin nombre, tipo o rango valido de fechas.
+- Una prueba debe tener numero, orden y nombre.
+- Una prueba de ergometro no puede requerir bote.
+- Una inscripcion `nominativa` debe tener integrantes.
+- No se puede repetir deportista ni orden dentro de una inscripcion.
+- Si la prueba requiere timonel, la inscripcion debe incluir uno.
+- Si la prueba requiere bote y la inscripcion queda `nominativa`, debe existir bote compatible y disponible.
 - La hora de termino de una reunion debe ser posterior a la de inicio.
 - El acta debe traer descripcion o archivo.
 - El archivo de acta no puede superar 5 MB.
@@ -396,5 +436,6 @@ rama-remo/
 4. Registrar usuario existente como deportista.
 5. Cambiar categoria y revisar historial.
 6. Ingresar un bote del club y comprobar filtros en `Flota`.
-7. Crear reunion con participantes y acta.
-8. Crear plan anual, item y seguimiento.
+7. Crear competencia, prueba e inscripcion del club.
+8. Crear reunion con participantes y acta.
+9. Crear plan anual, item y seguimiento.

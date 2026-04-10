@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import {
   ActaEntity,
   CategoriaEntity,
+  ClubEntity,
   DeportistaCategoriaEntity,
   DeportistaEntity,
   EstadoBoteEntity,
@@ -27,6 +28,7 @@ import { SeedService } from './seed.service';
     TypeOrmModule.forFeature([
       RolEntity,
       CategoriaEntity,
+      ClubEntity,
       TipoBoteEntity,
       EstadoBoteEntity,
       MenuEntity,

@@ -195,13 +195,14 @@ export function DatePickerField({
               {calendarDays.map((calendarDay) => {
                 const isSelected = calendarDay.value === value;
                 const isToday = calendarDay.value === todayValue;
-                const isDisabled = !isWithinRange(calendarDay.value, min, max);
+                const isInRange = isWithinRange(calendarDay.value, min, max);
+                const isDisabled = !isInRange;
 
                 return (
                   <button
                     key={calendarDay.value}
                     aria-pressed={isSelected}
-                    className={`date-picker__day${calendarDay.isCurrentMonth ? '' : ' is-outside'}${isSelected ? ' is-selected' : ''}${isToday ? ' is-today' : ''}`}
+                    className={`date-picker__day${calendarDay.isCurrentMonth ? '' : ' is-outside'}${isInRange ? ' is-in-range' : ''}${isSelected ? ' is-selected' : ''}${isToday ? ' is-today' : ''}`}
                     disabled={isDisabled}
                     type="button"
                     onClick={() => applyDate(parseIsoDate(calendarDay.value) ?? today)}
@@ -213,6 +214,18 @@ export function DatePickerField({
             </div>
 
             <div className="date-picker__footer">
+              {min || max ? (
+                <span className="date-picker__range-hint">
+                  {min && max
+                    ? min === max
+                      ? `Solo ${formatDisplayDate(parseIsoDate(min) ?? today)}`
+                      : `${formatDisplayDate(parseIsoDate(min) ?? today)} a ${formatDisplayDate(parseIsoDate(max) ?? today)}`
+                    : min
+                      ? `Desde ${formatDisplayDate(parseIsoDate(min) ?? today)}`
+                      : `Hasta ${formatDisplayDate(parseIsoDate(max ?? todayValue) ?? today)}`}
+                </span>
+              ) : null}
+
               <button
                 className="date-picker__action"
                 type="button"

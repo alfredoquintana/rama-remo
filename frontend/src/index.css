@@ -842,6 +842,14 @@ dt {
   min-width: 220px;
 }
 
+.competitions-table .competitions-table__name {
+  min-width: 240px;
+}
+
+.competitions-table__actions {
+  justify-content: flex-end;
+}
+
 .meetings-table__time-range {
   white-space: nowrap;
 }
@@ -887,6 +895,26 @@ dt {
     border-color 120ms ease,
     box-shadow 120ms ease,
     background-color 120ms ease;
+}
+
+.form-field input,
+.form-field select {
+  min-height: 48px;
+}
+
+.form-field select,
+.competition-form__select {
+  appearance: none;
+  line-height: 1.2;
+  padding-right: 42px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(50% - 2px),
+    calc(100% - 12px) calc(50% - 2px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
 }
 
 .date-picker,
@@ -983,6 +1011,12 @@ dt {
   margin-bottom: 14px;
 }
 
+.date-picker__range-hint {
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
 .date-picker__month-label {
   font-size: 0.98rem;
   font-weight: 700;
@@ -1061,6 +1095,11 @@ dt {
   background: color-mix(in srgb, var(--interactive-surface) 82%, var(--surface-strong) 18%);
 }
 
+.date-picker__day.is-in-range:not(.is-selected):not(:disabled) {
+  background: color-mix(in srgb, var(--primary-soft) 28%, transparent 72%);
+  border-color: color-mix(in srgb, var(--primary) 16%, transparent 84%);
+}
+
 .date-picker__day.is-outside {
   color: color-mix(in srgb, var(--muted) 70%, transparent 30%);
 }
@@ -1084,6 +1123,10 @@ dt {
 .time-picker__action:disabled {
   opacity: 0.35;
   cursor: not-allowed;
+}
+
+.competition-modal__actions {
+  justify-content: flex-end;
 }
 
 .date-picker__footer {
@@ -1506,6 +1549,87 @@ dt {
   margin-bottom: 16px;
 }
 
+.competition-test-toggle-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+
+.competition-toggle {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid var(--interactive-border);
+  border-radius: 16px;
+  background: var(--interactive-surface-soft);
+  cursor: pointer;
+}
+
+.competition-toggle input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.competition-toggle__slider {
+  position: relative;
+  width: 48px;
+  height: 28px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--field-border) 74%, transparent 26%);
+  transition:
+    background-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.competition-toggle__slider::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 3px 8px rgba(15, 15, 15, 0.22);
+  transition: transform 120ms ease;
+}
+
+.competition-toggle__copy {
+  display: grid;
+  gap: 4px;
+}
+
+.competition-toggle__copy strong {
+  font-size: 0.96rem;
+}
+
+.competition-toggle__copy small {
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.competition-toggle input:checked + .competition-toggle__slider {
+  background: color-mix(in srgb, var(--primary) 72%, #ffffff 28%);
+}
+
+.competition-toggle input:checked + .competition-toggle__slider::after {
+  transform: translateX(20px);
+}
+
+.competition-toggle input:disabled + .competition-toggle__slider {
+  opacity: 0.58;
+}
+
+.competition-toggle:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.82;
+}
+
 .search-results,
 .selected-participants {
   display: grid;
@@ -1565,6 +1689,458 @@ dt {
 .file-card__meta span {
   color: var(--muted);
   font-size: 0.92rem;
+}
+
+.competitions-layout {
+  align-items: start;
+}
+
+.competitions-row--active {
+  background: color-mix(in srgb, var(--primary-soft) 54%, transparent 46%);
+}
+
+.competition-history,
+.competition-registration-members {
+  display: grid;
+  gap: 12px;
+}
+
+.competitions-page {
+  align-items: stretch;
+}
+
+.competition-shell {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.competition-sidebar,
+.competition-workspace,
+.competition-overview,
+.competition-tab-content,
+.competition-test-list,
+.competition-summary-stack,
+.competition-mode-switch,
+.competition-modal__form {
+  display: grid;
+  gap: 18px;
+}
+
+.competition-modal__form .form-grid {
+  align-items: start;
+}
+
+.competition-modal__form .form-field {
+  align-content: start;
+}
+
+.competition-sidebar {
+  position: sticky;
+  top: 24px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+}
+
+.competition-sidebar__header {
+  display: grid;
+  gap: 16px;
+}
+
+.competition-sidebar__summary {
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
+  border: 1px solid var(--elevated-border);
+  border-radius: 18px;
+  background: var(--elevated-surface);
+}
+
+.competition-sidebar__summary span {
+  color: var(--muted);
+}
+
+.competition-sidebar__summary .button {
+  width: 100%;
+}
+
+.competition-list {
+  display: grid;
+  gap: 12px;
+}
+
+.competition-list__item,
+.competition-list-button,
+.competition-subnav__item {
+  width: 100%;
+  display: grid;
+  gap: 8px;
+  padding: 16px 18px;
+  border: 1px solid var(--interactive-border);
+  border-radius: 16px;
+  background: var(--interactive-surface);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    border-color 120ms ease,
+    background-color 120ms ease;
+}
+
+.competition-list__item:hover,
+.competition-subnav__item:hover {
+  transform: translateY(-1px);
+}
+
+.competition-list__item span,
+.competition-list-button span,
+.competition-subnav__item span {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.competition-list__meta {
+  display: grid;
+  gap: 4px;
+}
+
+.competition-list__footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.competition-list__footer span {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.competition-list__item.is-active,
+.competition-subnav__item.is-active {
+  background: color-mix(in srgb, var(--primary-soft) 72%, var(--surface-strong) 28%);
+  border-color: color-mix(in srgb, var(--primary) 18%, var(--interactive-border) 82%);
+}
+
+.competition-list__row,
+.competition-overview__header,
+.competition-test-card__header,
+.competition-chip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.competition-overview__copy {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.competition-overview__copy h3,
+.competition-test-card__copy h4 {
+  margin: 0;
+}
+
+.competition-overview__status {
+  display: grid;
+  gap: 10px;
+  min-width: 180px;
+  justify-items: end;
+  text-align: right;
+}
+
+.competition-overview__status-copy {
+  display: grid;
+  gap: 6px;
+}
+
+.competition-overview__status-meta {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.competition-overview__edit-button {
+  justify-self: end;
+}
+
+.competition-new__test-button {
+  justify-self: end;
+  margin-left: auto;
+}
+
+.competition-tests-table__scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.competition-tests-table {
+  min-width: 1120px;
+  table-layout: auto;
+}
+
+.competition-tests-table th,
+.competition-tests-table td {
+  vertical-align: middle;
+}
+
+.competition-tests-table td strong {
+  display: block;
+  line-height: 1.25;
+}
+
+.competition-tests-table th:nth-child(1),
+.competition-tests-table td:nth-child(1) {
+  min-width: 220px;
+}
+
+.competition-tests-table th:nth-child(2),
+.competition-tests-table td:nth-child(2) {
+  min-width: 84px;
+}
+
+.competition-tests-table th:nth-child(3),
+.competition-tests-table td:nth-child(3),
+.competition-tests-table th:nth-child(4),
+.competition-tests-table td:nth-child(4) {
+  min-width: 130px;
+}
+
+.competition-tests-table th:nth-child(5),
+.competition-tests-table td:nth-child(5) {
+  min-width: 170px;
+  white-space: nowrap;
+}
+
+.competition-tests-table th:nth-child(6),
+.competition-tests-table td:nth-child(6) {
+  min-width: 150px;
+}
+
+.competition-tests-table th:nth-child(7),
+.competition-tests-table td:nth-child(7) {
+  min-width: 250px;
+}
+
+.competition-tests-table__actions {
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+}
+
+.competition-tests-table__actions .button {
+  white-space: nowrap;
+}
+
+.competition-test-list--legacy {
+  display: none;
+}
+
+.competition-overview__actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+  border-top: 1px solid var(--elevated-border);
+}
+
+.competition-eyebrow {
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.competition-kpi-grid,
+.competition-test-card__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.competition-kpi {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--elevated-surface);
+  border: 1px solid var(--elevated-border);
+}
+
+.competition-kpi span {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.competition-kpi strong {
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.competition-subnav {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.competition-subnav__item {
+  min-height: 92px;
+  align-content: start;
+}
+
+.competition-summary-grid {
+  align-items: start;
+}
+
+.competition-summary-card,
+.competition-empty-state {
+  display: grid;
+  gap: 8px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: var(--elevated-surface);
+  border: 1px solid var(--elevated-border);
+}
+
+.competition-summary-stack {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.competition-summary-card span,
+.competition-empty-state p {
+  color: var(--muted);
+}
+
+.competition-test-card {
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+  border-radius: 20px;
+  background: var(--elevated-surface);
+  border: 1px solid var(--elevated-border);
+}
+
+.competition-test-card__copy {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.competition-test-card__grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.competition-test-card__grid > div {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--interactive-border);
+  border-radius: 14px;
+  background: var(--interactive-surface-soft);
+}
+
+.competition-test-card__grid dd {
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+.competition-test-card__footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.competition-test-card__status {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.competition-detail-grid__full {
+  grid-column: 1 / -1;
+}
+
+.competition-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(7, 7, 7, 0.56);
+  backdrop-filter: blur(8px);
+}
+
+.competition-modal {
+  width: min(760px, 100%);
+  max-height: min(88dvh, 980px);
+  overflow-y: auto;
+  display: grid;
+  gap: 20px;
+  padding: 22px;
+  border: 1px solid var(--surface-border);
+  border-radius: 26px;
+  background: var(--surface);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow);
+}
+
+.competition-modal--wide {
+  width: min(1080px, 100%);
+}
+
+.competition-modal__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.competition-mode-switch {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.competition-registration-panel {
+  gap: 16px;
+}
+
+.competition-tests-table__actions {
+  flex-wrap: nowrap;
+}
+
+.competition-export-fields {
+  margin-top: 16px;
+}
+
+.competition-registration-modal {
+  width: min(1080px, 100%);
+}
+
+.competition-registration-layout {
+  display: grid;
+  gap: 18px;
+}
+
+.competition-search-results {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.competition-master-card {
+  display: grid;
+  gap: 8px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--primary-soft) 38%, var(--elevated-surface) 62%);
+  border: 1px solid color-mix(in srgb, var(--primary) 14%, var(--elevated-border) 86%);
 }
 
 .planning-stats-grid {
@@ -2107,6 +2683,22 @@ dt {
     grid-template-columns: 1fr;
   }
 
+  .competition-shell,
+  .competition-subnav,
+  .competition-kpi-grid,
+  .competition-summary-stack,
+  .competition-test-card__grid,
+  .competition-test-toggle-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .competition-sidebar {
+    position: static;
+    top: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
   .app-sidebar {
     position: fixed;
     top: 0;
@@ -2340,6 +2932,15 @@ dt {
     border-radius: 20px;
   }
 
+  .competition-modal-backdrop {
+    padding: 12px;
+  }
+
+  .competition-modal {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
   .athlete-modal-backdrop,
   .fleet-modal-backdrop,
   .user-access-modal-backdrop {
@@ -2355,9 +2956,28 @@ dt {
 
   .athlete-modal__header,
   .fleet-modal__header,
-  .user-access-modal__header {
+  .user-access-modal__header,
+  .competition-modal__header,
+  .competition-overview__header,
+  .competition-test-card__header {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .competition-overview__status,
+  .competition-test-card__footer {
+    justify-items: start;
+    text-align: left;
+  }
+
+  .competition-overview__edit-button {
+    justify-self: stretch;
+    width: 100%;
+  }
+
+  .competition-new__test-button {
+    justify-self: stretch;
+    width: 100%;
   }
 
   .fleet-page__summary {

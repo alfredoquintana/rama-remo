@@ -1,3 +1,8 @@
+import type {
+  CompetitionRegistrationStatus,
+  CompetitionStatus,
+  CompetitionType,
+} from '../types/competitions';
 import type { MeetingMode, MeetingState } from '../types/meetings';
 import type {
   AnnualPlanStatus,
@@ -35,5 +40,24 @@ export const meetingStateLabels: Record<MeetingState, string> = {
 export const meetingModeLabels: Record<MeetingMode, string> = {
   presencial: 'Presencial',
   online: 'Online',
-  hibrida: 'Híbrida',
+  hibrida: 'Hibrida',
+};
+
+export const competitionTypeLabels: Record<CompetitionType, string> = {
+  regata: 'Regata',
+  ergometro: 'Ergometro',
+};
+
+export const competitionStatusLabels: Record<CompetitionStatus, string> = {
+  borrador: 'Borrador',
+  en_trabajo: 'En trabajo',
+  cerrada: 'Cerrada',
+};
+
+export const competitionRegistrationStatusLabels: Record<
+  CompetitionRegistrationStatus,
+  string
+> = {
+  presuntiva: 'Presuntiva',
+  nominativa: 'Nominativa',
 };
