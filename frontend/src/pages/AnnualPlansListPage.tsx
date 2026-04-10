@@ -33,7 +33,7 @@ export function AnnualPlansListPage() {
 
   const handleDelete = async (plan: AnnualPlanListItem) => {
     const confirmed = window.confirm(
-      `Seguro que quieres eliminar el plan "${plan.nombre}" del año ${plan.anio}? Esta acción no se puede deshacer.`,
+      `Vas a eliminar el plan "${plan.nombre}" del año ${plan.anio}, junto con sus áreas, ítems y seguimientos. Esta acción no se puede deshacer.`,
     );
 
     if (!confirmed) {
@@ -58,9 +58,7 @@ export function AnnualPlansListPage() {
       <div className="page-heading">
         <div>
           <h2>Planificación anual</h2>
-          <p>
-            Ordena compromisos, responsables y seguimiento para mostrar avances del año.
-          </p>
+          <p>Ordena compromisos, responsables y seguimiento para mostrar avances del año.</p>
         </div>
         <Link className="button button-primary" to="/planificacion/nuevo">
           Crear plan anual
@@ -91,7 +89,6 @@ export function AnnualPlansListPage() {
                 <th>Estado</th>
                 <th>Items</th>
                 <th>Cumplimiento</th>
-                <th>Atrasados</th>
                 <th>Acciones</th>
               </tr>
             </thead>
@@ -108,20 +105,13 @@ export function AnnualPlansListPage() {
                   <td data-label="Estado">{annualPlanStatusLabels[plan.estado]}</td>
                   <td data-label="Items">{plan.summary.totalItems}</td>
                   <td data-label="Cumplimiento">{plan.summary.porcentajeCumplimiento}%</td>
-                  <td data-label="Atrasados">{plan.summary.atrasados}</td>
                   <td data-label="Acciones">
-                    <div className="table-actions">
+                    <div className="table-actions annual-plans-table__actions">
                       <Link
                         className="button button-secondary button-small"
                         to={`/planificacion/${plan.idPlanAnual}`}
                       >
                         Ver
-                      </Link>
-                      <Link
-                        className="button button-secondary button-small"
-                        to={`/planificacion/${plan.idPlanAnual}/editar`}
-                      >
-                        Editar
                       </Link>
                       <button
                         className="button button-danger button-small"

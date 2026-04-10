@@ -1,124 +1,197 @@
 # Sistema Rama de Remo
 
-Aplicacion full stack para la gestion administrativa de una rama de remo. El sistema cubre autenticacion, usuarios, roles, reuniones con acta integrada, planificacion anual con seguimiento y una interfaz web protegida para trabajo interno de directiva.
+Aplicacion full stack para la gestion interna de una rama de remo. El estado actual de la rama `desarrollo` cubre autenticacion, usuarios, habilitacion de acceso, deportistas, categorias, flota, reuniones con acta integrada, planificacion anual con seguimiento y una interfaz web protegida para trabajo operativo.
 
 ## Estado actual
 
-- Backend en NestJS con TypeORM y MySQL.
-- Frontend en React + TypeScript + Vite.
-- Sesion protegida con token.
-- Seeds automaticos para catalogos y datos demo.
-- Interfaz con selector de temas inspirado en la bandera de Alemania.
-- Formato visual estandar de fechas `dd/mm/YY`.
-- Formato visual estandar de horas `HH:mm`.
+- Backend en NestJS 11 con TypeORM y MySQL.
+- Frontend en React 19 + TypeScript + Vite.
+- Autenticacion por RUT y clave con JWT.
+- Usuarios que pueden existir con o sin acceso al sistema.
+- Modulo deportivo basado en `usuario`, `deportista`, `categoria` y `deportista_categoria`.
+- Modulo de flota basado en `tipo_bote`, `estado_bote` y `bote`.
+- Reuniones con participantes y acta asociada.
+- Planificacion anual con areas, items y seguimientos.
+- Seed automatico para catalogos y datos demo de desarrollo.
+
+## Documentacion tecnica
+
+- [Docs generales](./docs/README.md)
+- [Modelo de datos actual](./docs/arquitectura/01-modelo-datos-mer.md)
+- [Arquitectura y funcionamiento](./docs/arquitectura/02-arquitectura-y-funcionamiento.md)
+- [Procesos clave](./docs/arquitectura/03-bpmn-procesos-clave.md)
+- [Desarrollo actual](./docs/arquitectura/04-desarrollo-actual.md)
 
 ## Estandar de idioma y codificacion
 
-- Todos los archivos fuente y de configuracion deben guardarse en `UTF-8`.
-- Los textos visibles al usuario deben escribirse en español correcto, con tildes, `ñ` y signos como `¿`.
-- Esta misma regla aplica a seeds, usuarios demo, nombres simulados, mensajes de validacion, labels y placeholders.
-- No se deben reemplazar tildes o `ñ` por versiones simplificadas como `sesion`, `reunion`, `ano`, `Munoz` o `Nunez`, salvo que una restriccion tecnica externa lo exija.
-- Cuando se agreguen nuevos textos o datos simulados, se debe preferir ortografia natural en español, tanto al escribir manualmente como al generar contenido desde codigo.
+- Todos los archivos fuente y de configuracion deben guardarse en UTF-8.
+- Los textos visibles al usuario deben escribirse en espanol consistente con el sistema.
+- Esta regla aplica a labels, mensajes, seeds, datos demo y documentacion.
 
-## Modulos funcionales
+## Modulos funcionales vigentes
 
 ### Autenticacion y sesion
 
 - Login por RUT y clave.
-- Persistencia de sesion en frontend.
-- Ruta protegida para toda la aplicacion excepto `/login`.
+- Reconstruccion de sesion desde `GET /auth/me`.
 - Cambio de clave desde `Mi acceso`.
-- Validacion global del backend con `ValidationPipe`:
-  - `whitelist: true`
-  - `transform: true`
-  - `forbidNonWhitelisted: true`
+- Toda la aplicacion queda protegida por `ProtectedRoute`, salvo `/login`.
 
 ### Usuarios y roles
 
-- Crear usuarios con clave provisoria automatica.
-- Editar datos personales y roles.
-- Asignar uno o mas roles por usuario.
-- Listado ordenado por nombre.
-- Visualizacion de roles con inicial mayuscula en frontend.
-- Protecciones de negocio:
-  - no se puede eliminar un usuario con actas registradas a su nombre
-  - no se puede eliminar el ultimo usuario con rol `admin`
-  - no se puede crear o actualizar un usuario con un RUT duplicado
+- Crear usuario con acceso o sin acceso.
+- Editar datos personales.
+- Habilitar acceso a un usuario existente.
+- Asignar uno o mas roles a usuarios con acceso.
+- Regla actual:
+  - un usuario sin acceso puede existir sin roles
+  - un usuario con acceso debe tener al menos un rol
+  - si no hay acceso, no se genera clave provisoria
+  - si se habilita acceso, se genera clave provisoria segun entorno
+
+### Deportistas y categorias
+
+- Buscar usuarios existentes para registrarlos como deportistas.
+- Registrar deportista sin duplicar datos personales.
+- Asignar categoria inicial.
+- Listar deportistas activos.
+- Ver categoria vigente e historial.
+- Cambiar categoria manteniendo trazabilidad.
+- Regla actual:
+  - la condicion deportiva la define la existencia de `deportista`
+  - el rol `deportista` no equivale por si solo a ser deportista en el modulo
+  - cada deportista debe tener una sola categoria vigente
+
+### Flota
+
+- Gestion centralizada desde `/flota`.
+- Catalogos parametrizados para tipo de bote y estado de bote.
+- Registro, edicion y consulta de botes desde modales.
+- Busqueda inteligente por nombre, marca, tipo, estado y anio.
+- Filtros por tipo de bote, estado y activo.
+- Paginacion en el listado.
+- Regla actual:
+  - `tipo_bote` y `estado_bote` se cargan por seed
+  - los botes del club se ingresan manualmente
+  - `nombre` de bote es unico
+  - solo se permite crear o editar usando catalogos activos
 
 ### Reuniones y actas
 
 - Crear, editar, listar y eliminar reuniones.
-- Asignar participantes desde buscador por nombre, RUT o rol.
-- Registrar acta en el mismo flujo de la reunion.
-- Adjuntar archivo al acta en base64.
+- Buscar y asignar participantes.
+- Registrar acta dentro del mismo flujo de la reunion.
+- Adjuntar archivo del acta en base64.
 - El sistema registra automaticamente:
-  - usuario que actualiza el acta
-  - rol principal del usuario autenticado
+  - usuario que actualiza
+  - rol principal usado para el acta
   - fecha de actualizacion
-- Reglas de negocio:
-  - la hora de fin debe ser posterior a la hora de inicio
-  - no se puede guardar un acta vacia
-  - el archivo del acta no puede superar 5 MB
-  - todos los participantes deben existir
 
 ### Planificacion anual
 
 - Crear, editar, listar y eliminar planes anuales.
-- Definir areas del plan.
+- Definir areas.
 - Crear y actualizar items por area.
-- Registrar seguimientos con avance porcentual y aprendizaje.
-- Resumen automatico:
-  - total de items
-  - cumplidos
-  - en curso
-  - atrasados
-  - porcentaje de cumplimiento
-- Reglas de negocio:
-  - un plan debe tener al menos un area
-  - el anio debe estar entre 2000 y 2100
-  - no se pueden repetir nombres de areas dentro del mismo plan
-  - no se puede quitar un area si ya tiene items asociados
-  - el responsable debe existir si fue informado
-  - el avance del seguimiento debe estar entre 0 y 100
-  - los estados finales pueden completar automaticamente la fecha de cumplimiento
+- Registrar seguimientos con avance porcentual.
+- Obtener resumen automatico de estado del plan.
 
-## Cambios actuales de interfaz
+## Modelo de datos actual
 
-- Modal de cuenta sobre el nombre del usuario con:
-  - cambio de tema
-  - configurar o cambiar foto
-  - quitar foto
-  - acceso a `Mi acceso`
-  - cierre de sesion
-- Menu lateral con icono de casa junto a `Inicio`.
-- Tema por defecto: `Alemania clasico`.
-- Temas disponibles:
-  - `Alemania clasico`
-  - `Alemania grafito`
-  - `Alemania marfil`
-- El tema se guarda en `localStorage` y se reaplica al volver a entrar.
-- La foto personal del usuario tambien se guarda en `localStorage`.
+El modelo real se deriva de TypeORM en [backend/src/database/entities](./backend/src/database/entities) y no de `docs/database.sql`.
 
-## Stack tecnico
+Entidades principales:
 
-- Frontend: React 19 + TypeScript + Vite + React Router.
-- Backend: NestJS 11 + TypeScript.
-- ORM: TypeORM.
-- Base de datos: MySQL.
-- Gestor de paquetes: npm.
+- `usuario`
+- `rol`
+- `usuario_rol`
+- `menu`
+- `item`
+- `menu_rol`
+- `categoria`
+- `deportista`
+- `deportista_categoria`
+- `tipo_bote`
+- `estado_bote`
+- `bote`
+- `reunion`
+- `participante_reunion`
+- `acta`
+- `plan_anual`
+- `plan_area`
+- `plan_item`
+- `plan_seguimiento`
 
-## Requisitos previos
+Puntos de negocio importantes:
 
-- Node.js 22 o superior.
-- npm 10 o superior.
-- MySQL disponible localmente.
-- XAMPP es una opcion valida para desarrollo local.
+- `usuario.clave_hash` puede ser `null`, lo que permite usuarios sin acceso.
+- `deportista` referencia a `usuario` en relacion uno a uno.
+- `deportista_categoria` conserva historial y vigencia de categoria.
+- `tipo_bote` y `estado_bote` son catalogos operativos parametrizados.
+- `bote` referencia obligatoriamente a un tipo y un estado.
+- `acta.id_reunion` es unico, por lo que solo existe una acta por reunion.
+- `plan_anual.anio` es unico.
+
+## Flujos importantes
+
+### Usuario sin acceso
+
+1. Se crea `usuario` con datos personales.
+2. No se asignan roles.
+3. `clave_hash` queda `null`.
+4. No puede iniciar sesion.
+
+### Habilitar acceso
+
+1. Se toma un usuario ya existente.
+2. Se asignan roles.
+3. Se genera clave provisoria.
+4. El usuario queda habilitado para login.
+
+### Registrar deportista
+
+1. Se busca un usuario ya existente.
+2. Se valida que aun no sea deportista.
+3. Se crea `deportista`.
+4. Se crea una fila vigente en `deportista_categoria`.
+
+### Cambiar categoria
+
+1. Se toma la categoria vigente.
+2. La categoria actual deja de estar vigente.
+3. Se registra `fecha_hasta`.
+4. Se crea nueva fila vigente.
+
+### Gestionar flota
+
+1. Se cargan catalogos de tipos y estados.
+2. Se consulta grilla paginada con filtros y buscador.
+3. Se crea o edita un bote desde modal.
+4. El backend valida tipo activo, estado activo y nombre unico.
+
+## Seed de desarrollo
+
+El seed se ejecuta al iniciar backend y deja:
+
+- 9 roles base.
+- Catalogo de categorias deportivas.
+- Catalogo completo de tipos de bote: `1x`, `2x`, `2-`, `2+`, `4x`, `4-`, `4+`, `8+`.
+- Estados de bote: `Disponible`, `En mantenimiento`, `Fuera de servicio`.
+- Menus base de Inicio, Usuarios, Deportistas, Flota, Reuniones y Planificacion.
+- 6 usuarios demo con acceso.
+- 100 personas del club adicionales.
+- Esas 100 personas tambien registradas como deportistas.
+- Categorias iniciales para esos 100 deportistas.
+- 30 deportistas clasificados como Master.
+- 2 reuniones demo.
+- 1 acta demo.
+- 1 plan anual demo con areas, items y seguimientos.
+- No se crean botes demo: la flota del club se ingresa manualmente.
 
 ## Variables de entorno
 
 ### Backend
 
-Archivo: [backend/.env.example](c:\Users\alfre\OneDrive\Documentos\rama-remo\backend\.env.example)
+Archivo: [backend/.env.example](./backend/.env.example)
 
 ```env
 DB_HOST=localhost
@@ -134,15 +207,9 @@ ADMIN_PASSWORD=admin123
 DEFAULT_USER_PASSWORD=remo1234
 ```
 
-Notas:
-
-- `FRONTEND_URL` controla el origen permitido por CORS.
-- `ADMIN_RUT` y `ADMIN_PASSWORD` determinan el admin inicial.
-- `DEFAULT_USER_PASSWORD` define la clave provisoria de usuarios nuevos.
-
 ### Frontend
 
-Archivo: [frontend/.env.example](c:\Users\alfre\OneDrive\Documentos\rama-remo\frontend\.env.example)
+Archivo: [frontend/.env.example](./frontend/.env.example)
 
 ```env
 VITE_API_BASE_URL=http://localhost:3001
@@ -164,117 +231,29 @@ cd frontend
 npm.cmd install
 ```
 
-Nota para PowerShell:
-
-- Si `npm` falla por `npm.ps1`, usa `npm.cmd`.
-
 ## Puesta en marcha
 
-Orden recomendado:
-
-1. Iniciar MySQL.
-2. Crear la base configurada en `backend/.env`.
-3. Levantar backend.
-4. Levantar frontend.
-
-### Crear base de datos
-
-Puedes crearla desde phpMyAdmin o con el script [docs/database.sql](c:\Users\alfre\OneDrive\Documentos\rama-remo\docs\database.sql).
-
-Configuracion habitual:
-
-- host: `localhost`
-- puerto: `3306`
-- usuario: `root`
-- password: vacio
-- base: `rama_remo`
-
-### Levantar backend
+### Backend
 
 ```powershell
 cd backend
 npm.cmd run start:dev
 ```
 
-Disponible en:
-
-- `http://localhost:3001`
-- health check: `http://localhost:3001/health`
-
-Al iniciar:
-
-- TypeORM sincroniza tablas en desarrollo.
-- Se validan variables de entorno.
-- Se aplican roles base, menus e items.
-- Se siembran usuarios demo, reuniones demo y planificacion demo si aun no existen.
-
-### Levantar frontend
+### Frontend
 
 ```powershell
 cd frontend
 npm.cmd run dev
 ```
 
-Disponible en:
-
-- `http://localhost:5173`
-
 ## Acceso inicial
 
-Administrador inicial:
+- RUT admin: `11111111-1`
+- clave admin: `admin123`
+- clave provisoria por defecto: `remo1234`
 
-- RUT: `11111111-1`
-- clave: `admin123`
-- roles: `admin`, `presidente`
-
-Clave provisoria por defecto para nuevos usuarios:
-
-- `remo1234`
-
-Cada usuario nuevo:
-
-- inicia sesion con su RUT
-- recibe la clave provisoria definida por entorno
-- puede cambiarla desde `Mi acceso`
-
-## Datos demo incluidos
-
-El seed deja una base de demostracion coherente con:
-
-- 6 usuarios demo
-- 9 roles base
-- menus de Inicio, Usuarios, Reuniones y Planificacion
-- 2 reuniones demo
-- 1 acta demo
-- 1 plan anual demo
-- areas, items y seguimientos de ejemplo
-
-### Roles base
-
-- admin
-- presidente
-- vicepresidente
-- secretario
-- tesorero
-- director
-- apoderado
-- deportista
-- entrenador
-
-### Menus e items base
-
-- Inicio
-- Usuarios
-  - Listado de usuarios
-  - Crear usuario
-- Reuniones
-  - Listado de reuniones
-  - Crear reunion
-- Planificacion
-  - Planes anuales
-  - Crear plan anual
-
-## Rutas del frontend
+## Rutas de frontend vigentes
 
 - `/login`
 - `/`
@@ -282,6 +261,11 @@ El seed deja una base de demostracion coherente con:
 - `/usuarios`
 - `/usuarios/nuevo`
 - `/usuarios/:id/editar`
+- `/usuarios/:id/habilitar-acceso`
+- `/deportistas`
+- `/deportistas/nuevo`
+- `/deportistas/:id`
+- `/flota`
 - `/reuniones`
 - `/reuniones/nueva`
 - `/reuniones/:id`
@@ -291,7 +275,7 @@ El seed deja una base de demostracion coherente con:
 - `/planificacion/:id`
 - `/planificacion/:id/editar`
 
-## API principal
+## API principal vigente
 
 ### Base y autenticacion
 
@@ -306,7 +290,29 @@ El seed deja una base de demostracion coherente con:
 - `GET /users/:id`
 - `POST /users`
 - `PATCH /users/:id`
+- `POST /users/:id/enable-access`
 - `DELETE /users/:id`
+
+### Deportistas
+
+- `GET /athletes/users/search`
+- `GET /athletes`
+- `GET /athletes/:id`
+- `POST /athletes`
+- `PATCH /athletes/:id/category`
+
+### Categorias
+
+- `GET /categories`
+- `POST /categories`
+
+### Flota
+
+- `GET /fleet/catalogs`
+- `GET /fleet`
+- `GET /fleet/:id`
+- `POST /fleet`
+- `PATCH /fleet/:id`
 
 ### Reuniones
 
@@ -332,105 +338,22 @@ El seed deja una base de demostracion coherente con:
 - `GET /menus`
 - `GET /roles`
 
-## Validaciones relevantes
+## Validaciones destacadas
 
-### Backend
-
-#### Login
-
-- `rut`: string, maximo 20 caracteres
-- `password`: string, maximo 100 caracteres
-
-#### Cambio de clave
-
-- `newPassword`: minimo 6 y maximo 100 caracteres
-
-#### Usuarios
-
-- `rut`: string, maximo 20
-- `nombre`: string, maximo 120
-- `telefono`: string, maximo 30
-- `fechaNac`: fecha valida ISO
-- `direccion`: string, maximo 255
-- `roleIds`: arreglo unico de enteros
-- en creacion, `roleIds` no puede venir vacio
-
-#### Reuniones
-
-- `fecha`: fecha valida ISO
-- `horaInicio`: formato `HH:mm`
-- `horaFin`: formato `HH:mm`
-- `lugar`: string, maximo 150
-- `estado`: enum valido
-- `modalidad`: enum valido
-- `participantIds`: arreglo unico de enteros, opcional
-- `acta.titulo`: string, maximo 160
-- `acta.archivo.nombre`: maximo 255
-- `acta.archivo.tipo`: maximo 150
-- `acta.archivo.contenidoBase64`: base64 valido
-- `acta.archivo.tamanoBytes`: entre 1 byte y 5 MB
-
-Reglas adicionales:
-
-- `horaFin` debe ser mayor que `horaInicio`
-- el acta debe traer descripcion o archivo
-- el actor autenticado debe existir y tener al menos un rol
-
-#### Plan anual
-
-- `anio`: entero entre 2000 y 2100
-- `nombre`: string, maximo 150
-- `areas`: minimo una
-- `areas.nombre`: maximo 100
-- `areas.orden`: entero minimo 1
-
-Reglas adicionales:
-
-- no se repiten nombres de areas dentro del mismo plan
-- las areas se normalizan con `trim`
-- el sistema controla duplicados a nivel de base de datos
-
-#### Item de plan
-
-- `idAreaPlan`: entero
-- `idResponsable`: entero opcional
-- `titulo`: string, maximo 150
-- `descripcion`: requerido
-- `resultadoEsperado`: requerido
-- `prioridad`: enum opcional
-- `estado`: enum opcional
-- `fechaPlanificada`: fecha valida ISO
-- `fechaCumplimientoReal`: fecha valida ISO opcional
-- `resumenFinal`: string opcional
-
-#### Seguimiento
-
-- `estado`: enum valido
-- `avancePorcentaje`: entero entre 0 y 100
-- `comentario`: requerido
-- `bloqueos`, `proximoPaso`, `funcionoBien`, `porMejorar`: opcionales
-
-### Frontend
-
-El frontend agrega validaciones de experiencia antes de enviar al backend:
-
-- confirmacion de nueva clave debe coincidir
-- al menos un rol al crear o editar usuario
-- al menos un area al crear o editar plan
-- no repetir nombres de areas en el mismo plan
-- item de plan con titulo, descripcion, resultado esperado y fecha planificada
-- seguimiento con comentario y avance entre 0 y 100
-- acta con descripcion o archivo
-- archivo de acta con maximo 5 MB
-
-## Criterios de interfaz actuales
-
-- El frontend usa `input type="date"` y `input type="time"` para capturar datos tecnicos.
-- La visualizacion de fechas se muestra como `dd/mm/YY`.
-- La visualizacion de horas se muestra como `HH:mm`.
-- El selector de tema y la foto personal viven en el modal de cuenta.
-- `Inicio` aparece como acceso principal en el sidebar con icono de casa.
-- Los nombres de roles se muestran con inicial mayuscula.
+- No se puede crear un usuario con RUT duplicado.
+- No se puede dejar sin roles a un usuario con acceso.
+- No se pueden asignar roles a un usuario sin acceso usando el update comun.
+- No se puede registrar dos veces al mismo usuario como deportista.
+- No se puede dejar mas de una categoria vigente por deportista.
+- La nueva categoria no puede iniciar antes que la vigente.
+- No se puede crear una categoria sin nombre.
+- No se puede crear un bote sin tipo de bote valido.
+- No se puede crear un bote sin estado de bote valido.
+- No se puede repetir el nombre de un bote.
+- No se puede usar un tipo o estado de bote inactivo al guardar.
+- La hora de termino de una reunion debe ser posterior a la de inicio.
+- El acta debe traer descripcion o archivo.
+- El archivo de acta no puede superar 5 MB.
 
 ## Estructura principal del repositorio
 
@@ -442,7 +365,10 @@ rama-remo/
 |  |  |- database/
 |  |  |  |- entities/
 |  |  |- modules/
+|  |     |- athletes/
 |  |     |- auth/
+|  |     |- categories/
+|  |     |- fleet/
 |  |     |- health/
 |  |     |- meetings/
 |  |     |- menus/
@@ -455,7 +381,6 @@ rama-remo/
 |  |- src/
 |  |  |- app/
 |  |  |- components/
-|  |  |- hooks/
 |  |  |- layouts/
 |  |  |- pages/
 |  |  |- services/
@@ -463,42 +388,13 @@ rama-remo/
 |  |  |- utils/
 ```
 
-## Comandos utiles
-
-### Frontend
-
-```powershell
-cd frontend
-npm.cmd run dev
-npm.cmd run build
-npm.cmd run lint
-npm.cmd run preview
-```
-
-### Backend
-
-```powershell
-cd backend
-npm.cmd run start:dev
-npm.cmd run build
-npm.cmd run lint
-```
-
 ## Verificaciones recomendadas
 
-Despues de levantar el proyecto conviene probar:
-
-1. Login con el usuario admin inicial.
-2. Cambio de clave en `Mi acceso`.
-3. Creacion y edicion de usuario.
-4. Creacion de reunion con participantes.
-5. Carga de acta con descripcion o archivo.
-6. Creacion de plan anual, item y seguimiento.
-7. Cambio de tema desde el modal de cuenta.
-
-## Estado de verificacion en este repositorio
-
-- Backend compila correctamente.
-- Frontend compila correctamente.
-- Se ha verificado construccion con `npm.cmd run build` en frontend.
-- El sistema mantiene datos demo coherentes para desarrollo local.
+1. Login con usuario admin.
+2. Crear usuario sin acceso.
+3. Habilitar acceso a usuario existente.
+4. Registrar usuario existente como deportista.
+5. Cambiar categoria y revisar historial.
+6. Ingresar un bote del club y comprobar filtros en `Flota`.
+7. Crear reunion con participantes y acta.
+8. Crear plan anual, item y seguimiento.

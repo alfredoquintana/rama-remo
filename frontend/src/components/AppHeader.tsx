@@ -230,10 +230,7 @@ export function AppHeader({
                 alt="Icono Rudern"
               />
               <div>
-                <h1 className="app-header__title">Sistema Rama de Remo</h1>
-                <p className="app-header__subtitle">
-                  Usuarios, roles, reuniones y actas para la directiva.
-                </p>
+                <h1 className="app-header__title">Sistema Rama de Remo CDA</h1>
               </div>
             </div>
           </div>

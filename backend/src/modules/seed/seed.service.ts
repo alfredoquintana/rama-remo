@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import {
   ActaEntity,
+  EstadoBoteEntity,
   CategoriaEntity,
   DeportistaCategoriaEntity,
   DeportistaEntity,
@@ -22,6 +23,7 @@ import {
   PrioridadPlanItem,
   ReunionEntity,
   RolEntity,
+  TipoBoteEntity,
   UsuarioEntity,
   UsuarioRolEntity,
 } from '../../database/entities';
@@ -61,6 +63,93 @@ const SPORTS_MENU_ROLE_NAMES = [
   'director',
   'deportista',
   'entrenador',
+] as const;
+
+const FLEET_MENU_ROLE_NAMES = [
+  'admin',
+  'presidente',
+  'vicepresidente',
+  'secretario',
+  'tesorero',
+  'director',
+  'entrenador',
+] as const;
+
+const BOAT_TYPE_SEED_DEFINITIONS = [
+  {
+    codigo: '1x',
+    nombre: 'Single scull',
+    requiereTimonel: false,
+    orden: 1,
+    activo: true,
+  },
+  {
+    codigo: '2x',
+    nombre: 'Doble scull',
+    requiereTimonel: false,
+    orden: 2,
+    activo: true,
+  },
+  {
+    codigo: '2-',
+    nombre: 'Dos sin timonel',
+    requiereTimonel: false,
+    orden: 3,
+    activo: true,
+  },
+  {
+    codigo: '2+',
+    nombre: 'Dos con timonel',
+    requiereTimonel: true,
+    orden: 4,
+    activo: true,
+  },
+  {
+    codigo: '4x',
+    nombre: 'Cuadruple scull',
+    requiereTimonel: false,
+    orden: 5,
+    activo: true,
+  },
+  {
+    codigo: '4-',
+    nombre: 'Cuatro sin timonel',
+    requiereTimonel: false,
+    orden: 6,
+    activo: true,
+  },
+  {
+    codigo: '4+',
+    nombre: 'Cuatro con timonel',
+    requiereTimonel: true,
+    orden: 7,
+    activo: true,
+  },
+  {
+    codigo: '8+',
+    nombre: 'Ocho con timonel',
+    requiereTimonel: true,
+    orden: 8,
+    activo: true,
+  },
+] as const;
+
+const BOAT_STATE_SEED_DEFINITIONS = [
+  {
+    nombre: 'Disponible',
+    permiteUso: true,
+    activo: true,
+  },
+  {
+    nombre: 'En mantenimiento',
+    permiteUso: false,
+    activo: true,
+  },
+  {
+    nombre: 'Fuera de servicio',
+    permiteUso: false,
+    activo: true,
+  },
 ] as const;
 
 const DEMO_USERS = [
@@ -126,6 +215,10 @@ export class SeedService implements OnApplicationBootstrap {
     private readonly rolesRepository: Repository<RolEntity>,
     @InjectRepository(CategoriaEntity)
     private readonly categoriesRepository: Repository<CategoriaEntity>,
+    @InjectRepository(TipoBoteEntity)
+    private readonly boatTypesRepository: Repository<TipoBoteEntity>,
+    @InjectRepository(EstadoBoteEntity)
+    private readonly boatStatesRepository: Repository<EstadoBoteEntity>,
     @InjectRepository(MenuEntity)
     private readonly menusRepository: Repository<MenuEntity>,
     @InjectRepository(ItemEntity)
@@ -159,6 +252,7 @@ export class SeedService implements OnApplicationBootstrap {
   async onApplicationBootstrap() {
     await this.seedRoles();
     await this.seedCategories();
+    await this.seedFleetCatalogs();
     await this.seedMenus();
     const seededUsers = await this.seedUsers();
     await this.seedClubAthletes();
@@ -196,12 +290,54 @@ export class SeedService implements OnApplicationBootstrap {
     this.logger.log('Categorías deportivas listas.');
   }
 
+  private async seedFleetCatalogs() {
+    const existingBoatTypes = await this.boatTypesRepository.find();
+    const existingBoatTypeByCode = new Map(
+      existingBoatTypes.map((boatType) => [boatType.codigo, boatType] as const),
+    );
+    const existingBoatStates = await this.boatStatesRepository.find();
+    const existingBoatStateByName = new Map(
+      existingBoatStates.map(
+        (boatState) => [boatState.nombre, boatState] as const,
+      ),
+    );
+
+    await this.boatTypesRepository.save(
+      BOAT_TYPE_SEED_DEFINITIONS.map((boatTypeDefinition) => {
+        const existingBoatType = existingBoatTypeByCode.get(
+          boatTypeDefinition.codigo,
+        );
+
+        return this.boatTypesRepository.create({
+          idTipoBote: existingBoatType?.idTipoBote,
+          ...boatTypeDefinition,
+        });
+      }),
+    );
+
+    await this.boatStatesRepository.save(
+      BOAT_STATE_SEED_DEFINITIONS.map((boatStateDefinition) => {
+        const existingBoatState = existingBoatStateByName.get(
+          boatStateDefinition.nombre,
+        );
+
+        return this.boatStatesRepository.create({
+          idEstadoBote: existingBoatState?.idEstadoBote,
+          ...boatStateDefinition,
+        });
+      }),
+    );
+
+    this.logger.log('Catalogos de flota listos.');
+  }
+
   private async seedMenus() {
     const inicioMenu = await this.ensureMenu('Inicio', ['Inicio']);
     const usuariosMenu = await this.ensureMenu('Usuarios', ['Usuarios']);
     const deportistasMenu = await this.ensureMenu('Deportistas', [
       'Deportistas',
     ]);
+    const flotaMenu = await this.ensureMenu('Flota', ['Flota']);
     const reunionesMenu = await this.ensureMenu('Reuniones', ['Reuniones']);
     const planificacionMenu = await this.ensureMenu('Planificación', [
       'Planificación',
@@ -231,6 +367,7 @@ export class SeedService implements OnApplicationBootstrap {
       '/deportistas/nuevo',
       deportistasMenu.idMenu,
     );
+    await this.ensureItem('Gestion de flota', '/flota', flotaMenu.idMenu);
     await this.ensureItem(
       'Listado de reuniones',
       '/reuniones',
@@ -292,6 +429,17 @@ export class SeedService implements OnApplicationBootstrap {
       if (role) {
         menuRoles.push({
           idMenu: deportistasMenu.idMenu,
+          idRol: role.idRol,
+        } as MenuRolEntity);
+      }
+    }
+
+    for (const roleName of FLEET_MENU_ROLE_NAMES) {
+      const role = roleByName.get(roleName);
+
+      if (role) {
+        menuRoles.push({
+          idMenu: flotaMenu.idMenu,
           idRol: role.idRol,
         } as MenuRolEntity);
       }

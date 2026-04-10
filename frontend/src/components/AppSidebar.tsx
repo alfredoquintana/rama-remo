@@ -16,6 +16,104 @@ const fallbackMenus: Menu[] = [
   },
 ];
 
+function normalizeText(value: string) {
+  return value
+    .replace(/Ã¡/g, 'á')
+    .replace(/Ã©/g, 'é')
+    .replace(/Ã­/g, 'í')
+    .replace(/Ã³/g, 'ó')
+    .replace(/Ãº/g, 'ú')
+    .replace(/Ã±/g, 'ñ')
+    .trim();
+}
+
+function createMenuKey(value: string) {
+  return normalizeText(value)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+function normalizeMenuName(value: string) {
+  const cleanedValue = normalizeText(value)
+    .replace(/planificaci\?n/i, 'Planificación')
+    .replace(/menu/i, 'Menú');
+  const key = createMenuKey(cleanedValue);
+
+  if (key.includes('inicio')) {
+    return 'Inicio';
+  }
+
+  if (key.includes('usuario')) {
+    return 'Usuarios';
+  }
+
+  if (key.includes('reunion')) {
+    return 'Reuniones';
+  }
+
+  if (key.includes('planificacion')) {
+    return 'Planificación';
+  }
+
+  if (key.includes('deportista')) {
+    return 'Deportistas';
+  }
+
+  if (key.includes('flota')) {
+    return 'Flota';
+  }
+
+  return cleanedValue;
+}
+
+function normalizeMenuItemName(value: string) {
+  const key = createMenuKey(value);
+
+  if (key === 'gestion de flota') {
+    return 'Gestión de flota';
+  }
+
+  return normalizeText(value);
+}
+
+function normalizeMenus(data: Menu[]) {
+  const groupedMenus = new Map<string, Menu>();
+
+  data.forEach((menu) => {
+    const normalizedName = normalizeMenuName(menu.nombre);
+    const menuKey = createMenuKey(normalizedName);
+    const currentMenu = groupedMenus.get(menuKey);
+    const normalizedItems = (menu.items ?? [])
+      .filter((item) => !isCreateMenuRoute(item.ruta))
+      .map((item) => ({
+        ...item,
+        nombre: normalizeMenuItemName(item.nombre),
+      }));
+
+    if (!currentMenu) {
+      groupedMenus.set(menuKey, {
+        idMenu: menu.idMenu,
+        nombre: normalizedName,
+        items: normalizedItems,
+      });
+      return;
+    }
+
+    const currentItemsByRoute = new Map(
+      currentMenu.items.map((item) => [item.ruta, item] as const),
+    );
+
+    normalizedItems.forEach((item) => {
+      if (!currentItemsByRoute.has(item.ruta)) {
+        currentMenu.items.push(item);
+      }
+    });
+  });
+
+  return [...groupedMenus.values()];
+}
+
 function HomeIcon() {
   return (
     <svg
@@ -120,6 +218,28 @@ function PlanningSectionIcon() {
   );
 }
 
+function FleetSectionIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="app-nav__icon app-nav__icon--section"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3.5 15.5h17" />
+      <path d="M5 15.5c1.5 2.1 4 3.5 7 3.5s5.5-1.4 7-3.5" />
+      <path d="M11.5 6.5 8 15.5" />
+      <path d="M14.5 6.5 18 15.5" />
+      <path d="M10.7 8.5h1.6" />
+      <path d="M13.7 8.5h1.6" />
+    </svg>
+  );
+}
+
 function CloseIcon() {
   return (
     <svg
@@ -147,6 +267,10 @@ function resolveSectionIcon(menuName: string) {
 
   if (normalizedName.includes('deportista')) {
     return <AthletesSectionIcon />;
+  }
+
+  if (normalizedName.includes('flota')) {
+    return <FleetSectionIcon />;
   }
 
   if (normalizedName.includes('reunion')) {
@@ -207,7 +331,7 @@ export function AppSidebar({
     getMenus()
       .then((data) => {
         if (active && data.length > 0) {
-          setMenus(data);
+          setMenus(normalizeMenus(data));
         }
       })
       .catch(() => {

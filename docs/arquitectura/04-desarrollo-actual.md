@@ -1,6 +1,6 @@
-# Diagrama de desarrollo actual
+# Desarrollo actual
 
-Este documento muestra como esta organizado hoy el desarrollo del sistema, que piezas existen y que consideraciones tecnicas conviene tener presentes.
+Este documento muestra como esta organizado hoy el desarrollo del sistema y que componentes existen realmente en la rama actual.
 
 ## Topologia de desarrollo local
 
@@ -37,11 +37,15 @@ flowchart TD
     BACKEND --> B2[src/database/entities]
     BACKEND --> B3[src/modules/auth]
     BACKEND --> B4[src/modules/users]
-    BACKEND --> B5[src/modules/meetings]
-    BACKEND --> B6[src/modules/planning]
-    BACKEND --> B7[src/modules/menus]
-    BACKEND --> B8[src/modules/roles]
-    BACKEND --> B9[src/modules/seed]
+    BACKEND --> B5[src/modules/athletes]
+    BACKEND --> B6[src/modules/categories]
+    BACKEND --> B7[src/modules/fleet]
+    BACKEND --> B8[src/modules/meetings]
+    BACKEND --> B9[src/modules/planning]
+    BACKEND --> B10[src/modules/menus]
+    BACKEND --> B11[src/modules/roles]
+    BACKEND --> B12[src/modules/seed]
+    BACKEND --> B13[src/modules/health]
 
     FRONTEND --> F1[src/app]
     FRONTEND --> F2[src/layouts]
@@ -49,37 +53,95 @@ flowchart TD
     FRONTEND --> F4[src/pages]
     FRONTEND --> F5[src/services]
     FRONTEND --> F6[src/types]
+    FRONTEND --> F7[src/utils]
 ```
 
 ## Estado funcional actual
 
-- Implementado: autenticacion con JWT y sesion persistida en frontend.
-- Implementado: CRUD de usuarios con asignacion multiple de roles.
-- Implementado: CRUD de reuniones con participantes y acta integrada.
-- Implementado: CRUD de plan anual con areas, items y seguimientos.
-- Implementado: catalogos base, menus e informacion demo mediante seed al arranque.
-- Implementado: interfaz React protegida para operacion interna.
+- Implementado: autenticacion con JWT y sesion persistida.
+- Implementado: usuarios con y sin acceso.
+- Implementado: habilitacion de acceso con clave provisoria.
+- Implementado: modulo de deportistas con historial de categorias.
+- Implementado: busqueda y paginacion en listado de deportistas.
+- Implementado: modulo de flota con catalogos, filtros, paginacion y modales de gestion.
+- Implementado: reuniones con participantes y acta integrada.
+- Implementado: planificacion anual con areas, items y seguimientos.
+- Implementado: catalogos base, menus y datos demo mediante seed.
+
+## Estado del seed de desarrollo
+
+- 9 roles base.
+- Catalogo de categorias deportivas.
+- Catalogo completo de tipos de bote.
+- Catalogo de estados de bote.
+- Menus base de Inicio, Usuarios, Deportistas, Flota, Reuniones y Planificacion.
+- 6 usuarios demo con acceso.
+- 100 personas del club.
+- Esas 100 personas registradas como deportistas.
+- 30 deportistas Master.
+- No se crean botes demo.
+- 2 reuniones demo.
+- 1 acta demo.
+- 1 plan anual demo.
+
+## Estado actual por modulo
+
+### Usuarios
+
+- Lista, alta, edicion y eliminacion.
+- Flujo separado para habilitar acceso.
+- Regla vigente: update comun no habilita acceso si el usuario aun no lo tiene.
+
+### Deportistas
+
+- Registro sobre usuario existente.
+- Historial de categorias.
+- Cambio de categoria con cierre de vigente anterior.
+- Grilla con buscador por nombre, RUT y categoria.
+
+### Flota
+
+- Pantalla unica `/flota`.
+- Buscador inteligente por nombre, marca, codigo de tipo, nombre de tipo, estado y anio.
+- Filtros por tipo de bote, estado y activo.
+- Registro, edicion y detalle en modal.
+- Catalogos sembrados por bootstrap.
+
+### Reuniones
+
+- Lista, alta, detalle, edicion y eliminacion.
+- Participantes asociados a usuarios.
+- Acta integrada en el mismo flujo.
+
+### Planificacion
+
+- Lista, alta, detalle, edicion y eliminacion de planes.
+- Areas, items y seguimientos.
+- Resumen recompuesto desde backend.
 
 ## Decisiones tecnicas vigentes
 
 - Backend monolitico modular en NestJS.
-- Frontend SPA en React con React Router.
+- Frontend SPA con React Router.
 - Persistencia relacional en MySQL.
-- ORM con TypeORM y sincronizacion automatica en desarrollo.
-- Seed automatico como parte del bootstrap de la aplicacion.
-- Almacenamiento de archivos de acta dentro de la base en formato base64.
+- Sin migraciones versionadas.
+- Sin filtro efectivo de autorizacion por rol aun.
+- Seed automatico como parte del bootstrap en desarrollo.
+- Archivos de acta persistidos dentro de la base en base64.
 
-## Brechas o consideraciones del estado actual
+## Consideraciones y brechas actuales
 
-- `docs/database.sql` no documenta el esquema real; solo crea la base.
-- No hay migraciones versionadas ni estrategia formal de evolucion de esquema.
-- El modelo tiene `menu_rol`, pero la navegacion no se filtra aun por roles en tiempo de consulta.
-- La autenticacion existe, pero no hay autorizacion por rol a nivel de endpoint.
-- Al guardar archivos de acta en base, el crecimiento de la tabla `acta` puede volverse relevante con el tiempo.
+- `docs/database.sql` no documenta el esquema funcional real.
+- El modelo contiene `menu_rol`, pero la navegacion no se filtra aun por rol.
+- El sistema ya diferencia usuario y acceso, pero no tiene aun una capa formal de autorizacion por modulo.
+- El almacenamiento base64 en `acta` puede crecer con el tiempo.
+- El modulo `flota` ya existe, pero no hay todavia modulo de regatas ni asignacion de botes a tripulaciones.
+- No existen migraciones, por lo que el modelo depende del estado actual de entidades y `synchronize`.
 
 ## Recomendaciones para la siguiente iteracion
 
-- Generar migraciones o un SQL exportado desde el esquema real.
-- Aplicar filtro efectivo de menus y permisos por rol.
-- Separar archivos adjuntos de acta hacia almacenamiento externo o al menos binario fuera de `base64`.
-- Incorporar diagramas como parte del README principal o de una wiki tecnica si este material va a crecer.
+- Incorporar migraciones o una estrategia versionada de esquema.
+- Filtrar menus y permisos de endpoints por rol.
+- Evaluar almacenamiento externo para adjuntos de acta.
+- Extender flota hacia disponibilidad operativa o integracion con futuras regatas.
+- Mantener esta documentacion sincronizada con `backend/src/database/entities`, `frontend/src/app/App.tsx` y `backend/src/modules/seed/seed.service.ts`.

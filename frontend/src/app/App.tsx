@@ -11,6 +11,7 @@ import { AnnualPlanDetailPage } from '../pages/AnnualPlanDetailPage';
 import { AnnualPlanEditPage } from '../pages/AnnualPlanEditPage';
 import { AnnualPlansListPage } from '../pages/AnnualPlansListPage';
 import { HomePage } from '../pages/HomePage';
+import { FleetPage } from '../pages/FleetPage';
 import { LoginPage } from '../pages/LoginPage';
 import { MeetingCreatePage } from '../pages/MeetingCreatePage';
 import { MeetingDetailPage } from '../pages/MeetingDetailPage';
@@ -34,6 +35,7 @@ export function App() {
               <Route path="/deportistas" element={<AthletesListPage />} />
               <Route path="/deportistas/nuevo" element={<AthleteCreatePage />} />
               <Route path="/deportistas/:id" element={<AthleteDetailPage />} />
+              <Route path="/flota" element={<FleetPage />} />
               <Route path="/usuarios" element={<UsersListPage />} />
               <Route path="/usuarios/nuevo" element={<UserCreatePage />} />
               <Route path="/usuarios/:id/editar" element={<UserEditPage />} />

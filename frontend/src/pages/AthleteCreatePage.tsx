@@ -1,6 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { DatePickerField } from '../components/DatePickerField';
 import { StatusMessage } from '../components/StatusMessage';
+import { useDebouncedValue } from '../hooks';
 import { createAthlete, searchAthleteUsers } from '../services/athletes';
 import { getCategories } from '../services/categories';
 import type { AthleteUserSearchResult, Category } from '../types/athletes';
@@ -22,6 +24,7 @@ export function AthleteCreatePage() {
   const [isSearching, setIsSearching] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const debouncedSearchTerm = useDebouncedValue(searchTerm, 350);
 
   useEffect(() => {
     getCategories()
@@ -38,20 +41,45 @@ export function AthleteCreatePage() {
       });
   }, []);
 
-  const handleSearch = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  useEffect(() => {
+    const term = debouncedSearchTerm.trim();
+
+    if (!term) {
+      setResults([]);
+      setIsSearching(false);
+      return;
+    }
+
+    let cancelled = false;
     setIsSearching(true);
     setErrorMessage('');
 
-    try {
-      const data = await searchAthleteUsers(searchTerm);
-      setResults(data);
-    } catch (error) {
-      setErrorMessage((error as Error).message);
-    } finally {
-      setIsSearching(false);
-    }
-  };
+    searchAthleteUsers(term)
+      .then((data) => {
+        if (cancelled) {
+          return;
+        }
+
+        setResults(data);
+      })
+      .catch((error: Error) => {
+        if (cancelled) {
+          return;
+        }
+
+        setErrorMessage(error.message);
+        setResults([]);
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsSearching(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [debouncedSearchTerm]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -63,6 +91,11 @@ export function AthleteCreatePage() {
 
     if (!selectedCategoryId) {
       setErrorMessage('Debes seleccionar una categoría.');
+      return;
+    }
+
+    if (!fechaDesde) {
+      setErrorMessage('Debes indicar la fecha desde.');
       return;
     }
 
@@ -90,19 +123,12 @@ export function AthleteCreatePage() {
 
   return (
     <section className="page-section">
-      <div className="page-heading">
-        <div>
-          <h2>Registrar deportista</h2>
-          <p>Busca una persona ya registrada y crea su ficha deportiva sin duplicar datos.</p>
-        </div>
-      </div>
-
       {errorMessage ? <StatusMessage kind="error" message={errorMessage} /> : null}
 
-      <form className="form-card" onSubmit={handleSearch}>
+      <div className="form-card">
         <div className="section-heading">
           <div>
-            <h3>Buscar usuario existente</h3>
+            <h3>Buscar usuario</h3>
             <p className="form-help">
               Puedes buscar por nombre o RUT. El usuario no debe estar registrado ya como
               deportista.
@@ -111,19 +137,29 @@ export function AthleteCreatePage() {
         </div>
 
         <div className="selection-row">
-          <label className="form-field">
+          <label className="form-field athlete-search-field">
             <span>Búsqueda</span>
             <input
-              placeholder="Ejemplo: Sofía o 21.000.000"
+              placeholder="Ejemplo: Sofía o 21000000"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
             />
           </label>
 
-          <button className="button button-primary" disabled={isSearching} type="submit">
-            {isSearching ? 'Buscando...' : 'Buscar'}
+          <button
+            className="button button-secondary"
+            disabled={!searchTerm}
+            type="button"
+            onClick={() => {
+              setSearchTerm('');
+              setResults([]);
+            }}
+          >
+            Limpiar
           </button>
         </div>
+
+        {isSearching ? <p className="form-help">Buscando usuarios...</p> : null}
 
         <div className="search-results">
           {results.map((user) => (
@@ -147,7 +183,11 @@ export function AthleteCreatePage() {
             </button>
           ))}
         </div>
-      </form>
+
+        {!isSearching && debouncedSearchTerm.trim() && results.length === 0 ? (
+          <p className="form-help">No encontramos usuarios con esa búsqueda.</p>
+        ) : null}
+      </div>
 
       <form className="form-card" onSubmit={handleSubmit}>
         <div className="section-heading">
@@ -196,15 +236,12 @@ export function AthleteCreatePage() {
             </select>
           </label>
 
-          <label className="form-field">
-            <span>Fecha desde</span>
-            <input
-              required
-              type="date"
-              value={fechaDesde}
-              onChange={(event) => setFechaDesde(event.target.value)}
-            />
-          </label>
+          <DatePickerField
+            label="Fecha desde"
+            required
+            value={fechaDesde}
+            onChange={setFechaDesde}
+          />
         </div>
 
         <div className="form-actions">
