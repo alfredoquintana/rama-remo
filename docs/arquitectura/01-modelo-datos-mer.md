@@ -100,6 +100,67 @@ erDiagram
         BOOLEAN activo
     }
 
+    COMPETENCIA {
+        INT id_competencia PK
+        INT id_club FK
+        VARCHAR nombre
+        ENUM tipo_competencia
+        ENUM origen
+        VARCHAR organizador NULL
+        VARCHAR sede NULL
+        DATE fecha_inicio
+        DATE fecha_fin
+        ENUM estado
+        LONGTEXT observacion NULL
+    }
+
+    COMPETENCIA_PRUEBA {
+        INT id_competencia_prueba PK
+        INT id_competencia FK
+        INT id_categoria FK NULL
+        INT id_tipo_bote FK NULL
+        INT numero_prueba
+        INT orden_prueba
+        VARCHAR nombre_prueba
+        VARCHAR categoria_origen NULL
+        VARCHAR genero_origen NULL
+        VARCHAR modalidad_origen NULL
+        VARCHAR tipo_bote_origen NULL
+        INT distancia NULL
+        DATE fecha NULL
+        TIME hora NULL
+        BOOLEAN requiere_bote
+        INT cantidad_tripulantes_esperada NULL
+        BOOLEAN requiere_timonel
+        BOOLEAN es_master
+        LONGTEXT observacion NULL
+        ENUM origen_dato
+    }
+
+    COMPETENCIA_INSCRIPCION {
+        INT id_competencia_inscripcion PK
+        INT id_competencia_prueba FK UK
+        INT id_bote FK NULL
+        VARCHAR estado
+        DECIMAL promedio_edad NULL
+        VARCHAR categoria_master_estimada NULL
+    }
+
+    COMPETENCIA_INSCRIPCION_INTEGRANTE {
+        INT id_competencia_inscripcion_integrante PK
+        INT id_competencia_inscripcion FK
+        INT id_deportista FK
+        INT orden
+        BOOLEAN es_timonel
+        VARCHAR rol_texto NULL
+        VARCHAR snapshot_nombre
+        VARCHAR snapshot_rut
+        DATE snapshot_fecha_nacimiento
+        INT edad_competencia
+        VARCHAR categoria_master_individual NULL
+        LONGTEXT observacion NULL
+    }
+
     REUNION {
         INT id_reunion PK
         DATE fecha
@@ -188,6 +249,15 @@ erDiagram
     TIPO_BOTE ||--o{ BOTE : clasifica
     ESTADO_BOTE ||--o{ BOTE : condiciona
 
+    CATEGORIA ||--o{ COMPETENCIA_PRUEBA : normaliza
+    CLUB ||--o{ COMPETENCIA : organiza
+    COMPETENCIA ||--o{ COMPETENCIA_PRUEBA : contiene
+    TIPO_BOTE ||--o{ COMPETENCIA_PRUEBA : define
+    COMPETENCIA_PRUEBA ||--o| COMPETENCIA_INSCRIPCION : admite
+    BOTE o|--o{ COMPETENCIA_INSCRIPCION : asigna
+    COMPETENCIA_INSCRIPCION ||--o{ COMPETENCIA_INSCRIPCION_INTEGRANTE : compone
+    DEPORTISTA ||--o{ COMPETENCIA_INSCRIPCION_INTEGRANTE : participa
+
     REUNION ||--o{ PARTICIPANTE_REUNION : convoca
     USUARIO ||--o{ PARTICIPANTE_REUNION : participa
     REUNION ||--o| ACTA : genera
@@ -227,6 +297,16 @@ erDiagram
 - Regla funcional: `bote.nombre` es unico en el sistema.
 - Regla funcional: al crear o editar un bote solo se aceptan tipos y estados activos.
 - El seed carga catalogos de flota, pero no crea botes del club.
+
+### Competencias
+
+- `competencia` modela el evento y su ventana operativa.
+- `competencia_prueba` normaliza categoria por `id_categoria` y tipo de bote por `id_tipo_bote`.
+- `competencia_prueba.categoria_origen` se conserva como snapshot operativo del nombre de categoria.
+- `competencia_inscripcion` admite una sola fila por prueba.
+- `competencia_inscripcion.estado` hoy trabaja con el dominio `presuntiva` o `nominativa`.
+- `competencia_inscripcion` ya no usa `codigo_embarcacion` ni `observacion_interna`.
+- `competencia_inscripcion_integrante` conserva snapshots historicos del deportista inscrito.
 
 ### Reuniones y actas
 

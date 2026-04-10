@@ -64,6 +64,7 @@ flowchart TD
 - Implementado: modulo de deportistas con historial de categorias.
 - Implementado: busqueda y paginacion en listado de deportistas.
 - Implementado: modulo de flota con catalogos, filtros, paginacion y modales de gestion.
+- Implementado: modulo de competencias con pruebas, inscripcion del club, filtros operativos y validaciones deportivas.
 - Implementado: reuniones con participantes y acta integrada.
 - Implementado: planificacion anual con areas, items y seguimientos.
 - Implementado: catalogos base, menus y datos demo mediante seed.
@@ -106,6 +107,16 @@ flowchart TD
 - Filtros por tipo de bote, estado y activo.
 - Registro, edicion y detalle en modal.
 - Catalogos sembrados por bootstrap.
+
+### Competencias
+
+- Pantalla de entrada `/competencias` con grilla.
+- Pantalla de gestion `/competencias/:id` con KPIs, pruebas e inscripciones.
+- Pruebas con categoria normalizada por `id_categoria` y snapshot de nombre para trazabilidad.
+- Inscripciones del club con estados `presuntiva` y `nominativa`.
+- Filtrado de botes por tipo compatible.
+- Filtrado de deportistas por categoria vigente de la prueba.
+- Validacion backend de dotacion, timonel, bote compatible y categoria del deportista.
 
 ### Reuniones
 

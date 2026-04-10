@@ -6,6 +6,7 @@ import {
   ActaEntity,
   EstadoBoteEntity,
   CategoriaEntity,
+  ClubEntity,
   DeportistaCategoriaEntity,
   DeportistaEntity,
   EstadoPlanAnual,
@@ -74,6 +75,22 @@ const FLEET_MENU_ROLE_NAMES = [
   'director',
   'entrenador',
 ] as const;
+
+const COMPETITIONS_MENU_ROLE_NAMES = [
+  'admin',
+  'presidente',
+  'vicepresidente',
+  'secretario',
+  'tesorero',
+  'director',
+  'entrenador',
+] as const;
+
+const CLUB_SEED_DEFINITION = {
+  nombre: 'Club Phoenix',
+  activo: true,
+  observacion: 'Club base para la gestión interna de la rama de remo.',
+} as const;
 
 const BOAT_TYPE_SEED_DEFINITIONS = [
   {
@@ -215,6 +232,8 @@ export class SeedService implements OnApplicationBootstrap {
     private readonly rolesRepository: Repository<RolEntity>,
     @InjectRepository(CategoriaEntity)
     private readonly categoriesRepository: Repository<CategoriaEntity>,
+    @InjectRepository(ClubEntity)
+    private readonly clubsRepository: Repository<ClubEntity>,
     @InjectRepository(TipoBoteEntity)
     private readonly boatTypesRepository: Repository<TipoBoteEntity>,
     @InjectRepository(EstadoBoteEntity)
@@ -251,6 +270,7 @@ export class SeedService implements OnApplicationBootstrap {
 
   async onApplicationBootstrap() {
     await this.seedRoles();
+    await this.seedClub();
     await this.seedCategories();
     await this.seedFleetCatalogs();
     await this.seedMenus();
@@ -265,6 +285,21 @@ export class SeedService implements OnApplicationBootstrap {
       ROLE_NAMES.map((nombre) => ({ nombre })),
       ['nombre'],
     );
+  }
+
+  private async seedClub() {
+    const existingClub = await this.clubsRepository.findOneBy({
+      nombre: CLUB_SEED_DEFINITION.nombre,
+    });
+
+    await this.clubsRepository.save(
+      this.clubsRepository.create({
+        idClub: existingClub?.idClub,
+        ...CLUB_SEED_DEFINITION,
+      }),
+    );
+
+    this.logger.log('Club base listo.');
   }
 
   private async seedCategories() {
@@ -338,6 +373,9 @@ export class SeedService implements OnApplicationBootstrap {
       'Deportistas',
     ]);
     const flotaMenu = await this.ensureMenu('Flota', ['Flota']);
+    const competenciasMenu = await this.ensureMenu('Competencias', [
+      'Competencias',
+    ]);
     const reunionesMenu = await this.ensureMenu('Reuniones', ['Reuniones']);
     const planificacionMenu = await this.ensureMenu('Planificación', [
       'Planificación',
@@ -368,6 +406,11 @@ export class SeedService implements OnApplicationBootstrap {
       deportistasMenu.idMenu,
     );
     await this.ensureItem('Gestion de flota', '/flota', flotaMenu.idMenu);
+    await this.ensureItem(
+      'Gestión de competencias',
+      '/competencias',
+      competenciasMenu.idMenu,
+    );
     await this.ensureItem(
       'Listado de reuniones',
       '/reuniones',
@@ -440,6 +483,17 @@ export class SeedService implements OnApplicationBootstrap {
       if (role) {
         menuRoles.push({
           idMenu: flotaMenu.idMenu,
+          idRol: role.idRol,
+        } as MenuRolEntity);
+      }
+    }
+
+    for (const roleName of COMPETITIONS_MENU_ROLE_NAMES) {
+      const role = roleByName.get(roleName);
+
+      if (role) {
+        menuRoles.push({
+          idMenu: competenciasMenu.idMenu,
           idRol: role.idRol,
         } as MenuRolEntity);
       }

@@ -240,6 +240,27 @@ function FleetSectionIcon() {
   );
 }
 
+function CompetitionsSectionIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="app-nav__icon app-nav__icon--section"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4.5 6.5h15" />
+      <path d="M4.5 12h15" />
+      <path d="M4.5 17.5h15" />
+      <path d="M7.5 4v16" />
+      <path d="M16.5 4v16" />
+    </svg>
+  );
+}
+
 function CloseIcon() {
   return (
     <svg
@@ -271,6 +292,10 @@ function resolveSectionIcon(menuName: string) {
 
   if (normalizedName.includes('flota')) {
     return <FleetSectionIcon />;
+  }
+
+  if (normalizedName.includes('competencia')) {
+    return <CompetitionsSectionIcon />;
   }
 
   if (normalizedName.includes('reunion')) {
