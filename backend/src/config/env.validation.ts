@@ -6,6 +6,7 @@ import {
   IsString,
   Max,
   Min,
+  MinLength,
   validateSync,
 } from 'class-validator';
 
@@ -42,21 +43,48 @@ class EnvironmentVariables {
   @IsString()
   FRONTEND_URL?: string;
 
-  @IsOptional()
   @IsString()
-  APP_SECRET?: string;
+  @IsNotEmpty()
+  @MinLength(32)
+  APP_SECRET!: string;
 
-  @IsOptional()
   @IsString()
-  ADMIN_RUT?: string;
+  @IsNotEmpty()
+  ADMIN_RUT!: string;
 
-  @IsOptional()
   @IsString()
-  ADMIN_PASSWORD?: string;
+  @IsNotEmpty()
+  @MinLength(8)
+  ADMIN_PASSWORD!: string;
 
-  @IsOptional()
   @IsString()
-  DEFAULT_USER_PASSWORD?: string;
+  @IsNotEmpty()
+  @MinLength(8)
+  DEFAULT_USER_PASSWORD!: string;
+
+  @Type(() => Number)
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  LOGIN_RATE_LIMIT_WINDOW_MS?: number;
+
+  @Type(() => Number)
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  LOGIN_RATE_LIMIT_MAX?: number;
+
+  @Type(() => Number)
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  SENSITIVE_RATE_LIMIT_WINDOW_MS?: number;
+
+  @Type(() => Number)
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  SENSITIVE_RATE_LIMIT_MAX?: number;
 }
 
 export function validateEnvironment(config: Record<string, unknown>) {

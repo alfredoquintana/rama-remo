@@ -504,17 +504,12 @@ export class SeedService implements OnApplicationBootstrap {
   }
 
   private async seedUsers() {
-    const adminRut = this.configService.get<string>(
-      'app.adminRut',
-      '11111111-1',
-    );
-    const adminPassword = this.configService.get<string>(
+    const adminRut = this.configService.getOrThrow<string>('app.adminRut');
+    const adminPassword = this.configService.getOrThrow<string>(
       'app.adminPassword',
-      'admin123',
     );
-    const defaultUserPassword = this.configService.get<string>(
+    const defaultUserPassword = this.configService.getOrThrow<string>(
       'app.defaultUserPassword',
-      'remo1234',
     );
     const clubAthletes = buildClubAthleteSeedUsers();
 

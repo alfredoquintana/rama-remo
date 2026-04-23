@@ -98,7 +98,7 @@ export class AuthService {
         rut: normalizedUser.rut,
         roles: normalizedUser.roles.map((role) => role.nombre),
       },
-      this.configService.get<string>('app.authSecret', 'rama-remo-dev-secret'),
+      this.configService.getOrThrow<string>('app.authSecret'),
     );
 
     return {

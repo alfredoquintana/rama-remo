@@ -50,7 +50,7 @@ export class AuthGuard implements CanActivate {
     const token = authorizationHeader.replace('Bearer ', '');
     const payload = verifyToken(
       token,
-      this.configService.get<string>('app.authSecret', 'rama-remo-dev-secret'),
+      this.configService.getOrThrow<string>('app.authSecret'),
     );
 
     if (!payload) {

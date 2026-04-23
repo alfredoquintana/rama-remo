@@ -177,7 +177,7 @@ export class UsersService {
       : [];
     const provisionalPassword =
       roles.length > 0
-        ? this.configService.get<string>('app.defaultUserPassword', 'remo1234')
+        ? this.configService.getOrThrow<string>('app.defaultUserPassword')
         : null;
 
     try {
@@ -288,9 +288,8 @@ export class UsersService {
     }
 
     const roles = await this.loadRoles(enableUserAccessDto.roleIds);
-    const provisionalPassword = this.configService.get<string>(
+    const provisionalPassword = this.configService.getOrThrow<string>(
       'app.defaultUserPassword',
-      'remo1234',
     );
 
     await this.dataSource.transaction(async (manager) => {

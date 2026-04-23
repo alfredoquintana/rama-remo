@@ -221,11 +221,21 @@ DB_PASSWORD=
 DB_NAME=rama_remo
 PORT=3001
 FRONTEND_URL=http://localhost:5173
-APP_SECRET=rama-remo-dev-secret
+APP_SECRET=replace-with-a-long-random-secret-at-least-32-characters
 ADMIN_RUT=11111111-1
-ADMIN_PASSWORD=admin123
-DEFAULT_USER_PASSWORD=remo1234
+ADMIN_PASSWORD=replace-with-admin-password
+DEFAULT_USER_PASSWORD=replace-with-provisional-password
+LOGIN_RATE_LIMIT_WINDOW_MS=600000
+LOGIN_RATE_LIMIT_MAX=5
+SENSITIVE_RATE_LIMIT_WINDOW_MS=60000
+SENSITIVE_RATE_LIMIT_MAX=20
 ```
+
+Notas:
+
+- `APP_SECRET`, `ADMIN_RUT`, `ADMIN_PASSWORD` y `DEFAULT_USER_PASSWORD` ahora son obligatorios.
+- El backend ya no arranca con secretos ni credenciales de respaldo embebidas en codigo.
+- Los limites de rate limiting pueden ajustarse por entorno sin tocar el codigo.
 
 ### Frontend
 
@@ -257,6 +267,7 @@ npm.cmd install
 
 ```powershell
 cd backend
+# copia backend/.env.example a backend/.env y completa los valores obligatorios
 npm.cmd run start:dev
 ```
 
@@ -269,9 +280,13 @@ npm.cmd run dev
 
 ## Acceso inicial
 
-- RUT admin: `11111111-1`
-- clave admin: `admin123`
-- clave provisoria por defecto: `remo1234`
+- RUT admin: valor configurado en `ADMIN_RUT`
+- clave admin: valor configurado en `ADMIN_PASSWORD`
+- clave provisoria para usuarios con acceso: valor configurado en `DEFAULT_USER_PASSWORD`
+
+## Seguridad aplicada
+
+- [Endurecimiento del backend](./docs/backend-security-hardening.md)
 
 ## Rutas de frontend vigentes
 
