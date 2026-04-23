@@ -18,6 +18,7 @@ Estos documentos no son un complemento decorativo del proyecto. Se usan para:
 - [Procesos clave](./arquitectura/03-bpmn-procesos-clave.md)
 - [Desarrollo actual](./arquitectura/04-desarrollo-actual.md)
 - [Modulo de competencias](./arquitectura/05-modulo-competencias.md)
+- [Modulo de entrenadores](./arquitectura/06-modulo-entrenadores.md)
 
 ## Criterio de actualizacion
 
@@ -37,6 +38,7 @@ La documentacion actual cubre:
 - competencias, pruebas e inscripciones
 - reuniones con acta
 - planificacion anual con seguimiento
+- propuesta funcional inicial para modulo de entrenadores
 
 ## Regla editorial
 
