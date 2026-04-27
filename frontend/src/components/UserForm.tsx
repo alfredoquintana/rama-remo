@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
 import { DatePickerField } from './DatePickerField';
 import { StatusMessage } from './StatusMessage';
 import type { Role, UserPayload } from '../types/users';
@@ -24,7 +24,58 @@ type UserFormProps = {
   onSubmit: (values: UserPayload) => Promise<void>;
 };
 
+function normalizeInitialUserValues(initialValues: UserPayload): UserPayload {
+  return {
+    ...initialValues,
+    rut: normalizeRut(initialValues.rut),
+    telefono: formatPhone(initialValues.telefono),
+  };
+}
+
 export function UserForm({
+  roles,
+  initialValues,
+  submitLabel,
+  isSubmitting,
+  errorMessage,
+  accessSectionMode = 'required',
+  disablePersonalFields = false,
+  onSubmit,
+}: UserFormProps) {
+  const normalizedInitialValues = useMemo(
+    () => normalizeInitialUserValues(initialValues),
+    [initialValues],
+  );
+  const formKey = useMemo(
+    () =>
+      [
+        accessSectionMode,
+        normalizedInitialValues.rut,
+        normalizedInitialValues.nombre,
+        normalizedInitialValues.telefono,
+        normalizedInitialValues.fechaNac,
+        normalizedInitialValues.direccion,
+        normalizedInitialValues.roleIds.join(','),
+      ].join('|'),
+    [accessSectionMode, normalizedInitialValues],
+  );
+
+  return (
+    <UserFormContent
+      key={formKey}
+      accessSectionMode={accessSectionMode}
+      disablePersonalFields={disablePersonalFields}
+      errorMessage={errorMessage}
+      initialValues={normalizedInitialValues}
+      isSubmitting={isSubmitting}
+      roles={roles}
+      submitLabel={submitLabel}
+      onSubmit={onSubmit}
+    />
+  );
+}
+
+function UserFormContent({
   roles,
   initialValues,
   submitLabel,
@@ -40,19 +91,6 @@ export function UserForm({
   const [isAccessEnabled, setIsAccessEnabled] = useState(
     accessSectionMode === 'required' ? true : initialValues.roleIds.length > 0,
   );
-
-  useEffect(() => {
-    setValues({
-      ...initialValues,
-      rut: normalizeRut(initialValues.rut),
-      telefono: formatPhone(initialValues.telefono),
-    });
-    setLocalError('');
-    setPendingRoleId('');
-    setIsAccessEnabled(
-      accessSectionMode === 'required' ? true : initialValues.roleIds.length > 0,
-    );
-  }, [accessSectionMode, initialValues]);
 
   const selectedRoles = roles.filter((role) => values.roleIds.includes(role.idRol));
   const availableRoles = roles.filter((role) => !values.roleIds.includes(role.idRol));

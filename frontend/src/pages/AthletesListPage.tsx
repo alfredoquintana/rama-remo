@@ -32,7 +32,6 @@ export function AthletesListPage() {
   const location = useLocation();
   const [athletes, setAthletes] = useState<Athlete[]>([]);
   const [searchInput, setSearchInput] = useState('');
-  const [activeSearch, setActiveSearch] = useState('');
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState<Omit<
     AthletesListResponse,
@@ -41,18 +40,7 @@ export function AthletesListPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const debouncedSearchInput = useDebouncedValue(searchInput, 350);
-
-  useEffect(() => {
-    const nextSearch = debouncedSearchInput.trim();
-
-    if (nextSearch === activeSearch) {
-      return;
-    }
-
-    setIsLoading(true);
-    setPage(1);
-    setActiveSearch(nextSearch);
-  }, [activeSearch, debouncedSearchInput]);
+  const activeSearch = debouncedSearchInput.trim();
 
   useEffect(() => {
     getAthletes({
@@ -85,7 +73,6 @@ export function AthletesListPage() {
   const handleClearSearch = () => {
     setIsLoading(true);
     setSearchInput('');
-    setActiveSearch('');
     setPage(1);
   };
 
@@ -114,7 +101,11 @@ export function AthletesListPage() {
             <input
               placeholder="Nombre, RUT o categoría"
               value={searchInput}
-              onChange={(event) => setSearchInput(event.target.value)}
+              onChange={(event) => {
+                setIsLoading(true);
+                setSearchInput(event.target.value);
+                setPage(1);
+              }}
             />
           </label>
 

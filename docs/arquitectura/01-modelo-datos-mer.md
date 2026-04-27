@@ -184,6 +184,7 @@ erDiagram
         VARCHAR archivo_nombre NULL
         VARCHAR archivo_tipo NULL
         LONGTEXT archivo_contenido_base64 NULL
+        VARCHAR archivo_ruta NULL
         INT archivo_tamano_bytes NULL
         DATETIME fecha_actualizacion
         INT actualizado_por FK
@@ -312,7 +313,8 @@ erDiagram
 
 - `participante_reunion` usa clave primaria compuesta.
 - `acta.id_reunion` es unico, lo que fuerza una sola acta por reunion.
-- El archivo del acta se persiste dentro de la base en base64.
+- Los adjuntos nuevos de acta se persisten en storage local y la base guarda metadata/ruta.
+- `archivo_contenido_base64` queda como compatibilidad para actas historicas sin migrar.
 
 ### Planificacion
 

@@ -18,6 +18,7 @@ Estos documentos no son un complemento decorativo del proyecto. Se usan para:
 - [Procesos clave](./arquitectura/03-bpmn-procesos-clave.md)
 - [Desarrollo actual](./arquitectura/04-desarrollo-actual.md)
 - [Modulo de competencias](./arquitectura/05-modulo-competencias.md)
+- [Estandar de desarrollo y escalabilidad](./desarrollo/estandar-desarrollo.md)
 - [Endurecimiento del backend](./backend-security-hardening.md)
 
 ## Criterio de actualizacion

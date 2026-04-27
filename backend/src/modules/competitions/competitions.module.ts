@@ -11,6 +11,7 @@ import {
   DeportistaEntity,
   TipoBoteEntity,
 } from '../../database/entities';
+import { CompetitionCatalogsService } from './competition-catalogs.service';
 import { CompetitionsController } from './competitions.controller';
 import { CompetitionsService } from './competitions.service';
 
@@ -29,6 +30,6 @@ import { CompetitionsService } from './competitions.service';
     ]),
   ],
   controllers: [CompetitionsController],
-  providers: [CompetitionsService],
+  providers: [CompetitionsService, CompetitionCatalogsService],
 })
 export class CompetitionsModule {}

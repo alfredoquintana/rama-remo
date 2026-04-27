@@ -10,7 +10,11 @@ import {
   EstadoBoteEntity,
   TipoBoteEntity,
 } from '../../database/entities';
-import { normalizeFreeText, normalizeLabelText, normalizeCodeText } from '../../common/text.util';
+import {
+  normalizeFreeText,
+  normalizeLabelText,
+  normalizeCodeText,
+} from '../../common/text.util';
 import { CreateBoatDto } from './dto/create-boat.dto';
 import { ListBoatsQueryDto } from './dto/list-boats-query.dto';
 import { UpdateBoatDto } from './dto/update-boat.dto';
@@ -155,7 +159,10 @@ export class FleetService {
           nombre: normalizeLabelText(createBoatDto.nombre),
           marca: this.normalizeOptionalText(createBoatDto.marca, 'code'),
           anio: createBoatDto.anio ?? null,
-          observacion: this.normalizeOptionalText(createBoatDto.observacion, 'free'),
+          observacion: this.normalizeOptionalText(
+            createBoatDto.observacion,
+            'free',
+          ),
           activo: createBoatDto.activo ?? true,
         }),
       );

@@ -89,14 +89,6 @@ export function DatePickerField({
     };
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!selectedDate) {
-      return;
-    }
-
-    setVisibleMonth(startOfMonth(selectedDate));
-  }, [selectedDate]);
-
   const displayValue = selectedDate ? formatDisplayDate(selectedDate) : '';
   const fieldClassName = ['form-field', className].filter(Boolean).join(' ');
 

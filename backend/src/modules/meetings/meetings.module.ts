@@ -9,6 +9,7 @@ import {
   UsuarioRolEntity,
 } from '../../database/entities';
 import { MeetingsController } from './meetings.controller';
+import { MeetingsMinutesService } from './meetings-minutes.service';
 import { MeetingsService } from './meetings.service';
 
 @Module({
@@ -23,6 +24,6 @@ import { MeetingsService } from './meetings.service';
     ]),
   ],
   controllers: [MeetingsController],
-  providers: [MeetingsService],
+  providers: [MeetingsService, MeetingsMinutesService],
 })
 export class MeetingsModule {}

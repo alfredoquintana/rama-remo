@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+﻿import { useEffect, useState, type FormEvent } from 'react';
 import { StatusMessage } from '../components/StatusMessage';
 import { useDebouncedValue } from '../hooks';
 import {
@@ -12,140 +12,24 @@ import {
 import type {
   Boat,
   BoatDetail,
-  BoatPayload,
   BoatState,
   BoatType,
   FleetCatalogsResponse,
   FleetListResponse,
 } from '../types/fleet';
 import { toTitleCaseLabel } from '../utils/text';
-
-const PAGE_SIZE = 10;
-
-type FleetFilterForm = {
-  search: string;
-  idTipoBote: string;
-  idEstadoBote: string;
-  activo: string;
-};
-
-type BoatFormValues = {
-  idTipoBote: string;
-  idEstadoBote: string;
-  nombre: string;
-  marca: string;
-  anio: string;
-  observacion: string;
-  activo: boolean;
-};
-
-type FleetModalMode = 'create' | 'edit' | 'detail' | null;
-
-function buildPagination(currentPage: number, totalPages: number) {
-  if (totalPages <= 1) {
-    return [1];
-  }
-
-  const pages = new Set<number>([1, totalPages]);
-
-  for (let page = currentPage - 1; page <= currentPage + 1; page += 1) {
-    if (page >= 1 && page <= totalPages) {
-      pages.add(page);
-    }
-  }
-
-  return [...pages].sort((first, second) => first - second);
-}
-
-function createEmptyBoatForm(catalogs: FleetCatalogsResponse | null): BoatFormValues {
-  return {
-    idTipoBote: String(catalogs?.tiposBote[0]?.idTipoBote ?? ''),
-    idEstadoBote: String(catalogs?.estadosBote[0]?.idEstadoBote ?? ''),
-    nombre: '',
-    marca: '',
-    anio: '',
-    observacion: '',
-    activo: true,
-  };
-}
-
-function createBoatFormFromDetail(boat: BoatDetail): BoatFormValues {
-  return {
-    idTipoBote: String(boat.tipoBote.idTipoBote),
-    idEstadoBote: String(boat.estadoBote.idEstadoBote),
-    nombre: boat.nombre,
-    marca: boat.marca ?? '',
-    anio: boat.anio ? String(boat.anio) : '',
-    observacion: boat.observacion ?? '',
-    activo: boat.activo,
-  };
-}
-
-function buildBoatPayload(values: BoatFormValues): BoatPayload {
-  return {
-    idTipoBote: Number(values.idTipoBote),
-    idEstadoBote: Number(values.idEstadoBote),
-    nombre: values.nombre.trim(),
-    marca: values.marca.trim() || undefined,
-    anio: values.anio.trim() ? Number(values.anio) : undefined,
-    observacion: values.observacion.trim() || undefined,
-    activo: values.activo,
-  };
-}
-
-function describeActiveFilter(value: string) {
-  if (value === 'true') {
-    return 'Solo activos';
-  }
-
-  if (value === 'false') {
-    return 'Solo inactivos';
-  }
-
-  return 'Todos';
-}
-
-function areFiltersEqual(first: FleetFilterForm, second: FleetFilterForm) {
-  return (
-    first.search === second.search &&
-    first.idTipoBote === second.idTipoBote &&
-    first.idEstadoBote === second.idEstadoBote &&
-    first.activo === second.activo
-  );
-}
-
-function describeAppliedFilters(
-  filters: FleetFilterForm,
-  catalogs: FleetCatalogsResponse | null,
-) {
-  const descriptions: string[] = [];
-
-  if (filters.idTipoBote) {
-    const selectedType = catalogs?.tiposBote.find(
-      (tipoBote) => String(tipoBote.idTipoBote) === filters.idTipoBote,
-    );
-
-    if (selectedType) {
-      descriptions.push(`Tipo: ${selectedType.codigo} - ${selectedType.nombre}`);
-    }
-  }
-
-  if (filters.idEstadoBote) {
-    const selectedState = catalogs?.estadosBote.find(
-      (estadoBote) => String(estadoBote.idEstadoBote) === filters.idEstadoBote,
-    );
-
-    if (selectedState) {
-      descriptions.push(`Estado: ${selectedState.nombre}`);
-    }
-  }
-
-  if (filters.activo) {
-    descriptions.push(describeActiveFilter(filters.activo));
-  }
-
-  return descriptions.join(' · ');
-}
+import {
+  PAGE_SIZE,
+  areFiltersEqual,
+  buildBoatPayload,
+  buildPagination,
+  createBoatFormFromDetail,
+  createEmptyBoatForm,
+  describeAppliedFilters,
+  type BoatFormValues,
+  type FleetFilterForm,
+  type FleetModalMode,
+} from '../features/fleet/fleetPage.helpers';
 
 export function FleetPage() {
   const [boats, setBoats] = useState<Boat[]>([]);
@@ -362,7 +246,7 @@ export function FleetPage() {
 
   const handleDeleteBoat = async (boat: Boat) => {
     const confirmed = window.confirm(
-      `¿Seguro que quieres eliminar el bote ${toTitleCaseLabel(boat.nombre)}? Esta acción no se puede deshacer.`,
+      `Â¿Seguro que quieres eliminar el bote ${toTitleCaseLabel(boat.nombre)}? Esta acciÃ³n no se puede deshacer.`,
     );
 
     if (!confirmed) {
@@ -511,7 +395,7 @@ export function FleetPage() {
           <div className="fleet-page__summary">
             {appliedFilters.search ? (
               <p className="form-help">
-                Búsqueda activa: <strong>{appliedFilters.search}</strong>
+                BÃºsqueda activa: <strong>{appliedFilters.search}</strong>
               </p>
             ) : null}
             {(appliedFilters.idTipoBote || appliedFilters.idEstadoBote || appliedFilters.activo) ? (
@@ -533,7 +417,7 @@ export function FleetPage() {
                   <th>Tipo</th>
                   <th>Estado</th>
                   <th>Marca</th>
-                  <th>Año</th>
+                  <th>AÃ±o</th>
                   <th>Activo</th>
                   <th>Acciones</th>
                 </tr>
@@ -552,7 +436,7 @@ export function FleetPage() {
                       <td data-label="Marca">
                         {boat.marca ? boat.marca.toUpperCase() : '-'}
                       </td>
-                      <td data-label="Año">{boat.anio ?? '-'}</td>
+                      <td data-label="AÃ±o">{boat.anio ?? '-'}</td>
                       <td data-label="Activo">
                         <span className={`pill ${boat.activo ? 'success' : 'neutral'}`}>
                           {boat.activo ? 'Activo' : 'Inactivo'}
@@ -657,23 +541,23 @@ export function FleetPage() {
                 </h3>
                 <p className="form-help">
                   {modalMode === 'detail'
-                    ? 'Consulta la información general del bote y su estado actual.'
-                    : 'Completa la información del bote respetando el catálogo de tipos y estados.'}
+                    ? 'Consulta la informaciÃ³n general del bote y su estado actual.'
+                    : 'Completa la informaciÃ³n del bote respetando el catÃ¡logo de tipos y estados.'}
                 </p>
               </div>
 
               <button
-                aria-label="Cerrar gestión de flota"
+                aria-label="Cerrar gestiÃ³n de flota"
                 className="app-header__account-close"
                 type="button"
                 onClick={closeModal}
               >
-                ×
+                Ã—
               </button>
             </div>
 
             {isModalLoading ? (
-              <p>Cargando información del bote...</p>
+              <p>Cargando informaciÃ³n del bote...</p>
             ) : modalMode === 'detail' && selectedBoat ? (
               <div className="fleet-detail-grid">
                 <label className="form-field">
@@ -698,7 +582,7 @@ export function FleetPage() {
                   <span>Permite uso</span>
                   <input
                     readOnly
-                    value={selectedBoat.estadoBote.permiteUso ? 'Sí' : 'No'}
+                    value={selectedBoat.estadoBote.permiteUso ? 'SÃ­' : 'No'}
                   />
                 </label>
 
@@ -708,7 +592,7 @@ export function FleetPage() {
                 </label>
 
                 <label className="form-field">
-                  <span>Año</span>
+                  <span>AÃ±o</span>
                   <input readOnly value={selectedBoat.anio ? String(selectedBoat.anio) : ''} />
                 </label>
 
@@ -716,17 +600,17 @@ export function FleetPage() {
                   <span>Requiere timonel</span>
                   <input
                     readOnly
-                    value={selectedBoat.tipoBote.requiereTimonel ? 'Sí' : 'No'}
+                    value={selectedBoat.tipoBote.requiereTimonel ? 'SÃ­' : 'No'}
                   />
                 </label>
 
                 <label className="form-field">
                   <span>Activo</span>
-                  <input readOnly value={selectedBoat.activo ? 'Sí' : 'No'} />
+                  <input readOnly value={selectedBoat.activo ? 'SÃ­' : 'No'} />
                 </label>
 
                 <label className="form-field form-field--full">
-                  <span>Observación</span>
+                  <span>ObservaciÃ³n</span>
                   <textarea readOnly rows={4} value={selectedBoat.observacion ?? ''} />
                 </label>
               </div>
@@ -804,7 +688,7 @@ export function FleetPage() {
                   </label>
 
                   <label className="form-field">
-                    <span>Año</span>
+                    <span>AÃ±o</span>
                     <input
                       max="2100"
                       min="1900"
@@ -834,7 +718,7 @@ export function FleetPage() {
                   </label>
 
                   <label className="form-field form-field--full">
-                    <span>Observación</span>
+                    <span>ObservaciÃ³n</span>
                     <textarea
                       rows={4}
                       value={boatForm.observacion}
@@ -873,3 +757,4 @@ export function FleetPage() {
     </section>
   );
 }
+

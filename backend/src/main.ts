@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
+import type { Express } from 'express';
 import { rateLimit } from 'express-rate-limit';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
@@ -12,7 +13,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get<number>('app.port', 3001);
   const httpAdapter = app.getHttpAdapter();
-  const expressApp = httpAdapter.getInstance();
+  const expressApp = httpAdapter.getInstance() as unknown as Express;
 
   expressApp.disable('x-powered-by');
 
@@ -27,7 +28,10 @@ async function bootstrap() {
   app.use(
     '/auth/login',
     rateLimit({
-      windowMs: configService.get<number>('app.loginRateLimitWindowMs', 600_000),
+      windowMs: configService.get<number>(
+        'app.loginRateLimitWindowMs',
+        600_000,
+      ),
       limit: configService.get<number>('app.loginRateLimitMax', 5),
       standardHeaders: 'draft-7',
       legacyHeaders: false,

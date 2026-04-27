@@ -1,4 +1,4 @@
-import {
+﻿import {
   BadRequestException,
   Injectable,
   NotFoundException,
@@ -11,23 +11,20 @@ import {
   ReunionEntity,
   UsuarioEntity,
 } from '../../database/entities';
-import { normalizeFreeText, normalizeLabelText } from '../../common/text.util';
+import { normalizeLabelText } from '../../common/text.util';
 import { CreateMeetingDto } from './dto/create-meeting.dto';
 import { UpdateMeetingDto } from './dto/update-meeting.dto';
-import { UpsertActaDto } from './dto/upsert-acta.dto';
+import { MeetingsMinutesService } from './meetings-minutes.service';
 
 @Injectable()
 export class MeetingsService {
-  private static readonly MAX_ACTA_FILE_SIZE_BYTES = 5 * 1024 * 1024;
-
   constructor(
     private readonly dataSource: DataSource,
+    private readonly meetingsMinutesService: MeetingsMinutesService,
     @InjectRepository(ReunionEntity)
     private readonly meetingsRepository: Repository<ReunionEntity>,
     @InjectRepository(ParticipanteReunionEntity)
     private readonly participantsRepository: Repository<ParticipanteReunionEntity>,
-    @InjectRepository(ActaEntity)
-    private readonly minutesRepository: Repository<ActaEntity>,
     @InjectRepository(UsuarioEntity)
     private readonly usersRepository: Repository<UsuarioEntity>,
   ) {}
@@ -80,7 +77,7 @@ export class MeetingsService {
     });
 
     if (!meeting) {
-      throw new NotFoundException('Reunión no encontrada.');
+      throw new NotFoundException('ReuniÃ³n no encontrada.');
     }
 
     return this.mapMeetingDetail(meeting);
@@ -101,7 +98,10 @@ export class MeetingsService {
     await this.ensureUsersExist(participantIds);
 
     if (createMeetingDto.acta) {
-      await this.ensureActaDataIsValid(actorUserId, createMeetingDto.acta);
+      await this.meetingsMinutesService.ensureActaDataIsValid(
+        actorUserId,
+        createMeetingDto.acta,
+      );
     }
 
     const meetingId = await this.dataSource.transaction(async (manager) => {
@@ -129,7 +129,7 @@ export class MeetingsService {
       );
 
       if (createMeetingDto.acta) {
-        await this.upsertActa(
+        await this.meetingsMinutesService.upsertActa(
           minutesRepository,
           meeting.idReunion,
           createMeetingDto.acta,
@@ -153,7 +153,7 @@ export class MeetingsService {
     });
 
     if (!currentMeeting) {
-      throw new NotFoundException('Reunión no encontrada.');
+      throw new NotFoundException('ReuniÃ³n no encontrada.');
     }
 
     const nextHoraInicio =
@@ -177,7 +177,10 @@ export class MeetingsService {
     }
 
     if (updateMeetingDto.acta) {
-      await this.ensureActaDataIsValid(actorUserId, updateMeetingDto.acta);
+      await this.meetingsMinutesService.ensureActaDataIsValid(
+        actorUserId,
+        updateMeetingDto.acta,
+      );
     }
 
     await this.dataSource.transaction(async (manager) => {
@@ -208,7 +211,7 @@ export class MeetingsService {
       }
 
       if (updateMeetingDto.acta) {
-        await this.upsertActa(
+        await this.meetingsMinutesService.upsertActa(
           minutesRepository,
           id,
           updateMeetingDto.acta,
@@ -221,18 +224,22 @@ export class MeetingsService {
   }
 
   async delete(id: number) {
-    const currentMeeting = await this.meetingsRepository.findOneBy({
-      idReunion: id,
+    const currentMeeting = await this.meetingsRepository.findOne({
+      where: { idReunion: id },
+      relations: {
+        acta: true,
+      },
     });
 
     if (!currentMeeting) {
-      throw new NotFoundException('Reunión no encontrada.');
+      throw new NotFoundException('ReuniÃ³n no encontrada.');
     }
 
+    await this.meetingsMinutesService.deleteActaFile(currentMeeting.acta);
     await this.meetingsRepository.delete({ idReunion: id });
 
     return {
-      message: 'Reunión eliminada correctamente.',
+      message: 'ReuniÃ³n eliminada correctamente.',
     };
   }
 
@@ -247,7 +254,7 @@ export class MeetingsService {
   private ensureMeetingPlaceIsValid(lugar: string) {
     if (!lugar) {
       throw new BadRequestException(
-        'Debes indicar el lugar o medio donde se realizará la reunión.',
+        'Debes indicar el lugar o medio donde se realizarÃ¡ la reuniÃ³n.',
       );
     }
   }
@@ -266,35 +273,10 @@ export class MeetingsService {
     }
   }
 
-  private async ensureActaDataIsValid(userId: number, acta: UpsertActaDto) {
-    this.ensureActaPayloadHasContent(acta);
-    await this.resolveActaActor(userId);
-  }
-
-  private ensureActaPayloadHasContent(acta: UpsertActaDto) {
-    const hasDescripcion = Boolean(acta.descripcion?.trim());
-    const hasArchivo = Boolean(acta.archivo?.contenidoBase64?.trim());
-
-    if (!hasDescripcion && !hasArchivo) {
-      throw new BadRequestException(
-        'Debes ingresar una descripción o adjuntar un archivo para el acta.',
-      );
-    }
-
-    if (
-      acta.archivo &&
-      acta.archivo.tamanoBytes > MeetingsService.MAX_ACTA_FILE_SIZE_BYTES
-    ) {
-      throw new BadRequestException(
-        'El archivo del acta no puede superar los 5 MB.',
-      );
-    }
-  }
-
   private validateMeetingTimes(horaInicio: string, horaFin: string) {
     if (horaFin <= horaInicio) {
       throw new BadRequestException(
-        'La hora de término debe ser posterior a la hora de inicio.',
+        'La hora de tÃ©rmino debe ser posterior a la hora de inicio.',
       );
     }
   }
@@ -320,79 +302,7 @@ export class MeetingsService {
     );
   }
 
-  private async upsertActa(
-    minutesRepository: Repository<ActaEntity>,
-    meetingId: number,
-    acta: UpsertActaDto,
-    actorUserId: number,
-  ) {
-    const actor = await this.resolveActaActor(actorUserId);
-    const currentActa = await minutesRepository.findOneBy({
-      idReunion: meetingId,
-    });
-    const descripcion = acta.descripcion ? normalizeFreeText(acta.descripcion) : '';
-    const archivo = acta.archivo;
-
-    await minutesRepository.save(
-      minutesRepository.create({
-        idActa: currentActa?.idActa,
-        idReunion: meetingId,
-        titulo: acta.titulo ? normalizeLabelText(acta.titulo) : null,
-        texto: descripcion,
-        archivoNombre: archivo?.nombre ?? null,
-        archivoTipo: archivo?.tipo ?? null,
-        archivoContenidoBase64: archivo?.contenidoBase64 ?? null,
-        archivoTamanoBytes: archivo?.tamanoBytes ?? null,
-        fechaActualizacion: new Date(),
-        actualizadoPorId: actor.idUsuario,
-        idRol: actor.idRol,
-      }),
-    );
-  }
-
-  private async resolveActaActor(userId: number) {
-    const user = await this.usersRepository.findOne({
-      where: { idUsuario: userId },
-      relations: {
-        usuarioRoles: {
-          rol: true,
-        },
-      },
-    });
-
-    if (!user) {
-      throw new NotFoundException('El usuario autenticado no existe.');
-    }
-
-    const roles = [...(user.usuarioRoles ?? [])]
-      .map((userRole) => userRole.rol)
-      .sort((first, second) => {
-        if (first.nombre === 'admin') {
-          return -1;
-        }
-
-        if (second.nombre === 'admin') {
-          return 1;
-        }
-
-        return first.nombre.localeCompare(second.nombre);
-      });
-
-    const primaryRole = roles[0];
-
-    if (!primaryRole) {
-      throw new BadRequestException(
-        'El usuario autenticado no tiene roles asignados para registrar el acta.',
-      );
-    }
-
-    return {
-      idUsuario: user.idUsuario,
-      idRol: primaryRole.idRol,
-    };
-  }
-
-  private mapMeetingDetail(meeting: ReunionEntity) {
+  private async mapMeetingDetail(meeting: ReunionEntity) {
     const participantes = [...(meeting.participantes ?? [])]
       .map((participant) => participant.usuario)
       .sort((first, second) => first.nombre.localeCompare(second.nombre))
@@ -420,30 +330,7 @@ export class MeetingsService {
       participantIds: participantes.map((participant) => participant.idUsuario),
       participantes,
       hasActa: Boolean(meeting.acta),
-      acta: meeting.acta
-        ? {
-            idActa: meeting.acta.idActa,
-            titulo: meeting.acta.titulo,
-            descripcion: meeting.acta.texto,
-            archivo: meeting.acta.archivoContenidoBase64
-              ? {
-                  nombre: meeting.acta.archivoNombre ?? 'acta-adjunta',
-                  tipo: meeting.acta.archivoTipo ?? 'application/octet-stream',
-                  contenidoBase64: meeting.acta.archivoContenidoBase64,
-                  tamanoBytes: meeting.acta.archivoTamanoBytes ?? 0,
-                }
-              : null,
-            fechaActualizacion: meeting.acta.fechaActualizacion,
-            actualizadoPor: {
-              idUsuario: meeting.acta.actualizadoPor.idUsuario,
-              nombre: meeting.acta.actualizadoPor.nombre,
-            },
-            rol: {
-              idRol: meeting.acta.rol.idRol,
-              nombre: meeting.acta.rol.nombre,
-            },
-          }
-        : null,
+      acta: await this.meetingsMinutesService.mapActa(meeting.acta),
     };
   }
 }

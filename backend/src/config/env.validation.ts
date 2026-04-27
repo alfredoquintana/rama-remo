@@ -43,6 +43,10 @@ class EnvironmentVariables {
   @IsString()
   FRONTEND_URL?: string;
 
+  @IsOptional()
+  @IsString()
+  ATTACHMENTS_DIR?: string;
+
   @IsString()
   @IsNotEmpty()
   @MinLength(32)

@@ -18,7 +18,12 @@ import {
   UsuarioEntity,
   UsuarioRolEntity,
 } from '../../database/entities';
-import { isValidPhone, isValidRut, normalizePhone, normalizeRut } from '../../common/contact.util';
+import {
+  isValidPhone,
+  isValidRut,
+  normalizePhone,
+  normalizeRut,
+} from '../../common/contact.util';
 import { normalizeFreeText, normalizePersonName } from '../../common/text.util';
 import { hashPassword } from '../auth/password.util';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -138,7 +143,9 @@ export class UsersService {
           })
         : [];
 
-    const usersById = new Map(users.map((user) => [user.idUsuario, user] as const));
+    const usersById = new Map(
+      users.map((user) => [user.idUsuario, user] as const),
+    );
     const orderedUsers = userIds
       .map((idUsuario) => usersById.get(idUsuario))
       .filter((user): user is UsuarioEntity => Boolean(user));
@@ -367,35 +374,44 @@ export class UsersService {
   }
 
   private normalizeUserData(
-    payload: Partial<Pick<CreateUserDto, 'rut' | 'nombre' | 'telefono' | 'direccion'>>,
+    payload: Partial<
+      Pick<CreateUserDto, 'rut' | 'nombre' | 'telefono' | 'direccion'>
+    >,
     allowPartial = false,
   ) {
     const normalizedData = {
       rut: payload.rut !== undefined ? normalizeRut(payload.rut) : undefined,
       nombre:
-        payload.nombre !== undefined ? normalizePersonName(payload.nombre) : undefined,
+        payload.nombre !== undefined
+          ? normalizePersonName(payload.nombre)
+          : undefined,
       telefono:
-        payload.telefono !== undefined ? normalizePhone(payload.telefono) : undefined,
+        payload.telefono !== undefined
+          ? normalizePhone(payload.telefono)
+          : undefined,
       direccion:
         payload.direccion !== undefined
           ? normalizeFreeText(payload.direccion)
           : undefined,
     };
 
-    if ((!allowPartial || normalizedData.rut !== undefined) && !normalizedData.rut) {
+    if (
+      (!allowPartial || normalizedData.rut !== undefined) &&
+      !normalizedData.rut
+    ) {
       throw new BadRequestException('Debes ingresar un RUT.');
     }
 
-    if (
-      normalizedData.rut !== undefined &&
-      !isValidRut(normalizedData.rut)
-    ) {
+    if (normalizedData.rut !== undefined && !isValidRut(normalizedData.rut)) {
       throw new BadRequestException(
         'Debes ingresar un RUT válido en formato 12345678-5.',
       );
     }
 
-    if ((!allowPartial || normalizedData.nombre !== undefined) && !normalizedData.nombre) {
+    if (
+      (!allowPartial || normalizedData.nombre !== undefined) &&
+      !normalizedData.nombre
+    ) {
       throw new BadRequestException('Debes ingresar el nombre completo.');
     }
 

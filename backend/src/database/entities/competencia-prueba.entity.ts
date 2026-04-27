@@ -35,16 +35,36 @@ export class CompetenciaPruebaEntity {
   @Column({ name: 'nombre_prueba', length: 200 })
   nombrePrueba!: string;
 
-  @Column({ name: 'categoria_origen', type: 'varchar', length: 120, nullable: true })
+  @Column({
+    name: 'categoria_origen',
+    type: 'varchar',
+    length: 120,
+    nullable: true,
+  })
   categoriaOrigen!: string | null;
 
-  @Column({ name: 'genero_origen', type: 'varchar', length: 60, nullable: true })
+  @Column({
+    name: 'genero_origen',
+    type: 'varchar',
+    length: 60,
+    nullable: true,
+  })
   generoOrigen!: string | null;
 
-  @Column({ name: 'modalidad_origen', type: 'varchar', length: 120, nullable: true })
+  @Column({
+    name: 'modalidad_origen',
+    type: 'varchar',
+    length: 120,
+    nullable: true,
+  })
   modalidadOrigen!: string | null;
 
-  @Column({ name: 'tipo_bote_origen', type: 'varchar', length: 60, nullable: true })
+  @Column({
+    name: 'tipo_bote_origen',
+    type: 'varchar',
+    length: 60,
+    nullable: true,
+  })
   tipoBoteOrigen!: string | null;
 
   @Column({ type: 'int', nullable: true })

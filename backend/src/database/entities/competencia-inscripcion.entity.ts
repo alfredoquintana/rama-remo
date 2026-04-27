@@ -40,7 +40,12 @@ export class CompetenciaInscripcionEntity {
   })
   promedioEdad!: string | null;
 
-  @Column({ name: 'categoria_master_estimada', type: 'varchar', length: 20, nullable: true })
+  @Column({
+    name: 'categoria_master_estimada',
+    type: 'varchar',
+    length: 20,
+    nullable: true,
+  })
   categoriaMasterEstimada!: string | null;
 
   @ManyToOne(() => CompetenciaPruebaEntity, (prueba) => prueba.inscripciones, {

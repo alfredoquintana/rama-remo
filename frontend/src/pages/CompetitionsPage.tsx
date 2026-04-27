@@ -5,10 +5,12 @@ import {
   competitionTypeLabels,
 } from '../app/labels';
 import {
-  buildCompetitionPayload,
   CompetitionFormFields,
-  createEmptyCompetitionForm,
 } from '../components/competitions/CompetitionForms';
+import {
+  buildCompetitionPayload,
+  createEmptyCompetitionForm,
+} from '../components/competitions/competitionFormState';
 import { CompetitionModal } from '../components/competitions/CompetitionModal';
 import { StatusMessage } from '../components/StatusMessage';
 import {

@@ -1,5 +1,8 @@
 export function normalizeRut(value: string) {
-  const cleanedValue = value.replace(/[.\s]/g, '').replace(/-/g, '').toUpperCase();
+  const cleanedValue = value
+    .replace(/[.\s]/g, '')
+    .replace(/-/g, '')
+    .toUpperCase();
 
   if (cleanedValue.length <= 1) {
     return cleanedValue;

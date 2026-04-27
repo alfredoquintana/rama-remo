@@ -70,10 +70,6 @@ export function TimePickerField({
     };
   }, [isOpen]);
 
-  useEffect(() => {
-    setDraftSelection(parsedValue ?? getCurrentTimeSelection(minuteStep));
-  }, [minuteStep, parsedValue]);
-
   const displayValue = parsedValue ? formatTimeSelection(parsedValue) : '';
 
   const openPopover = () => {

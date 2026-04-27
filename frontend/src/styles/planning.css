@@ -1,0 +1,402 @@
+﻿.planning-stats-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.planning-overview,
+.planning-area-section,
+.planning-item-detail,
+.planning-item-modal__tabs {
+  display: grid;
+  gap: 18px;
+}
+
+.planning-overview__header,
+.planning-area-toolbar,
+.planning-followup-list__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.planning-overview__copy,
+.planning-item-summary__copy {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  width: 100%;
+}
+
+.planning-overview__eyebrow {
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.planning-overview__status {
+  display: grid;
+  gap: 8px;
+  min-width: 168px;
+  justify-items: end;
+  text-align: right;
+}
+
+.planning-overview__status strong {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.planning-area-grid,
+.planning-note-grid,
+.planning-feedback-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.planning-area-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.planning-note-grid,
+.planning-feedback-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 16px;
+}
+
+.planning-area-card,
+.planning-note,
+.planning-followup-card {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--elevated-surface);
+  border: 1px solid var(--elevated-border);
+}
+
+.planning-area-card span,
+.planning-note span,
+.planning-followup-card span,
+.planning-followup-card small {
+  color: var(--muted);
+}
+
+.planning-item-card {
+  display: grid;
+  gap: 18px;
+  width: 100%;
+  padding: 20px;
+  border-radius: 20px;
+  background: var(--elevated-surface);
+  border: 1px solid var(--elevated-border);
+}
+
+.planning-area-stack {
+  display: grid;
+  gap: 14px;
+}
+
+.planning-area-section {
+  padding: 16px;
+  border-radius: 20px;
+  background: var(--elevated-surface);
+  border: 1px solid var(--elevated-border);
+}
+
+.planning-area-section.is-open {
+  background: color-mix(in srgb, var(--elevated-surface) 84%, var(--primary-soft) 16%);
+}
+
+.planning-area-toggle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20px;
+  width: 100%;
+  padding: 4px 2px 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.planning-area-toggle__main,
+.planning-area-toggle__meta,
+.planning-item-summary__signals {
+  display: grid;
+  gap: 8px;
+}
+
+.planning-area-toggle__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.planning-item-summary__title-row {
+  display: grid;
+  gap: 12px;
+}
+
+.planning-area-toggle__main p,
+.planning-item-summary__copy p,
+.planning-area-empty p {
+  color: var(--muted);
+}
+
+.planning-area-toggle__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+  max-width: 420px;
+}
+
+.planning-area-toggle__meta span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--interactive-surface-soft);
+  border: 1px solid var(--interactive-border);
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.planning-chevron {
+  width: 18px;
+  height: 18px;
+  transition: transform 160ms ease;
+}
+
+.planning-chevron.is-open {
+  transform: rotate(180deg);
+}
+
+.planning-area-panel,
+.planning-followup-list {
+  display: grid;
+  gap: 16px;
+}
+
+.planning-area-toolbar {
+  align-items: center;
+  padding-top: 10px;
+  padding-bottom: 4px;
+  border-top: 1px solid var(--elevated-border);
+}
+
+.planning-area-empty {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--interactive-surface-soft);
+  border: 1px dashed var(--interactive-border);
+}
+
+.planning-item-summary {
+  display: grid;
+  gap: 18px;
+  width: 100%;
+  justify-items: stretch;
+  align-items: stretch;
+}
+
+.planning-item-summary__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: start;
+  width: 100%;
+}
+
+.planning-item-summary__copy {
+  flex: 1 1 auto;
+}
+
+.planning-item-summary__footer {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  justify-self: stretch;
+}
+
+.planning-item-summary__copy h4 {
+  margin: 0;
+}
+
+.planning-item-summary__metrics {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+}
+
+.planning-item-summary__manage-button {
+  white-space: nowrap;
+  box-shadow: none;
+  min-height: 38px;
+  flex-shrink: 0;
+}
+
+.planning-item-summary__actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  margin-left: auto;
+  flex: 0 0 auto;
+  width: auto;
+}
+
+.planning-progress--compact {
+  min-width: 0;
+}
+
+.planning-followup-list__header span,
+.planning-item-summary__signals span {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.planning-item-summary__metric-card {
+  display: grid;
+  gap: 12px;
+  min-height: 100%;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--interactive-surface-soft);
+  border: 1px solid var(--interactive-border);
+}
+
+.planning-item-summary__metric-card--progress .planning-progress__bar {
+  margin-top: 2px;
+}
+
+.planning-item-summary__signals {
+  align-content: center;
+}
+
+.planning-item-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(7, 7, 7, 0.56);
+  backdrop-filter: blur(8px);
+}
+
+.planning-item-modal {
+  width: min(980px, 100%);
+  max-height: min(88dvh, 980px);
+  overflow-y: auto;
+  display: grid;
+  gap: 20px;
+  padding: 22px;
+  border: 1px solid var(--surface-border);
+  border-radius: 26px;
+  background: var(--surface);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow);
+}
+
+.planning-item-modal__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.planning-item-modal__header h3 {
+  margin: 6px 0 10px;
+}
+
+.planning-item-modal__tabs {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.planning-item-card__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: start;
+}
+
+.planning-item-card__header h4 {
+  margin: 0 0 6px;
+}
+
+.planning-item-card__meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.planning-item-card__meta span {
+  display: inline-flex;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--meta-pill-surface);
+  color: var(--meta-pill-text);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.planning-item-card__body {
+  display: grid;
+  gap: 14px;
+}
+
+.planning-item-card__body strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.planning-item-card__body p {
+  color: var(--muted);
+}
+
+.planning-progress {
+  display: grid;
+  gap: 8px;
+}
+
+.planning-progress__label {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.planning-progress__bar {
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--progress-track);
+}
+
+.planning-progress__bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #b31217 0%, #ffce00 100%);
+}
+
+.planning-followup-card__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: start;
+}
+

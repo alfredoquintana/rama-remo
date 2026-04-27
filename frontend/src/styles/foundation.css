@@ -1,0 +1,193 @@
+﻿:root {
+  font-family:
+    Inter, 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
+    sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #1b1512;
+  --app-background:
+    radial-gradient(circle at top, #ffe39a 0%, #fff7df 36%, #f5d2cc 100%);
+  background: var(--app-background);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  --surface: rgba(255, 251, 245, 0.9);
+  --surface-strong: #fffdf8;
+  --surface-border: rgba(35, 24, 18, 0.12);
+  --primary: #181818;
+  --primary-dark: #050505;
+  --primary-soft: #f7d9d4;
+  --secondary: #ffe08a;
+  --text: #1b1512;
+  --muted: #66524b;
+  --danger: #b31217;
+  --danger-soft: #f7d9d4;
+  --success: #15803d;
+  --success-soft: #dcfce7;
+  --shadow: 0 20px 45px rgba(24, 24, 24, 0.12);
+  --primary-contrast: #ffffff;
+  --secondary-contrast: #4a3200;
+  --field-border: rgba(148, 163, 184, 0.35);
+  --table-border: rgba(148, 163, 184, 0.2);
+  --elevated-surface: rgba(255, 255, 255, 0.76);
+  --elevated-surface-strong: rgba(255, 255, 255, 0.82);
+  --interactive-surface: rgba(255, 255, 255, 0.78);
+  --interactive-surface-soft: rgba(255, 255, 255, 0.72);
+  --elevated-border: rgba(148, 163, 184, 0.22);
+  --interactive-border: rgba(148, 163, 184, 0.25);
+  --pill-neutral-surface: color-mix(in srgb, var(--surface-strong) 72%, #c7ced7 28%);
+  --link-accent: #1d4ed8;
+  --meta-pill-surface: rgba(15, 118, 110, 0.08);
+  --meta-pill-text: var(--primary-dark);
+  --progress-track: rgba(15, 23, 42, 0.08);
+  --theme-option-surface: #fffdf8;
+  --theme-option-text: #1b1512;
+  --page-heading-text: var(--text);
+  --page-heading-muted: var(--muted);
+  --native-color-scheme: light;
+  color-scheme: var(--native-color-scheme);
+}
+
+:root[data-theme='alemania-clasico'] {
+  color: #171313;
+  --app-background:
+    linear-gradient(180deg, rgba(16, 16, 16, 0.94) 0%, rgba(16, 16, 16, 0.82) 18%, rgba(138, 16, 24, 0.3) 48%, rgba(255, 206, 0, 0.18) 100%),
+    #f6efe3;
+  background: var(--app-background);
+  --surface: rgba(255, 248, 237, 0.9);
+  --surface-strong: #fffdf7;
+  --surface-border: rgba(33, 20, 16, 0.14);
+  --primary: #161313;
+  --primary-dark: #080606;
+  --primary-soft: #f5d8cb;
+  --secondary: #ffcf26;
+  --text: #171313;
+  --muted: #614a43;
+  --danger: #9c101d;
+  --danger-soft: #f6dad3;
+  --success: #15803d;
+  --success-soft: #dcfce7;
+  --shadow: 0 24px 52px rgba(23, 19, 19, 0.16);
+  --page-heading-text: #171313;
+  --page-heading-muted: #614a43;
+}
+
+:root[data-theme='alemania-grafito'] {
+  color: #f5efe4;
+  --app-background:
+    radial-gradient(circle at top, rgba(255, 205, 35, 0.16) 0%, rgba(121, 14, 20, 0.12) 30%, rgba(17, 17, 17, 0.95) 72%),
+    #111111;
+  background: var(--app-background);
+  --surface: rgba(27, 27, 27, 0.86);
+  --surface-strong: #242424;
+  --surface-border: rgba(255, 255, 255, 0.08);
+  --primary: #ffce2d;
+  --primary-dark: #fff3c0;
+  --primary-soft: rgba(156, 16, 29, 0.24);
+  --secondary: #8f111f;
+  --text: #f5efe4;
+  --muted: #c5b5a6;
+  --danger: #ff8088;
+  --danger-soft: rgba(143, 17, 31, 0.2);
+  --success: #4ade80;
+  --success-soft: rgba(34, 197, 94, 0.18);
+  --shadow: 0 24px 56px rgba(0, 0, 0, 0.34);
+  --primary-contrast: #171313;
+  --secondary-contrast: #fff3da;
+  --field-border: rgba(255, 211, 92, 0.16);
+  --table-border: rgba(255, 255, 255, 0.08);
+  --elevated-surface: rgba(35, 35, 35, 0.92);
+  --elevated-surface-strong: rgba(43, 43, 43, 0.96);
+  --interactive-surface: rgba(39, 39, 39, 0.92);
+  --interactive-surface-soft: rgba(31, 31, 31, 0.94);
+  --elevated-border: rgba(255, 255, 255, 0.08);
+  --interactive-border: rgba(255, 255, 255, 0.1);
+  --pill-neutral-surface: rgba(255, 255, 255, 0.08);
+  --link-accent: #ffd35c;
+  --meta-pill-surface: rgba(255, 206, 45, 0.14);
+  --meta-pill-text: #fff3c0;
+  --progress-track: rgba(255, 255, 255, 0.08);
+  --theme-option-surface: #262626;
+  --theme-option-text: #f5efe4;
+  --native-color-scheme: dark;
+}
+
+:root[data-theme='alemania-marfil'] {
+  color: #251a15;
+  --app-background:
+    linear-gradient(180deg, rgba(255, 242, 214, 0.84) 0%, rgba(255, 255, 255, 0.92) 28%, rgba(179, 18, 23, 0.08) 65%, rgba(255, 206, 0, 0.15) 100%),
+    #fbf6ec;
+  background: var(--app-background);
+  --surface: rgba(255, 252, 245, 0.92);
+  --surface-strong: #fffefa;
+  --surface-border: rgba(37, 26, 21, 0.11);
+  --primary: #201715;
+  --primary-dark: #100b09;
+  --primary-soft: #fde4da;
+  --secondary: #ffd84d;
+  --text: #251a15;
+  --muted: #6d584d;
+  --danger: #ab1722;
+  --danger-soft: #fde3db;
+  --success: #15803d;
+  --success-soft: #dcfce7;
+  --shadow: 0 24px 52px rgba(59, 32, 20, 0.12);
+  --primary-contrast: #fffef8;
+  --secondary-contrast: #4d3100;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100vh;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  background: var(--app-background);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+  color: var(--text);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--field-border) 70%, white 30%);
+  outline-offset: 3px;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+p,
+dl,
+dd {
+  margin: 0;
+}
+
+dt {
+  font-weight: 600;
+}
+

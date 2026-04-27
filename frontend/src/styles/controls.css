@@ -1,0 +1,945 @@
+﻿.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(24, 24, 24, 0.08);
+  transition:
+    transform 120ms ease,
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+}
+
+.button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.button-primary {
+  background: var(--primary);
+  color: var(--primary-contrast);
+}
+
+.button-secondary {
+  background: var(--secondary);
+  border-color: rgba(168, 121, 0, 0.2);
+  color: var(--secondary-contrast);
+}
+
+.button-danger {
+  background: color-mix(in srgb, var(--danger) 14%, var(--surface-strong) 86%);
+  border-color: color-mix(in srgb, var(--danger) 34%, transparent 66%);
+  color: var(--danger);
+}
+
+.button-danger:hover {
+  background: color-mix(in srgb, var(--danger) 20%, var(--surface-strong) 80%);
+}
+
+.button-small {
+  min-height: 34px;
+  padding-inline: 12px;
+  font-size: 0.9rem;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--table-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.data-table th {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+
+.table-note {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.92rem;
+  overflow-wrap: anywhere;
+}
+
+.meetings-table .meetings-table__date,
+.meetings-table .meetings-table__time {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.meetings-table .meetings-table__actions {
+  width: 190px;
+  white-space: nowrap;
+}
+
+.meetings-table .meetings-table__place {
+  min-width: 220px;
+}
+
+.competitions-table .competitions-table__name {
+  min-width: 240px;
+}
+
+.competitions-table__actions {
+  justify-content: flex-end;
+}
+
+.meetings-table__time-range {
+  white-space: nowrap;
+}
+
+.meetings-table__actions-group {
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.meetings-table__actions-group > * {
+  flex: 0 0 auto;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.form-field,
+.form-section {
+  display: grid;
+  gap: 8px;
+}
+
+.form-field span,
+.form-section legend {
+  font-weight: 600;
+}
+
+.form-field input,
+.form-field textarea,
+.form-field select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--field-border);
+  border-radius: 12px;
+  background: var(--surface-strong);
+  color: var(--text);
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    background-color 120ms ease;
+}
+
+.form-field input,
+.form-field select {
+  min-height: 48px;
+}
+
+.form-field select,
+.competition-form__select {
+  appearance: none;
+  line-height: 1.2;
+  padding-right: 42px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(50% - 2px),
+    calc(100% - 12px) calc(50% - 2px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.date-picker,
+.time-picker {
+  position: relative;
+}
+
+.date-picker__trigger,
+.date-picker__trigger:hover,
+.time-picker__trigger,
+.time-picker__trigger:hover {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid var(--field-border);
+  border-radius: 12px;
+  background: var(--surface-strong);
+  color: var(--text);
+  box-shadow: none;
+  transform: none;
+}
+
+.date-picker__trigger,
+.time-picker__trigger {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+}
+
+.date-picker__trigger.has-value,
+.time-picker__trigger.has-value {
+  color: var(--text);
+  font-weight: 400;
+}
+
+.date-picker__value,
+.time-picker__value {
+  min-width: 0;
+}
+
+.date-picker__value.is-placeholder,
+.time-picker__value.is-placeholder {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.date-picker__icon,
+.date-picker__chevron,
+.time-picker__icon {
+  flex-shrink: 0;
+}
+
+.date-picker__icon,
+.time-picker__icon {
+  width: 18px;
+  height: 18px;
+  color: var(--muted);
+}
+
+.date-picker__chevron {
+  width: 16px;
+  height: 16px;
+}
+
+.date-picker__popover,
+.time-picker__popover {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 10px);
+  left: 0;
+  width: min(320px, 100%);
+  padding: 16px;
+  border: 1px solid var(--elevated-border);
+  border-radius: 20px;
+  background: var(--elevated-surface-strong);
+  box-shadow: 0 24px 44px rgba(15, 23, 42, 0.18);
+  backdrop-filter: blur(18px);
+}
+
+.date-picker__header,
+.date-picker__footer,
+.time-picker__header,
+.time-picker__footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.date-picker__header {
+  margin-bottom: 14px;
+}
+
+.date-picker__range-hint {
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
+.date-picker__month-label {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+
+.date-picker__nav,
+.date-picker__action,
+.time-picker__action {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--interactive-border);
+  border-radius: 10px;
+  background: var(--interactive-surface);
+  color: var(--text);
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.date-picker__nav {
+  width: 36px;
+  padding: 0;
+}
+
+.date-picker__weekdays,
+.date-picker__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.date-picker__weekdays {
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.date-picker__weekdays span {
+  display: flex;
+  justify-content: center;
+  padding: 6px 0;
+}
+
+.date-picker__grid {
+  gap: 4px;
+}
+
+.date-picker__day,
+.date-picker__day:hover {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 38px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text);
+  box-shadow: none;
+  transform: none;
+  cursor: pointer;
+}
+
+.date-picker__day:hover:not(:disabled),
+.date-picker__nav:hover:not(:disabled),
+.date-picker__action:hover:not(:disabled),
+.date-picker__trigger:hover:not(:disabled),
+.time-picker__option:hover:not(:disabled),
+.time-picker__action:hover:not(:disabled),
+.time-picker__trigger:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--interactive-border) 76%, var(--field-border) 24%);
+  background: color-mix(in srgb, var(--interactive-surface) 82%, var(--surface-strong) 18%);
+}
+
+.date-picker__day.is-in-range:not(.is-selected):not(:disabled) {
+  background: color-mix(in srgb, var(--primary-soft) 28%, transparent 72%);
+  border-color: color-mix(in srgb, var(--primary) 16%, transparent 84%);
+}
+
+.date-picker__day.is-outside {
+  color: color-mix(in srgb, var(--muted) 70%, transparent 30%);
+}
+
+.date-picker__day.is-today {
+  border-color: color-mix(in srgb, var(--secondary) 60%, var(--field-border) 40%);
+}
+
+.date-picker__day.is-selected,
+.date-picker__day.is-selected:hover {
+  border-color: color-mix(in srgb, var(--primary) 72%, var(--secondary) 28%);
+  background: linear-gradient(135deg, var(--secondary) 0%, color-mix(in srgb, var(--secondary) 68%, var(--primary-soft) 32%) 100%);
+  color: var(--secondary-contrast);
+  font-weight: 700;
+}
+
+.date-picker__day:disabled,
+.date-picker__nav:disabled,
+.date-picker__action:disabled,
+.time-picker__option:disabled,
+.time-picker__action:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.competition-modal__actions {
+  justify-content: flex-end;
+}
+
+.date-picker__footer {
+  margin-top: 14px;
+}
+
+.date-picker__footer .date-picker__action:last-child {
+  margin-left: auto;
+}
+
+.time-picker__header {
+  margin-bottom: 14px;
+}
+
+.time-picker__title {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.time-picker__preview {
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.time-picker__columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.time-picker__column {
+  display: grid;
+  gap: 8px;
+}
+
+.time-picker__column-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.time-picker__options {
+  display: grid;
+  gap: 6px;
+  max-height: 220px;
+  padding-right: 4px;
+  overflow-y: auto;
+}
+
+.time-picker__option {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 38px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text);
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.time-picker__option.is-selected,
+.time-picker__option.is-selected:hover {
+  border-color: color-mix(in srgb, var(--secondary) 56%, var(--field-border) 44%);
+  background: color-mix(in srgb, var(--secondary) 18%, var(--surface-strong) 82%);
+  color: var(--text);
+  font-weight: 700;
+}
+
+.time-picker__footer {
+  margin-top: 14px;
+}
+
+.time-picker__action--primary {
+  margin-left: auto;
+}
+
+.date-picker.is-disabled .date-picker__trigger,
+.time-picker.is-disabled .time-picker__trigger {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.date-picker.is-open .date-picker__trigger,
+.time-picker.is-open .time-picker__trigger {
+  border-color: color-mix(in srgb, var(--interactive-border) 82%, var(--field-border) 18%);
+  box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.16);
+}
+
+.form-field input:focus,
+.form-field textarea:focus,
+.form-field select:focus {
+  border-color: color-mix(in srgb, var(--interactive-border) 82%, var(--field-border) 18%);
+  box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.16);
+}
+
+.form-help {
+  color: var(--muted);
+}
+
+.form-field--full {
+  grid-column: 1 / -1;
+}
+
+.form-section {
+  margin-top: 24px;
+  padding: 0;
+  border: 0;
+}
+
+.section-heading,
+.subform-card__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.section-heading {
+  margin-bottom: 12px;
+}
+
+.selection-row {
+  display: flex;
+  gap: 12px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.selection-row .form-field {
+  flex: 1 1 280px;
+}
+
+.athlete-search-field {
+  min-width: min(420px, 100%);
+}
+
+.fleet-search-field {
+  min-width: min(420px, 100%);
+}
+
+.fleet-filter-field {
+  min-width: 180px;
+}
+
+.table-toolbar,
+.pagination-bar,
+.pagination-pages {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.table-toolbar,
+.pagination-bar {
+  align-items: center;
+  justify-content: space-between;
+}
+
+.table-toolbar {
+  margin: 18px 0 14px;
+}
+
+.pagination-bar {
+  margin-top: 18px;
+}
+
+.pagination-pages {
+  align-items: center;
+  justify-content: center;
+}
+
+.athlete-detail-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  width: 100%;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.athlete-detail-heading > * {
+  width: 100%;
+  min-width: 0;
+  justify-self: stretch;
+}
+
+.athlete-detail-heading__actions,
+.athlete-detail-heading__meta,
+.athlete-modal,
+.athlete-modal__form {
+  display: grid;
+  gap: 14px;
+}
+
+.athlete-detail-heading__top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 24px;
+  width: 100%;
+}
+
+.athlete-detail-heading__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+}
+
+.athlete-detail-heading__top h2 {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.athlete-detail-heading__title-row .pill {
+  flex-shrink: 0;
+}
+
+.athlete-detail-heading__meta {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.athlete-detail-heading__meta .form-field input,
+.athlete-detail-heading__meta .form-field textarea {
+  color: var(--text);
+  background: var(--interactive-surface-soft);
+  border-color: var(--interactive-border);
+  cursor: default;
+}
+
+.athlete-detail-heading__meta .form-field textarea {
+  resize: none;
+}
+
+.athlete-detail-heading__actions {
+  align-content: start;
+  justify-items: end;
+  min-width: 220px;
+}
+
+.athlete-detail-heading__actions .button {
+  width: min(220px, 100%);
+}
+
+.athlete-detail-heading__actions .pill {
+  justify-self: end;
+}
+
+.athlete-modal-backdrop,
+.fleet-modal-backdrop,
+.user-access-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(7, 7, 7, 0.56);
+  backdrop-filter: blur(8px);
+}
+
+.athlete-modal,
+.fleet-modal,
+.user-access-modal {
+  width: min(760px, 100%);
+  max-height: min(88dvh, 760px);
+  overflow-y: auto;
+  padding: 22px;
+  border: 1px solid var(--surface-border);
+  border-radius: 26px;
+  background: var(--surface);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow);
+}
+
+.athlete-modal__header,
+.fleet-modal__header,
+.user-access-modal__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.fleet-page__filters {
+  align-items: end;
+}
+
+.fleet-page__summary {
+  display: grid;
+  gap: 4px;
+  justify-items: end;
+}
+
+.fleet-table td:nth-child(7),
+.fleet-table th:nth-child(7) {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.fleet-table__actions {
+  flex-wrap: nowrap;
+}
+
+.annual-plans-table__actions {
+  flex-wrap: nowrap;
+}
+
+.fleet-modal__form,
+.fleet-detail-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.fleet-modal__switch {
+  min-height: 100%;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--field-border);
+  border-radius: 12px;
+  background: var(--surface-strong);
+}
+
+.fleet-detail-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.fleet-detail-grid .form-field input,
+.fleet-detail-grid .form-field textarea {
+  color: var(--text);
+  background: var(--interactive-surface-soft);
+  border-color: var(--interactive-border);
+  cursor: default;
+}
+
+.fleet-detail-grid .form-field textarea {
+  resize: none;
+}
+
+.tag-list {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: var(--elevated-surface-strong);
+  border: 1px solid var(--interactive-border);
+  max-width: 100%;
+}
+
+.tag-chip button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--link-accent);
+  cursor: pointer;
+}
+
+.subform-card {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 18px;
+  background: var(--elevated-surface);
+  border: 1px solid var(--elevated-border);
+}
+
+.area-editor-list,
+.planning-item-list,
+.planning-followup-list {
+  display: grid;
+  gap: 16px;
+}
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.checkbox-card {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid var(--interactive-border);
+  border-radius: 14px;
+  background: var(--interactive-surface);
+}
+
+.checkbox-card input {
+  margin: 0;
+}
+
+.checkbox-card small {
+  color: var(--muted);
+}
+
+.switch-field {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.competition-test-toggle-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+
+.competition-toggle {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid var(--interactive-border);
+  border-radius: 16px;
+  background: var(--interactive-surface-soft);
+  cursor: pointer;
+}
+
+.competition-toggle input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.competition-toggle__slider {
+  position: relative;
+  width: 48px;
+  height: 28px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--field-border) 74%, transparent 26%);
+  transition:
+    background-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.competition-toggle__slider::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 3px 8px rgba(15, 15, 15, 0.22);
+  transition: transform 120ms ease;
+}
+
+.competition-toggle__copy {
+  display: grid;
+  gap: 4px;
+}
+
+.competition-toggle__copy strong {
+  font-size: 0.96rem;
+}
+
+.competition-toggle__copy small {
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.competition-toggle input:checked + .competition-toggle__slider {
+  background: color-mix(in srgb, var(--primary) 72%, #ffffff 28%);
+}
+
+.competition-toggle input:checked + .competition-toggle__slider::after {
+  transform: translateX(20px);
+}
+
+.competition-toggle input:disabled + .competition-toggle__slider {
+  opacity: 0.58;
+}
+
+.competition-toggle:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.82;
+}
+
+.search-results,
+.selected-participants {
+  display: grid;
+  gap: 12px;
+}
+
+.search-result {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--interactive-border);
+  border-radius: 14px;
+  background: var(--interactive-surface);
+  text-align: left;
+  cursor: pointer;
+}
+
+.search-result span {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.participant-chip {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--interactive-surface-soft);
+}
+
+.participant-chip span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.92rem;
+  word-break: break-word;
+}
+
+.file-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--elevated-surface);
+  border: 1px solid var(--elevated-border);
+}
+
+.file-card__meta {
+  display: grid;
+  gap: 4px;
+}
+
+.file-card__meta span {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+

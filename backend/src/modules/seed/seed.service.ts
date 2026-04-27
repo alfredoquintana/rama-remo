@@ -505,9 +505,8 @@ export class SeedService implements OnApplicationBootstrap {
 
   private async seedUsers() {
     const adminRut = this.configService.getOrThrow<string>('app.adminRut');
-    const adminPassword = this.configService.getOrThrow<string>(
-      'app.adminPassword',
-    );
+    const adminPassword =
+      this.configService.getOrThrow<string>('app.adminPassword');
     const defaultUserPassword = this.configService.getOrThrow<string>(
       'app.defaultUserPassword',
     );

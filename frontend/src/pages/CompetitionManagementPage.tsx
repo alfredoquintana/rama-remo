@@ -1,21 +1,23 @@
-import { useEffect, useMemo, useState, type FormEvent, type SetStateAction } from 'react';
+﻿import { useEffect, useMemo, useState, type FormEvent, type SetStateAction } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import {
   competitionRegistrationStatusLabels,
   competitionStatusLabels,
 } from '../app/labels';
 import {
-  buildCompetitionPayload,
-  buildTestPayload,
   CompetitionFormFields,
   CompetitionTestFormFields,
+} from '../components/competitions/CompetitionForms';
+import {
+  buildCompetitionPayload,
+  buildTestPayload,
   createCompetitionFormFromDetail,
   createEmptyTestForm,
   createEmptyTestFormForCompetition,
   createTestFormFromTest,
   type CompetitionFormState,
   type CompetitionTestFormState,
-} from '../components/competitions/CompetitionForms';
+} from '../components/competitions/competitionFormState';
 import { CompetitionModal } from '../components/competitions/CompetitionModal';
 import { StatusMessage } from '../components/StatusMessage';
 import { useDebouncedValue } from '../hooks';
@@ -31,153 +33,25 @@ import type {
   CompetitionAthlete,
   CompetitionCatalogsResponse,
   CompetitionDetail,
-  CompetitionRegistrationMemberPayload,
   CompetitionRegistrationStatus,
   CompetitionTest,
 } from '../types/competitions';
 import { formatDate, formatDateTime, formatTime } from '../utils/dateTime';
-
-type NavigationState = {
-  message?: string;
-};
-
-type TestModalMode = 'create' | 'edit' | null;
-
-type RegistrationMemberDraft = {
-  idDeportista: string;
-  orden: string;
-  esTimonel: boolean;
-  rolTexto: string;
-  observacion: string;
-};
-
-type RegistrationDraft = {
-  estado: CompetitionRegistrationStatus;
-  idBote: string;
-  integrantes: RegistrationMemberDraft[];
-};
-
-const TESTS_PAGE_SIZE = 8;
-
-function formatCompetitionWindow(fechaInicio: string, fechaFin: string) {
-  const start = formatDate(fechaInicio);
-  const end = formatDate(fechaFin);
-  return start && end ? `${start} - ${end}` : start || end || 'Sin fechas';
-}
-
-function buildPagination(currentPage: number, totalPages: number) {
-  if (totalPages <= 1) {
-    return [1];
-  }
-
-  const pages = new Set<number>([1, totalPages]);
-
-  for (let page = currentPage - 1; page <= currentPage + 1; page += 1) {
-    if (page >= 1 && page <= totalPages) {
-      pages.add(page);
-    }
-  }
-
-  return [...pages].sort((first, second) => first - second);
-}
-
-function normalizeSearchValue(value: string | number | null | undefined) {
-  return String(value ?? '')
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .toLowerCase()
-    .trim();
-}
-
-function formatRegistrationLabel(test: CompetitionTest) {
-  if (!test.inscripcion) {
-    return 'Sin inscripcion';
-  }
-
-  return `Inscripcion ${competitionRegistrationStatusLabels[test.inscripcion.estado].toLowerCase()}`;
-}
-
-function matchesCompetitionCategory(
-  athleteCategoryId: number | null | undefined,
-  athleteCategoryName: string | null | undefined,
-  testCategoryId: number | null | undefined,
-  testCategoryName: string | null | undefined,
-) {
-  if (testCategoryId != null) {
-    return athleteCategoryId === testCategoryId;
-  }
-
-  const normalizedTestCategory = normalizeSearchValue(testCategoryName);
-
-  if (!normalizedTestCategory) {
-    return true;
-  }
-
-  return normalizeSearchValue(athleteCategoryName) === normalizedTestCategory;
-}
-
-function buildTestSearchText(test: CompetitionTest) {
-  const memberCount = test.inscripcion?.integrantes.length ?? 0;
-  const values = [
-    test.numeroPrueba,
-    test.ordenPrueba,
-    test.nombrePrueba,
-    test.categoria?.nombre,
-    test.categoriaOrigen,
-    test.generoOrigen,
-    test.modalidadOrigen,
-    test.tipoBoteOrigen,
-    test.tipoBoteNormalizado?.codigo,
-    test.tipoBoteNormalizado?.nombre,
-    test.distancia,
-    test.fecha,
-    test.hora,
-    test.requiereBote ? 'requiere bote' : 'sin bote',
-    test.requiereTimonel ? 'requiere timonel' : 'sin timonel',
-    test.esMaster ? 'master' : 'general',
-    test.observacion,
-    test.inscripcion?.estado,
-    formatRegistrationLabel(test),
-    test.inscripcion?.bote?.nombre,
-    memberCount,
-    `${memberCount} integrantes`,
-  ];
-
-  return normalizeSearchValue(values.filter(Boolean).join(' '));
-}
-
-function createRegistrationDraftFromTest(test: CompetitionTest): RegistrationDraft {
-  return {
-    estado: test.inscripcion?.estado ?? 'presuntiva',
-    idBote: test.inscripcion?.bote ? String(test.inscripcion.bote.idBote) : '',
-    integrantes:
-      test.inscripcion?.integrantes.map((member) => ({
-        idDeportista: String(member.idDeportista),
-        orden: String(member.orden),
-        esTimonel: member.esTimonel,
-        rolTexto: member.rolTexto ?? '',
-        observacion: member.observacion ?? '',
-      })) ?? [],
-  };
-}
-
-function buildRegistrationPayload(draft: RegistrationDraft) {
-  const integrantes: CompetitionRegistrationMemberPayload[] = draft.integrantes.map(
-    (member) => ({
-      idDeportista: Number(member.idDeportista),
-      orden: Number(member.orden),
-      esTimonel: member.esTimonel,
-      rolTexto: member.rolTexto.trim() || undefined,
-      observacion: member.observacion.trim() || undefined,
-    }),
-  );
-
-  return {
-    estado: draft.estado,
-    idBote: draft.idBote ? Number(draft.idBote) : undefined,
-    integrantes,
-  };
-}
+import {
+  TESTS_PAGE_SIZE,
+  buildPagination,
+  buildRegistrationPayload,
+  buildTestSearchText,
+  createRegistrationDraftFromTest,
+  formatCompetitionWindow,
+  formatRegistrationLabel,
+  matchesCompetitionCategory,
+  normalizeSearchValue,
+  type NavigationState,
+  type RegistrationDraft,
+  type RegistrationMemberDraft,
+  type TestModalMode,
+} from '../features/competitions/competitionManagement.helpers';
 
 export function CompetitionManagementPage() {
   const params = useParams();
@@ -767,7 +641,7 @@ export function CompetitionManagementPage() {
                           <tr key={test.idCompetenciaPrueba}>
                             <td data-label="Prueba">
                               <strong>
-                                #{test.numeroPrueba} · {test.nombrePrueba}
+                                #{test.numeroPrueba} Â· {test.nombrePrueba}
                               </strong>
                             </td>
                             <td data-label="Bote">
@@ -782,7 +656,7 @@ export function CompetitionManagementPage() {
                             <td data-label="Programacion">
                               <strong>
                                 {formatDate(test.fecha ?? '') || 'Sin fecha'}
-                                {formatTime(test.hora) ? ` · ${formatTime(test.hora)}` : ''}
+                                {formatTime(test.hora) ? ` Â· ${formatTime(test.hora)}` : ''}
                               </strong>
                             </td>
                             <td data-label="Inscripcion">
@@ -854,10 +728,10 @@ export function CompetitionManagementPage() {
                       <div className="competition-test-card__header">
                         <div className="competition-test-card__copy">
                           <h4>
-                            #{test.numeroPrueba} · {test.nombrePrueba}
+                            #{test.numeroPrueba} Â· {test.nombrePrueba}
                           </h4>
                           <span>
-                            Orden {test.ordenPrueba} · {test.tipoBoteNormalizado?.codigo ?? test.tipoBoteOrigen ?? 'Sin bote normalizado'}
+                            Orden {test.ordenPrueba} Â· {test.tipoBoteNormalizado?.codigo ?? test.tipoBoteOrigen ?? 'Sin bote normalizado'}
                           </span>
                         </div>
 
@@ -910,7 +784,7 @@ export function CompetitionManagementPage() {
                         <div className="competition-master-card">
                           <strong>Resumen master</strong>
                           <span>
-                            Promedio edad: {test.inscripcion.promedioEdad.toFixed(2)} · categoria estimada:{' '}
+                            Promedio edad: {test.inscripcion.promedioEdad.toFixed(2)} Â· categoria estimada:{' '}
                             {test.inscripcion.categoriaMasterEstimada ?? 'Sin categoria'}
                           </span>
                         </div>
@@ -949,14 +823,14 @@ export function CompetitionManagementPage() {
         <CompetitionModal
           description="Vista resumida de la prueba con acceso rapido a sus datos operativos."
           size="wide"
-          title={`Detalle · #${selectedDetailTest.numeroPrueba}`}
+          title={`Detalle Â· #${selectedDetailTest.numeroPrueba}`}
           onClose={() => setDetailTestId(null)}
         >
           <div className="competition-modal__form">
             <div className="competition-summary-card">
               <strong>{selectedDetailTest.nombrePrueba}</strong>
               <span>
-                Orden {selectedDetailTest.ordenPrueba} · {selectedDetailTest.tipoBoteNormalizado?.codigo ?? selectedDetailTest.tipoBoteOrigen ?? 'Sin bote definido'}
+                Orden {selectedDetailTest.ordenPrueba} Â· {selectedDetailTest.tipoBoteNormalizado?.codigo ?? selectedDetailTest.tipoBoteOrigen ?? 'Sin bote definido'}
               </span>
             </div>
 
@@ -974,7 +848,7 @@ export function CompetitionManagementPage() {
                   <div className="competition-summary-card">
                     <strong>Categoria y genero</strong>
                     <span>
-                      {selectedDetailTest.categoria?.nombre ?? selectedDetailTest.categoriaOrigen ?? 'Sin categoria'} · {selectedDetailTest.generoOrigen ?? 'Sin genero'}
+                      {selectedDetailTest.categoria?.nombre ?? selectedDetailTest.categoriaOrigen ?? 'Sin categoria'} Â· {selectedDetailTest.generoOrigen ?? 'Sin genero'}
                     </span>
                   </div>
               <div className="competition-summary-card">
@@ -984,7 +858,7 @@ export function CompetitionManagementPage() {
               <div className="competition-summary-card">
                 <strong>Configuracion</strong>
                 <span>
-                  {selectedDetailTest.cantidadTripulantesEsperada ?? 'Sin dotacion'} integrantes · {selectedDetailTest.requiereTimonel ? 'con timonel' : 'sin timonel'}
+                  {selectedDetailTest.cantidadTripulantesEsperada ?? 'Sin dotacion'} integrantes Â· {selectedDetailTest.requiereTimonel ? 'con timonel' : 'sin timonel'}
                 </span>
               </div>
               <div className="competition-summary-card">
@@ -1004,7 +878,7 @@ export function CompetitionManagementPage() {
               <div className="competition-master-card">
                 <strong>Resumen master</strong>
                 <span>
-                  Promedio edad: {selectedDetailTest.inscripcion.promedioEdad.toFixed(2)} · categoria estimada:{' '}
+                  Promedio edad: {selectedDetailTest.inscripcion.promedioEdad.toFixed(2)} Â· categoria estimada:{' '}
                   {selectedDetailTest.inscripcion.categoriaMasterEstimada ?? 'Sin categoria'}
                 </span>
               </div>
@@ -1099,7 +973,7 @@ export function CompetitionManagementPage() {
         <CompetitionModal
           description="Completa la tripulacion del club y marca la inscripcion como presuntiva o nominativa segun corresponda."
           size="wide"
-          title={`Inscripcion · #${selectedRegistrationTest.numeroPrueba}`}
+          title={`Inscripcion Â· #${selectedRegistrationTest.numeroPrueba}`}
           onClose={closeRegistrationModal}
         >
           <form className="competition-registration-layout" onSubmit={handleRegistrationSubmit}>
@@ -1176,7 +1050,7 @@ export function CompetitionManagementPage() {
                       <strong>{athlete.nombre}</strong>
                       <span>
                         {athlete.rut}
-                        {athlete.categoriaVigente?.nombre ? ` · ${athlete.categoriaVigente.nombre}` : ''}
+                        {athlete.categoriaVigente?.nombre ? ` Â· ${athlete.categoriaVigente.nombre}` : ''}
                       </span>
                     </button>
                   ))
@@ -1260,7 +1134,7 @@ export function CompetitionManagementPage() {
               <div className="competition-master-card">
                 <strong>Ultimo calculo master</strong>
                 <span>
-                  Promedio edad: {selectedRegistrationTest.inscripcion.promedioEdad.toFixed(2)} · categoria estimada:{' '}
+                  Promedio edad: {selectedRegistrationTest.inscripcion.promedioEdad.toFixed(2)} Â· categoria estimada:{' '}
                   {selectedRegistrationTest.inscripcion.categoriaMasterEstimada ?? 'Sin categoria'}
                 </span>
               </div>
@@ -1280,3 +1154,4 @@ export function CompetitionManagementPage() {
     </section>
   );
 }
+

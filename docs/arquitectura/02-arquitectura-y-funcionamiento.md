@@ -89,7 +89,8 @@ flowchart LR
 
 - El formulario de reuniones valida fecha, horas, lugar y participantes.
 - El acta se maneja dentro del mismo flujo de la reunion.
-- Si se adjunta archivo, se guarda en base64 dentro de la base.
+- Si se adjunta archivo, el backend lo guarda en storage local y deja metadata en base.
+- Actas antiguas con base64 en base siguen siendo legibles por compatibilidad.
 - El backend resuelve automaticamente actor y rol principal del acta.
 
 ### 6. Planificacion anual

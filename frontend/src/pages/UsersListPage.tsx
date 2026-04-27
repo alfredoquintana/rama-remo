@@ -32,7 +32,6 @@ export function UsersListPage() {
   const location = useLocation();
   const [users, setUsers] = useState<User[]>([]);
   const [searchInput, setSearchInput] = useState('');
-  const [activeSearch, setActiveSearch] = useState('');
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState<Omit<UsersListResponse, 'items'> | null>(
     null,
@@ -42,18 +41,7 @@ export function UsersListPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const debouncedSearchInput = useDebouncedValue(searchInput, 350);
-
-  useEffect(() => {
-    const nextSearch = debouncedSearchInput.trim();
-
-    if (nextSearch === activeSearch) {
-      return;
-    }
-
-    setIsLoading(true);
-    setPage(1);
-    setActiveSearch(nextSearch);
-  }, [activeSearch, debouncedSearchInput]);
+  const activeSearch = debouncedSearchInput.trim();
 
   useEffect(() => {
     getUsersPage({
@@ -115,7 +103,6 @@ export function UsersListPage() {
   const handleClearSearch = () => {
     setIsLoading(true);
     setSearchInput('');
-    setActiveSearch('');
     setPage(1);
   };
 
@@ -148,7 +135,11 @@ export function UsersListPage() {
             <input
               placeholder="Nombre, RUT, teléfono o rol"
               value={searchInput}
-              onChange={(event) => setSearchInput(event.target.value)}
+              onChange={(event) => {
+                setIsLoading(true);
+                setSearchInput(event.target.value);
+                setPage(1);
+              }}
             />
           </label>
 

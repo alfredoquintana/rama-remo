@@ -47,6 +47,14 @@ export class ActaEntity {
   })
   archivoContenidoBase64!: string | null;
 
+  @Column({
+    name: 'archivo_ruta',
+    type: 'varchar',
+    length: 500,
+    nullable: true,
+  })
+  archivoRuta!: string | null;
+
   @Column({ name: 'archivo_tamano_bytes', type: 'int', nullable: true })
   archivoTamanoBytes!: number | null;
 

@@ -36,11 +36,17 @@ import {
 } from './dto/update-competition-registration.dto';
 import { UpdateCompetitionTestDto } from './dto/update-competition-test.dto';
 import { UpdateCompetitionDto } from './dto/update-competition.dto';
+import { CompetitionCatalogsService } from './competition-catalogs.service';
+import {
+  COMPETITION_TEST_DISTANCE_OPTIONS,
+  COMPETITION_TEST_MODALITY_OPTIONS,
+} from './competition-options';
 
 @Injectable()
 export class CompetitionsService {
   constructor(
     private readonly dataSource: DataSource,
+    private readonly competitionCatalogsService: CompetitionCatalogsService,
     @InjectRepository(ClubEntity)
     private readonly clubsRepository: Repository<ClubEntity>,
     @InjectRepository(CompetenciaEntity)
@@ -57,82 +63,8 @@ export class CompetitionsService {
     private readonly boatTypesRepository: Repository<TipoBoteEntity>,
   ) {}
 
-  private static readonly TEST_DISTANCE_OPTIONS = [250, 500, 750, 1000, 1500, 1750, 2000] as const;
-  private static readonly TEST_MODALITY_OPTIONS = [
-    'Serie',
-    'Repechaje',
-    'Semifinal',
-    'Final',
-    'Contrarreloj',
-    'Clasificatoria',
-  ] as const;
-
   async findCatalogs() {
-    const club = await this.findDefaultClubOrFail();
-    const [boatTypes, boats, athletes, categories] = await Promise.all([
-      this.boatTypesRepository.find({
-        where: { activo: true },
-        order: { orden: 'ASC', nombre: 'ASC' },
-      }),
-      this.boatsRepository.find({
-        where: { activo: true },
-        relations: { tipoBote: true, estadoBote: true },
-        order: { nombre: 'ASC' },
-      }),
-      this.athletesRepository.find({
-        where: { activo: true },
-        relations: { usuario: true, categorias: { categoria: true } },
-      }),
-      this.categoriesRepository.find({
-        where: { activa: true },
-        order: { orden: 'ASC', nombre: 'ASC' },
-      }),
-    ]);
-
-    return {
-      club: { idClub: club.idClub, nombre: club.nombre },
-      tiposCompetencia: Object.values(TipoCompetencia),
-      estadosCompetencia: Object.values(EstadoCompetencia),
-      estadosInscripcion: Object.values(EstadoInscripcionCompetencia),
-      categorias: categories.map((item) => ({
-        idCategoria: item.idCategoria,
-        nombre: item.nombre,
-        edadMin: item.edadMin,
-        edadMax: item.edadMax,
-        orden: item.orden,
-        activa: item.activa,
-      })),
-      modalidadesPrueba: [...CompetitionsService.TEST_MODALITY_OPTIONS],
-      distanciasPrueba: [...CompetitionsService.TEST_DISTANCE_OPTIONS],
-      tiposBote: boatTypes.map((item) => ({
-        idTipoBote: item.idTipoBote,
-        codigo: item.codigo,
-        nombre: item.nombre,
-        requiereTimonel: item.requiereTimonel,
-      })),
-      botes: boats
-        .filter((item) => item.estadoBote?.permiteUso)
-        .map((item) => ({
-          idBote: item.idBote,
-          nombre: item.nombre,
-          tipoBote: item.tipoBote
-            ? {
-                idTipoBote: item.tipoBote.idTipoBote,
-                codigo: item.tipoBote.codigo,
-                nombre: item.tipoBote.nombre,
-              }
-            : null,
-        })),
-      deportistas: athletes
-        .map((item) => ({
-          idDeportista: item.idDeportista,
-          nombre: item.usuario.nombre,
-          rut: item.usuario.rut,
-          fechaNacimiento: item.usuario.fechaNac,
-          categoriaVigente: this.resolveCurrentAthleteCategory(item),
-        }))
-        .sort((a, b) => a.nombre.localeCompare(b.nombre)),
-    };
+    return this.competitionCatalogsService.findCatalogs();
   }
 
   async findAll() {
@@ -157,7 +89,8 @@ export class CompetitionsService {
       resumen: {
         pruebas: item.pruebas?.length ?? 0,
         inscripciones:
-          item.pruebas?.filter((test) => (test.inscripciones?.length ?? 0) > 0).length ?? 0,
+          item.pruebas?.filter((test) => (test.inscripciones?.length ?? 0) > 0)
+            .length ?? 0,
       },
     }));
   }
@@ -208,10 +141,14 @@ export class CompetitionsService {
       fechaFin: dto.fechaFin ?? current.fechaFin,
       estado: dto.estado ?? current.estado,
       organizador:
-        dto.organizador !== undefined ? dto.organizador : current.organizador ?? undefined,
-      sede: dto.sede !== undefined ? dto.sede : current.sede ?? undefined,
+        dto.organizador !== undefined
+          ? dto.organizador
+          : (current.organizador ?? undefined),
+      sede: dto.sede !== undefined ? dto.sede : (current.sede ?? undefined),
       observacion:
-        dto.observacion !== undefined ? dto.observacion : current.observacion ?? undefined,
+        dto.observacion !== undefined
+          ? dto.observacion
+          : (current.observacion ?? undefined),
     });
 
     await this.ensureTestsRemainWithinCompetitionWindow(
@@ -230,7 +167,9 @@ export class CompetitionsService {
     );
 
     if (payload.tipoCompetencia === TipoCompetencia.ERGOMETRO) {
-      const tests = await this.competitionTestsRepository.findBy({ idCompetencia: id });
+      const tests = await this.competitionTestsRepository.findBy({
+        idCompetencia: id,
+      });
       if (tests.length > 0) {
         await this.competitionTestsRepository.save(
           tests.map((test) => ({
@@ -282,36 +221,52 @@ export class CompetitionsService {
         ordenPrueba: dto.ordenPrueba ?? current.ordenPrueba,
         nombrePrueba: dto.nombrePrueba ?? current.nombrePrueba,
         idCategoria:
-          dto.idCategoria !== undefined ? dto.idCategoria ?? undefined : current.idCategoria ?? undefined,
+          dto.idCategoria !== undefined
+            ? (dto.idCategoria ?? undefined)
+            : (current.idCategoria ?? undefined),
         categoriaOrigen:
           dto.categoriaOrigen !== undefined
             ? dto.categoriaOrigen
-            : current.categoriaOrigen ?? undefined,
+            : (current.categoriaOrigen ?? undefined),
         generoOrigen:
-          dto.generoOrigen !== undefined ? dto.generoOrigen : current.generoOrigen ?? undefined,
+          dto.generoOrigen !== undefined
+            ? dto.generoOrigen
+            : (current.generoOrigen ?? undefined),
         modalidadOrigen:
           dto.modalidadOrigen !== undefined
             ? dto.modalidadOrigen
-            : current.modalidadOrigen ?? undefined,
+            : (current.modalidadOrigen ?? undefined),
         tipoBoteOrigen:
           dto.tipoBoteOrigen !== undefined
             ? dto.tipoBoteOrigen
-            : current.tipoBoteOrigen ?? undefined,
+            : (current.tipoBoteOrigen ?? undefined),
         idTipoBote:
-          dto.idTipoBote !== undefined ? dto.idTipoBote ?? undefined : current.idTipoBote ?? undefined,
+          dto.idTipoBote !== undefined
+            ? (dto.idTipoBote ?? undefined)
+            : (current.idTipoBote ?? undefined),
         distancia:
-          dto.distancia !== undefined ? dto.distancia ?? undefined : current.distancia ?? undefined,
-        fecha: dto.fecha !== undefined ? dto.fecha ?? undefined : current.fecha ?? undefined,
-        hora: dto.hora !== undefined ? dto.hora ?? undefined : current.hora?.slice(0, 5) ?? undefined,
+          dto.distancia !== undefined
+            ? (dto.distancia ?? undefined)
+            : (current.distancia ?? undefined),
+        fecha:
+          dto.fecha !== undefined
+            ? (dto.fecha ?? undefined)
+            : (current.fecha ?? undefined),
+        hora:
+          dto.hora !== undefined
+            ? (dto.hora ?? undefined)
+            : (current.hora?.slice(0, 5) ?? undefined),
         requiereBote: dto.requiereBote ?? current.requiereBote,
         cantidadTripulantesEsperada:
           dto.cantidadTripulantesEsperada !== undefined
-            ? dto.cantidadTripulantesEsperada ?? undefined
-            : current.cantidadTripulantesEsperada ?? undefined,
+            ? (dto.cantidadTripulantesEsperada ?? undefined)
+            : (current.cantidadTripulantesEsperada ?? undefined),
         requiereTimonel: dto.requiereTimonel ?? current.requiereTimonel,
         esMaster: dto.esMaster ?? current.esMaster,
         observacion:
-          dto.observacion !== undefined ? dto.observacion ?? undefined : current.observacion ?? undefined,
+          dto.observacion !== undefined
+            ? (dto.observacion ?? undefined)
+            : (current.observacion ?? undefined),
       },
       current.competencia.tipoCompetencia,
       current.competencia.fechaInicio,
@@ -330,7 +285,10 @@ export class CompetitionsService {
     return this.findOne(current.idCompetencia);
   }
 
-  async updateRegistration(testId: number, dto: UpdateCompetitionRegistrationDto) {
+  async updateRegistration(
+    testId: number,
+    dto: UpdateCompetitionRegistrationDto,
+  ) {
     const test = await this.competitionTestsRepository.findOne({
       where: { idCompetenciaPrueba: testId },
       relations: {
@@ -352,16 +310,25 @@ export class CompetitionsService {
       test.idCategoria,
       test.categoriaOrigen,
     );
-    const status = this.normalizeRegistrationStatus(dto.estado ?? current?.estado);
-    const boatId = dto.idBote !== undefined ? dto.idBote ?? null : current?.idBote ?? null;
+    const status = this.normalizeRegistrationStatus(
+      dto.estado ?? current?.estado,
+    );
+    const boatId =
+      dto.idBote !== undefined
+        ? (dto.idBote ?? null)
+        : (current?.idBote ?? null);
     const boat = boatId ? await this.validateBoatForTest(boatId, test) : null;
     const masterData = this.calculateMasterData(members, test.esMaster);
 
     this.validateRegistrationState(test, status, members, boat);
 
     await this.dataSource.transaction(async (manager) => {
-      const registrationsRepository = manager.getRepository(CompetenciaInscripcionEntity);
-      const membersRepository = manager.getRepository(CompetenciaInscripcionIntegranteEntity);
+      const registrationsRepository = manager.getRepository(
+        CompetenciaInscripcionEntity,
+      );
+      const membersRepository = manager.getRepository(
+        CompetenciaInscripcionIntegranteEntity,
+      );
 
       const savedRegistration = await registrationsRepository.save(
         registrationsRepository.create({
@@ -384,7 +351,8 @@ export class CompetitionsService {
         await membersRepository.save(
           members.map((member) =>
             membersRepository.create({
-              idCompetenciaInscripcion: savedRegistration.idCompetenciaInscripcion,
+              idCompetenciaInscripcion:
+                savedRegistration.idCompetenciaInscripcion,
               ...member,
             }),
           ),
@@ -402,7 +370,9 @@ export class CompetitionsService {
     });
 
     if (!club) {
-      throw new NotFoundException('No existe un club configurado para registrar competencias.');
+      throw new NotFoundException(
+        'No existe un club configurado para registrar competencias.',
+      );
     }
 
     return club;
@@ -424,7 +394,9 @@ export class CompetitionsService {
     const nombre = normalizeLabelText(payload.nombre ?? '');
 
     if (!nombre) {
-      throw new BadRequestException('No puedes registrar una competencia sin nombre.');
+      throw new BadRequestException(
+        'No puedes registrar una competencia sin nombre.',
+      );
     }
 
     if (!payload.tipoCompetencia) {
@@ -465,7 +437,9 @@ export class CompetitionsService {
     const nombrePrueba = normalizeLabelText(payload.nombrePrueba ?? '');
 
     if (!nombrePrueba) {
-      throw new BadRequestException('No puedes registrar una prueba sin nombre.');
+      throw new BadRequestException(
+        'No puedes registrar una prueba sin nombre.',
+      );
     }
 
     if (!payload.numeroPrueba || !payload.ordenPrueba) {
@@ -474,8 +448,8 @@ export class CompetitionsService {
 
     if (
       payload.distancia != null &&
-      !CompetitionsService.TEST_DISTANCE_OPTIONS.includes(
-        payload.distancia as (typeof CompetitionsService.TEST_DISTANCE_OPTIONS)[number],
+      !COMPETITION_TEST_DISTANCE_OPTIONS.includes(
+        payload.distancia as (typeof COMPETITION_TEST_DISTANCE_OPTIONS)[number],
       )
     ) {
       throw new BadRequestException(
@@ -485,8 +459,8 @@ export class CompetitionsService {
 
     if (
       payload.modalidadOrigen &&
-      !CompetitionsService.TEST_MODALITY_OPTIONS.includes(
-        payload.modalidadOrigen as (typeof CompetitionsService.TEST_MODALITY_OPTIONS)[number],
+      !COMPETITION_TEST_MODALITY_OPTIONS.includes(
+        payload.modalidadOrigen as (typeof COMPETITION_TEST_MODALITY_OPTIONS)[number],
       )
     ) {
       throw new BadRequestException(
@@ -496,7 +470,8 @@ export class CompetitionsService {
 
     if (
       payload.fecha &&
-      (payload.fecha < competitionStartDate || payload.fecha > competitionEndDate)
+      (payload.fecha < competitionStartDate ||
+        payload.fecha > competitionEndDate)
     ) {
       throw new BadRequestException(
         'La fecha de la prueba debe estar dentro del rango definido para la competencia.',
@@ -510,11 +485,15 @@ export class CompetitionsService {
           ? await this.findCategoryByName(payload.categoriaOrigen)
           : null;
     const boatType =
-      payload.idTipoBote != null ? await this.findBoatTypeOrFail(payload.idTipoBote) : null;
+      payload.idTipoBote != null
+        ? await this.findBoatTypeOrFail(payload.idTipoBote)
+        : null;
     const derived = boatType ? this.deriveCrewInfo(boatType) : null;
 
     if (competitionType === TipoCompetencia.ERGOMETRO && payload.requiereBote) {
-      throw new ConflictException('Las pruebas de ergómetro no requieren bote.');
+      throw new ConflictException(
+        'Las pruebas de ergómetro no requieren bote.',
+      );
     }
 
     return {
@@ -523,10 +502,17 @@ export class CompetitionsService {
       nombrePrueba,
       idCategoria: category?.idCategoria ?? null,
       categoriaOrigen:
-        category?.nombre ?? this.normalizeOptionalText(payload.categoriaOrigen, 'label'),
+        category?.nombre ??
+        this.normalizeOptionalText(payload.categoriaOrigen, 'label'),
       generoOrigen: this.normalizeOptionalText(payload.generoOrigen, 'label'),
-      modalidadOrigen: this.normalizeOptionalText(payload.modalidadOrigen, 'label'),
-      tipoBoteOrigen: this.normalizeOptionalText(payload.tipoBoteOrigen, 'code'),
+      modalidadOrigen: this.normalizeOptionalText(
+        payload.modalidadOrigen,
+        'label',
+      ),
+      tipoBoteOrigen: this.normalizeOptionalText(
+        payload.tipoBoteOrigen,
+        'code',
+      ),
       idTipoBote: boatType?.idTipoBote ?? null,
       distancia: payload.distancia ?? null,
       fecha: payload.fecha ?? null,
@@ -536,10 +522,13 @@ export class CompetitionsService {
           ? false
           : derived
             ? true
-            : payload.requiereBote ?? true,
+            : (payload.requiereBote ?? true),
       cantidadTripulantesEsperada:
-        derived?.cantidadTripulantesEsperada ?? payload.cantidadTripulantesEsperada ?? null,
-      requiereTimonel: derived?.requiereTimonel ?? payload.requiereTimonel ?? false,
+        derived?.cantidadTripulantesEsperada ??
+        payload.cantidadTripulantesEsperada ??
+        null,
+      requiereTimonel:
+        derived?.requiereTimonel ?? payload.requiereTimonel ?? false,
       esMaster: payload.esMaster ?? false,
       observacion: this.normalizeOptionalText(payload.observacion),
       origenDato,
@@ -553,7 +542,9 @@ export class CompetitionsService {
     });
 
     if (!boatType) {
-      throw new NotFoundException('El tipo de bote indicado no existe o está inactivo.');
+      throw new NotFoundException(
+        'El tipo de bote indicado no existe o está inactivo.',
+      );
     }
 
     return boatType;
@@ -566,7 +557,9 @@ export class CompetitionsService {
     });
 
     if (!category) {
-      throw new NotFoundException('La categoria indicada no existe o esta inactiva.');
+      throw new NotFoundException(
+        'La categoria indicada no existe o esta inactiva.',
+      );
     }
 
     return category;
@@ -592,7 +585,9 @@ export class CompetitionsService {
     });
 
     return (
-      categories.find((item) => normalizeLabelText(item.nombre) === normalizedName) ?? null
+      categories.find(
+        (item) => normalizeLabelText(item.nombre) === normalizedName,
+      ) ?? null
     );
   }
 
@@ -627,12 +622,19 @@ export class CompetitionsService {
 
     return {
       cantidadTripulantesEsperada:
-        baseCrew == null ? null : boatType.requiereTimonel ? baseCrew + 1 : baseCrew,
+        baseCrew == null
+          ? null
+          : boatType.requiereTimonel
+            ? baseCrew + 1
+            : baseCrew,
       requiereTimonel: boatType.requiereTimonel,
     };
   }
 
-  private async validateBoatForTest(boatId: number, test: CompetenciaPruebaEntity) {
+  private async validateBoatForTest(
+    boatId: number,
+    test: CompetenciaPruebaEntity,
+  ) {
     const boat = await this.boatsRepository.findOne({
       where: { idBote: boatId },
       relations: { tipoBote: true, estadoBote: true },
@@ -647,7 +649,9 @@ export class CompetitionsService {
     }
 
     if (!boat.estadoBote?.permiteUso) {
-      throw new ConflictException('El bote asignado no se encuentra disponible.');
+      throw new ConflictException(
+        'El bote asignado no se encuentra disponible.',
+      );
     }
 
     if (test.idTipoBote && boat.idTipoBote !== test.idTipoBote) {
@@ -674,7 +678,9 @@ export class CompetitionsService {
             where: { idDeportista: In(ids), activo: true },
             relations: { usuario: true, categorias: { categoria: true } },
           });
-    const athletesById = new Map(athletes.map((item) => [item.idDeportista, item] as const));
+    const athletesById = new Map(
+      athletes.map((item) => [item.idDeportista, item] as const),
+    );
     const seenAthletes = new Set<number>();
     const seenOrders = new Set<number>();
     const year = Number(competitionDate.slice(0, 4));
@@ -708,7 +714,9 @@ export class CompetitionsService {
         const currentCategory = this.resolveCurrentAthleteCategory(athlete);
         const normalizedTestCategoryId = testCategoryId ?? null;
         const normalizedTestCategory = normalizeLabelText(testCategory ?? '');
-        const normalizedAthleteCategory = normalizeLabelText(currentCategory?.nombre ?? '');
+        const normalizedAthleteCategory = normalizeLabelText(
+          currentCategory?.nombre ?? '',
+        );
 
         if (
           normalizedTestCategoryId != null &&
@@ -729,7 +737,10 @@ export class CompetitionsService {
           );
         }
 
-        const age = Math.max(year - Number(athlete.usuario.fechaNac.slice(0, 4)), 0);
+        const age = Math.max(
+          year - Number(athlete.usuario.fechaNac.slice(0, 4)),
+          0,
+        );
 
         return {
           idDeportista: athlete.idDeportista,
@@ -740,7 +751,9 @@ export class CompetitionsService {
           snapshotRut: normalizeCodeText(athlete.usuario.rut),
           snapshotFechaNacimiento: athlete.usuario.fechaNac,
           edadCompetencia: age,
-          categoriaMasterIndividual: isMaster ? this.resolveMasterCategory(age) : null,
+          categoriaMasterIndividual: isMaster
+            ? this.resolveMasterCategory(age)
+            : null,
           observacion: this.normalizeOptionalText(member.observacion),
         };
       });
@@ -752,14 +765,19 @@ export class CompetitionsService {
     members: Array<{ esTimonel: boolean }>,
     boat: BoteEntity | null,
   ) {
-    if (status === EstadoInscripcionCompetencia.NOMINATIVA && members.length === 0) {
+    if (
+      status === EstadoInscripcionCompetencia.NOMINATIVA &&
+      members.length === 0
+    ) {
       throw new ConflictException(
         'Una inscripción nominativa debe tener al menos un integrante.',
       );
     }
 
     if (test.requiereTimonel && !members.some((member) => member.esTimonel)) {
-      throw new ConflictException('La prueba requiere timonel y la inscripción no tiene uno.');
+      throw new ConflictException(
+        'La prueba requiere timonel y la inscripción no tiene uno.',
+      );
     }
 
     if (!test.requiereTimonel && members.some((member) => member.esTimonel)) {
@@ -776,12 +794,20 @@ export class CompetitionsService {
       );
     }
 
-    if (status === EstadoInscripcionCompetencia.NOMINATIVA && test.requiereBote && !boat) {
-      throw new ConflictException('La inscripción nominativa requiere un bote asignado.');
+    if (
+      status === EstadoInscripcionCompetencia.NOMINATIVA &&
+      test.requiereBote &&
+      !boat
+    ) {
+      throw new ConflictException(
+        'La inscripción nominativa requiere un bote asignado.',
+      );
     }
   }
 
-  private normalizeRegistrationStatus(value?: string | null): EstadoInscripcionCompetencia {
+  private normalizeRegistrationStatus(
+    value?: string | null,
+  ): EstadoInscripcionCompetencia {
     if (
       value === EstadoInscripcionCompetencia.NOMINATIVA ||
       value === 'lista'
@@ -801,7 +827,8 @@ export class CompetitionsService {
     }
 
     const average =
-      members.reduce((sum, item) => sum + item.edadCompetencia, 0) / members.length;
+      members.reduce((sum, item) => sum + item.edadCompetencia, 0) /
+      members.length;
 
     return {
       promedioEdad: average.toFixed(2),
@@ -811,8 +838,12 @@ export class CompetitionsService {
 
   private resolveCurrentAthleteCategory(athlete: DeportistaEntity) {
     const currentCategory = [...(athlete.categorias ?? [])]
-      .filter((item) => item.vigente && item.fechaHasta == null && item.categoria)
-      .sort((first, second) => second.fechaDesde.localeCompare(first.fechaDesde))[0];
+      .filter(
+        (item) => item.vigente && item.fechaHasta == null && item.categoria,
+      )
+      .sort((first, second) =>
+        second.fechaDesde.localeCompare(first.fechaDesde),
+      )[0];
 
     return currentCategory?.categoria
       ? {
@@ -861,7 +892,9 @@ export class CompetitionsService {
       fechaActualizacion: competition.fechaActualizacion,
       resumen: {
         pruebas: tests.length,
-        inscripciones: tests.filter((item) => (item.inscripciones?.length ?? 0) > 0).length,
+        inscripciones: tests.filter(
+          (item) => (item.inscripciones?.length ?? 0) > 0,
+        ).length,
       },
       pruebas: tests.map((test) => {
         const registration = (test.inscripciones ?? [])[0] ?? null;
@@ -906,7 +939,9 @@ export class CompetitionsService {
                 idCompetenciaInscripcion: registration.idCompetenciaInscripcion,
                 estado: this.normalizeRegistrationStatus(registration.estado),
                 promedioEdad:
-                  registration.promedioEdad == null ? null : Number(registration.promedioEdad),
+                  registration.promedioEdad == null
+                    ? null
+                    : Number(registration.promedioEdad),
                 categoriaMasterEstimada: registration.categoriaMasterEstimada,
                 bote: registration.bote
                   ? {

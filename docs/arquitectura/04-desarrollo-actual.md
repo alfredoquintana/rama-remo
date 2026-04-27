@@ -138,14 +138,15 @@ flowchart TD
 - Sin migraciones versionadas.
 - Sin filtro efectivo de autorizacion por rol aun.
 - Seed automatico como parte del bootstrap en desarrollo.
-- Archivos de acta persistidos dentro de la base en base64.
+- Adjuntos nuevos de acta persistidos en storage local, con metadata en base.
+- Lectura compatible para actas antiguas que aun tengan base64 en base.
 
 ## Consideraciones y brechas actuales
 
 - `docs/database.sql` no documenta el esquema funcional real.
 - El modelo contiene `menu_rol`, pero la navegacion no se filtra aun por rol.
 - El sistema ya diferencia usuario y acceso, pero no tiene aun una capa formal de autorizacion por modulo.
-- El almacenamiento base64 en `acta` puede crecer con el tiempo.
+- Puede quedar data historica en `acta.archivo_contenido_base64` hasta migrarla.
 - El modulo `flota` ya existe, pero no hay todavia modulo de regatas ni asignacion de botes a tripulaciones.
 - No existen migraciones, por lo que el modelo depende del estado actual de entidades y `synchronize`.
 
@@ -153,6 +154,6 @@ flowchart TD
 
 - Incorporar migraciones o una estrategia versionada de esquema.
 - Filtrar menus y permisos de endpoints por rol.
-- Evaluar almacenamiento externo para adjuntos de acta.
+- Migrar adjuntos historicos desde base64 hacia storage y evaluar storage externo.
 - Extender flota hacia disponibilidad operativa o integracion con futuras regatas.
 - Mantener esta documentacion sincronizada con `backend/src/database/entities`, `frontend/src/app/App.tsx` y `backend/src/modules/seed/seed.service.ts`.

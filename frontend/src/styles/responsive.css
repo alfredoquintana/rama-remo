@@ -1,0 +1,392 @@
+﻿@media (max-width: 1080px) {
+  .app-body {
+    grid-template-columns: 1fr;
+  }
+
+  .competition-shell,
+  .competition-subnav,
+  .competition-kpi-grid,
+  .competition-summary-stack,
+  .competition-test-card__grid,
+  .competition-test-toggle-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .competition-sidebar {
+    position: static;
+    top: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .app-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1100;
+    width: min(360px, calc(100vw - 24px));
+    height: 100dvh;
+    overflow-y: auto;
+    border-radius: 0 24px 24px 0;
+    transform: translateX(calc(-100% - 24px));
+    transition: transform 180ms ease;
+  }
+
+  .content-grid,
+  .stats-grid,
+  .form-grid,
+  .checkbox-grid,
+  .detail-grid,
+  .fleet-detail-grid,
+  .athlete-detail-heading__meta {
+    grid-template-columns: 1fr;
+  }
+
+  .athlete-detail-heading__top {
+    grid-template-columns: 1fr;
+  }
+
+  .athlete-detail-heading__title-row {
+    flex-wrap: wrap;
+  }
+
+  .planning-area-grid,
+  .planning-note-grid,
+  .planning-feedback-grid,
+  .planning-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .planning-overview__header,
+  .planning-area-toolbar,
+  .planning-followup-list__header {
+    flex-direction: column;
+  }
+
+  .planning-overview__status,
+  .planning-area-toggle__meta {
+    text-align: left;
+  }
+
+  .planning-item-summary__metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .planning-item-summary__header {
+    flex-direction: column;
+  }
+
+  .planning-item-summary__actions {
+    justify-content: flex-start;
+    margin-left: 0;
+  }
+
+  .app-header__content {
+    flex-direction: column;
+  }
+
+  .app-header__session {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .app-header__account {
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .app-header__menu-button {
+    display: inline-flex;
+  }
+
+  .app-sidebar.is-mobile-open {
+    transform: translateX(0);
+  }
+
+  .app-sidebar__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1090;
+    background: rgba(7, 7, 7, 0.42);
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease;
+  }
+
+  .app-sidebar__backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .app-sidebar__mobile-header {
+    display: flex;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-shell {
+    padding: 12px 12px 24px;
+  }
+
+  .app-header,
+  .app-sidebar,
+  .hero-card,
+  .panel-card,
+  .form-card,
+  .stat-card {
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  .page-heading {
+    flex-direction: column;
+    padding: 18px;
+  }
+
+  .page-heading > .button,
+  .page-heading > a.button,
+  .page-heading > button.button {
+    width: 100%;
+  }
+
+  .app-header__title-row {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .app-header__logo {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+  }
+
+  .app-header__title {
+    font-size: clamp(1.4rem, 8vw, 1.95rem);
+  }
+
+  .app-header__subtitle {
+    font-size: 0.95rem;
+  }
+
+  .app-header__session,
+  .app-header__account {
+    width: 100%;
+  }
+
+  .app-header__account,
+  .app-header__account-trigger,
+  .app-header__account-modal {
+    width: 100%;
+  }
+
+  .app-header__account-trigger {
+    min-width: 0;
+    padding: 10px 12px;
+  }
+
+  .app-header__account-modal-backdrop {
+    padding: 12px;
+  }
+
+  .app-header__account-modal-top,
+  .app-header__account-modal-profile {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .app-header__account-actions--stacked {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-card__logo {
+    width: 72px;
+    height: 72px;
+  }
+
+  .planning-item-card__header,
+  .section-heading,
+  .subform-card__header,
+  .planning-followup-card__header {
+    flex-direction: column;
+  }
+
+  .selection-row,
+  .switch-field,
+  .participant-chip,
+  .planning-progress__label,
+  .panel-card__header,
+  .table-toolbar,
+  .pagination-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .planning-area-toggle {
+    grid-template-columns: 1fr;
+  }
+
+  .planning-overview__status {
+    min-width: 0;
+  }
+
+  .planning-area-toggle__title-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .planning-area-toggle__meta {
+    justify-content: flex-start;
+  }
+
+  .planning-item-summary__actions {
+    justify-content: flex-start;
+  }
+
+  .planning-item-modal-backdrop {
+    padding: 12px;
+  }
+
+  .planning-item-modal {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .competition-modal-backdrop {
+    padding: 12px;
+  }
+
+  .competition-modal {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .athlete-modal-backdrop,
+  .fleet-modal-backdrop,
+  .user-access-modal-backdrop {
+    padding: 12px;
+  }
+
+  .athlete-modal,
+  .fleet-modal,
+  .user-access-modal {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .athlete-modal__header,
+  .fleet-modal__header,
+  .user-access-modal__header,
+  .competition-modal__header,
+  .competition-overview__header,
+  .competition-test-card__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .competition-overview__status,
+  .competition-test-card__footer {
+    justify-items: start;
+    text-align: left;
+  }
+
+  .competition-overview__edit-button {
+    justify-self: stretch;
+    width: 100%;
+  }
+
+  .competition-new__test-button {
+    justify-self: stretch;
+    width: 100%;
+  }
+
+  .fleet-page__summary {
+    justify-items: start;
+  }
+
+  .fleet-table__actions {
+    flex-wrap: wrap;
+  }
+
+  .annual-plans-table__actions {
+    flex-wrap: wrap;
+  }
+
+  .athlete-detail-heading__actions {
+    width: 100%;
+    justify-items: stretch;
+    min-width: 0;
+  }
+
+  .planning-item-modal__header {
+    flex-direction: column;
+  }
+
+  .planning-item-modal__tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .inline-actions,
+  .form-actions,
+  .table-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .inline-actions > *,
+  .form-actions > *,
+  .table-actions > * {
+    width: 100%;
+  }
+
+  .file-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .data-table,
+  .data-table thead,
+  .data-table tbody,
+  .data-table tr,
+  .data-table th,
+  .data-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .data-table thead {
+    display: none;
+  }
+
+  .data-table tr {
+    display: grid;
+    gap: 10px;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  }
+
+  .data-table td {
+    display: grid;
+    gap: 4px;
+    padding: 0;
+    border: 0;
+  }
+
+  .data-table td::before {
+    content: attr(data-label);
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .table-note {
+    margin-top: 2px;
+  }
+
+  .planning-area-section,
+  .planning-item-card {
+    padding: 16px;
+  }
+}

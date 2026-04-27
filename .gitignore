@@ -6,6 +6,7 @@ backend/node_modules/
 frontend/dist/
 backend/dist/
 backend/.nestjs/
+backend/storage/
 coverage/
 
 # Environment files

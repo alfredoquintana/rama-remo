@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { CompetitionsService } from './competitions.service';
 import { CreateCompetitionDto } from './dto/create-competition.dto';
 import { CreateCompetitionTestDto } from './dto/create-competition-test.dto';
@@ -51,7 +59,10 @@ export class CompetitionsController {
     @Param('testId', ParseIntPipe) testId: number,
     @Body() updateCompetitionTestDto: UpdateCompetitionTestDto,
   ) {
-    return this.competitionsService.updateTest(testId, updateCompetitionTestDto);
+    return this.competitionsService.updateTest(
+      testId,
+      updateCompetitionTestDto,
+    );
   }
 
   @Patch('tests/:testId/registration')

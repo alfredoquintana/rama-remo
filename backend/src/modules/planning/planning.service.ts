@@ -510,7 +510,9 @@ export class PlanningService {
   ) {
     const rawValue = value ?? '';
     const normalizedValue =
-      mode === 'label' ? normalizeLabelText(rawValue) : normalizeFreeText(rawValue);
+      mode === 'label'
+        ? normalizeLabelText(rawValue)
+        : normalizeFreeText(rawValue);
 
     if (!normalizedValue) {
       throw new BadRequestException(message);
